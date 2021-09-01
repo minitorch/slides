@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 12</h2>
+<blockquote>
+<div><p>Tensor Functions</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Views / Strides</p></li>
+<li class="fragment"><p>Tensor Functions</p></li>
+<li class="fragment"><p>Operations</p></li>
+<li class="fragment"><p>Gradients</p></li>
+</ul>
+</section>
+<section >
+<h1>Views / Strides</h1>
+</section>
+<section >
+<h2>User API</h2>
+<ul class="simple">
+<li class="fragment"><p>Dims - # dimensions (<cite>tensor.dims</cite>)</p></li>
+<li class="fragment"><p>Shape -  # cells per dimension (<cite>tensor.shape</cite>)</p></li>
+<li class="fragment"><p>Size - # cells (<cite>tensor.size</cite>)</p></li>
+</ul>
+</section>
+<section >
+<h2>User Counting</h2>
+<p>Shape = (2, 3, 2)</p>
+<p>Index Counting</p>
+<ul class="simple">
+<li class="fragment"><p>(0, 0, 0)</p></li>
+<li class="fragment"><p>(0, 0, 1)</p></li>
+<li class="fragment"><p>(0, 1, 0)</p></li>
+</ul>
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul>
+<li><p>Permutation</p>
+<pre><code data-trim data-noescape class="python">tensor.permute(1, 0)</code></pre>
+</li>
+</ul>
+<img alt="_images/matrix1.png" src="_images/matrix1.png" />
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+</section>
+<section >
+<h2>How does this work</h2>
+<ul class="simple">
+<li><p><strong>Storage</strong> :  1-D array of numbers of length <cite>size</cite></p></li>
+<li><p><strong>Strides</strong> : tuple that provides the mapping from user <cite>indexing</cite>
+to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
+</ul>
+</section>
+<section >
+<h2>Strides</h2>
+<a class="reference internal image-reference" href="_images/stride1.png"><img alt="_images/stride1.png" class="align-center" src="_images/stride1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Stride Math</h2>
+<p>Calculating from strides</p>
+<pre data-id="stride-math"><code data-trim data-noescape class="python">stride1 * index1 + stride2 * index2 + stride3 * index3 ...</code></pre>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/163583">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Tensor Functions</h1>
+</section>
+<section >
+<h2>Functions</h2>
+<ul>
+<li><p>Moving from Scalar to Tensor Functions</p></li>
+<li><p>Implementation?</p>
+<pre><code data-trim data-noescape class="python">def add2(a, b):
+   out_tensor = minitorch.zeros(*a.shape)
+   for i in range(a.shape[0]):
+       for j in range(a.shape[1]):
+          out_tensor[i , j] = a[i, j] + b[i, j]
+   return out_tensor</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li class="fragment"><p>Different code per different dims</p></li>
+<li class="fragment"><p>Big autodiff graph</p></li>
+<li class="fragment"><p>Slow, lots of Python loops</p></li>
+<li class="fragment"><p>Lots of code</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Functions</h2>
+<ul>
+<li class="fragment"><p>Tensors as Variables.</p></li>
+<li class="fragment"><p>Track graph at tensor level</p></li>
+<li class="fragment"><p>Functions wrap / unwrap Tensors</p>
+<pre><code data-trim data-noescape class="python">out = a + b</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li class="fragment"><p><cite>Function</cite> class (forward / backward)</p></li>
+<li class="fragment"><p>Similar API as scalars</p></li>
+<li class="fragment"><p>Take / return Tensor objects</p></li>
+</ul>
+</section>
+<section >
+<h1>Operations</h1>
+</section>
+<section >
+<h2>Implementing Tensor Functions</h2>
+<ul class="simple">
+<li class="fragment"><p>Option: code <cite>for</cite> loop for each</p></li>
+<li class="fragment"><p>Lazy. We did this already...</p></li>
+<li class="fragment"><p>Optimization. how do we make it fast?</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ul class="simple">
+<li class="fragment"><p>Implement high-level functions</p></li>
+<li class="fragment"><p><cite>Lift</cite> scalar operators to tensors</p></li>
+<li class="fragment"><p>Go back and optimize high-level functions</p></li>
+<li class="fragment"><p>Customize important Functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Functions</h2>
+<p>Unary</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
+<p>Binary (for now, only same shape)</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
+<p>Reductions</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
+</section>
+<section >
+<h2>Tensor Ops</h2>
+<ol class="arabic simple">
+<li class="fragment"><p><strong>Map</strong> - Apply to all elements</p></li>
+<li class="fragment"><p><strong>Zip</strong> (same as zipWith) - Apply to all pairs</p></li>
+<li class="fragment"><p><strong>Reduce</strong> - Reduce a subset</p></li>
+</ol>
+</section>
+<section >
+<h2>Map</h2>
+<img alt="_images/map.png" class="align-center" src="_images/map.png" />
+</section>
+<section >
+<h2>Examples: Map</h2>
+<p>Binary operations</p>
+<pre data-id="examples-map"><code data-trim data-noescape class="python">new_tensor = tensor1.log()
+new_tensor = tensor1.exp()
+new_tensor = -tensor1</code></pre>
+</section>
+<section >
+<h2>Zip</h2>
+<img alt="_images/zip.png" class="align-center" src="_images/zip.png" />
+</section>
+<section >
+<h2>Examples: Zip</h2>
+<p>Binary operations</p>
+<pre data-id="examples-zip"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2
+new_tensor = tensor1 * tensor2
+new_tensor = tensor1 &lt; tensor2</code></pre>
+</section>
+<section >
+<h2>Reduce</h2>
+<img alt="_images/reduce.png" class="align-center" src="_images/reduce.png" />
+</section>
+<section >
+<h2>Reduce Options</h2>
+<ul>
+<li class="fragment"><p>Can reduce full tensor</p></li>
+<li class="fragment"><p>Can also just reduce 1 dimension</p>
+<pre><code data-trim data-noescape class="python">out = minitorch.rand(3,4,5).mean(1)
+print(out.shape )
+# (3, 1, 5)</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Examples: Reduce</h2>
+<p>Binary operations</p>
+<pre data-id="examples-reduce"><code data-trim data-noescape class="python">new_tensor = tensor1.mean()
+new_tensor = tensor1.sum(1)</code></pre>
+</section>
+<section >
+<h2>Notes</h2>
+<ul class="simple">
+<li class="fragment"><p>None of this relies on strides</p></li>
+<li class="fragment"><p>However, you will need strides to implement</p></li>
+</ul>
+</section>
+<section >
+<h1>Gradients</h1>
+</section>
+<section >
+<h2>Derivatives</h2>
+<ul class="simple">
+<li class="fragment"><p>Each tensor arg is many args</p></li>
+<li class="fragment"><p>Returning tensor is like running several Functions</p></li>
+<li class="fragment"><p>Result <cite>backward</cite> needs to run chain-rule for each arg and output.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Scalar -&gt; Tensor</p></li>
+<li class="fragment"><p>Derivative -&gt; Gradient</p></li>
+<li class="fragment"><p><cite>d_out</cite> -&gt;  <cite>grad_out</cite></p></li>
+<li class="fragment"><p>Recommendation: Reason through gradients as many derivatives</p></li>
+</ul>
+</section>
+<section >
+<h2>Map Gradient</h2>
+<img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
+</section>
+<section >
+<h2>Zip Gradient</h2>
+<img alt="_images/zip back.png" class="align-center" src="_images/zip back.png" />
+</section>
+<section >
+<h2>Reduce Gradient</h2>
+<img alt="_images/reduce back.png" class="align-center" src="_images/reduce back.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 9</h2>
+<blockquote>
+<div><p>Neural Networks</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Backpropagation</p></li>
+<li class="fragment"><p>Neural Networks</p></li>
+<li class="fragment"><p>Model Training</p></li>
+</ul>
+</section>
+<section >
+<h1>Backpropagation</h1>
+</section>
+<section >
+<h2>Math View</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; x \times y \\
+h(x, y) &amp;=&amp; \log(z) + \exp(z)
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Code View</h2>
+<pre data-id="code-view"><code data-trim data-noescape class="python">def h(x, y):
+   z = x * y
+   return z.log() + z.exp()
+x = minitorch.Scalar(5.)
+y = minitorch.Scalar(3.)
+h(x, y).backward(1)
+print(x.derivative)</code></pre>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Leaf: Variable created from scratch</p></li>
+<li class="fragment"><p>Non-Leaf: Variable created with a Function</p></li>
+<li class="fragment"><p>Constant: Term passed in that is not a variable</p></li>
+</ul>
+</section>
+<section >
+<h2>Method</h2>
+<ul class="simple">
+<li class="fragment"><p>Graph propagation on Variables</p></li>
+<li class="fragment"><p><a class="reference external" href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search</a> i.e. Queue</p></li>
+<li class="fragment"><p>Ensure flow to original Variables</p></li>
+</ul>
+</section>
+<section >
+<h2>Algorithm</h2>
+<p>Start with final Variable / derivative (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
+<ol class="loweralpha simple">
+<li><p>if Variable is a leaf, add derivative to .derivative</p></li>
+<li><p>if Variable is not a leaf,</p>
+<ol class="arabic simple">
+<li><p>Apply chainrule with <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
+<li><p>Add non-constant Variables to queue</p></li>
+</ol>
+</li>
+</ol>
+</section>
+<section >
+<h2>Example</h2>
+<p>Red -&gt; Pending Variables / derivatives (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
+<img alt="_images/backprop2.png" class="align-center" src="_images/backprop2.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop3.png" class="align-center" src="_images/backprop3.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop4.png" class="align-center" src="_images/backprop4.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop5.png" class="align-center" src="_images/backprop5.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
+</section>
+<section >
+<h2>Caveats</h2>
+<ul class="simple">
+<li><p>Simple implementation</p></li>
+<li><p>Many optimizations, alternatives</p></li>
+<li><p>Works for most NNs</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/160489">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Neural Networks</h1>
+</section>
+<section >
+<h2>Reminder</h2>
+<ul class="simple">
+<li><p>Dataset - Data to fit</p></li>
+<li><p>Model - Shape of fit</p></li>
+<li><p>Loss - Goodness of fit</p></li>
+</ul>
+</section>
+<section >
+<h2>Linear Model Example</h2>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/weight1.png"><img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/bias1.png"><img alt="_images/bias1.png" class="align-center" src="_images/bias1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Loss Function</h2>
+<a class="reference internal image-reference" href="_images/distance.png"><img alt="_images/distance.png" class="align-center" src="_images/distance.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Example Dataset</h2>
+<a class="reference internal image-reference" href="_images/sector2.png"><img alt="_images/sector2.png" class="align-center" src="_images/sector2.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Harder Datasets</h2>
+<ul class="simple">
+<li><p>Model may be too &quot;weak&quot;</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Neural Networks</h2>
+<ul class="simple">
+<li class="fragment"><p>New <em>model</em></p></li>
+<li class="fragment"><p>Uses repeated linear splits of data</p></li>
+<li class="fragment"><p>Produces non-linear separators</p></li>
+<li class="fragment"><p>Loss will not change</p></li>
+</ul>
+</section>
+<section >
+<h2>Intuition: Neural Networks</h2>
+<ol class="arabic simple">
+<li><p>Apply many linear seperators</p></li>
+<li><p>Reshape the data space based on results</p></li>
+<li><p>Apply a linear model on new space</p></li>
+</ol>
+</section>
+<section >
+<h2>Starting Point</h2>
+<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Intuition: Split 1</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Intuition: Split 2</h2>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Reshape: ReLU</h2>
+<a class="reference internal image-reference" href="_images/relu2.png"><img alt="_images/relu2.png" class="align-center" src="_images/relu2.png" style="width: 600px;" /></a>
+<p>Key: Non-linear function</p>
+</section>
+<section >
+<h2>Split 1</h2>
+<a class="reference internal image-reference" href="_images/relu.png"><img alt="_images/relu.png" class="align-center" src="_images/relu.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Split 2</h2>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Zoomed Out</h2>
+<a class="reference internal image-reference" href="_images/mlpgraph.png"><img alt="_images/mlpgraph.png" class="align-center" src="_images/mlpgraph.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Math View</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+h_ 1 &amp;=&amp; \text{ReLU}(x_1 \times w^0_1 + x_2 \times w^0_2 + b^0) \\
+h_ 2 &amp;=&amp; \text{ReLU}(x_1 \times w^1_1 + x_2 \times w^1_2 + b^1)\\
+m(x_1, x_2) &amp;=&amp; h_1 \times w_1 + h_2 \times w_2 + b
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Math View (Alt)</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Code View</h2>
+<p>Linear</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">class Linear(minitorch.Module):
+  def __init__(self):
+      super().__init__()
+      self.w_1 = minitorch.Parameter(minitorch.Scalar())
+      self.w_2 = minitorch.Parameter(minitorch.Scalar())
+      self.b = minitorch.Parameter(minitorch.Scalar())
+
+  def forward(self, inputs):
+      return (inputs[0] * self.w_1.value +
+             inputs[1] * self.w_2.value +
+             self.b.value)</code></pre>
+</section>
+<section >
+<h2>Code View</h2>
+<p>Model</p>
+<pre data-id="id10"><code data-trim data-noescape class="python">class Network(minitorch.Module):
+  def __init__(self):
+      super().__init__()
+      self.unit1 = Linear()
+      self.unit2 = Linear()
+      self.unit3 = Linear()
+
+  def forward(self, x):
+      h_1 = self.unit1.foward(x).relu()
+      h_2 = self.unit2.foward(x).relu()
+      return self.unit3.foward([h_1, h_2])</code></pre>
+</section>
+<section >
+<h2>Training</h2>
+<pre data-id="training"><code data-trim data-noescape class="python">model = Network()
+...
+model.named_parameters()</code></pre>
+<ul class="simple">
+<li><p>All the parameters in model are leaf Variables</p></li>
+<li><p>Computing backward on loss fills their derivative</p></li>
+</ul>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

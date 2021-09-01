@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/default.css"><div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+</div>
+</div>
+<section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 4</h2>
+<blockquote>
+<div><p>Models and Modules</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Class Note</h2>
+<ul class="simple">
+<li><p>You need to link your GitHub account</p></li>
+<li><p>Still 25 students with unlinked accounts</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/152502">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Visualization</p></li>
+<li class="fragment"><p>Datasets</p></li>
+<li class="fragment"><p>Modules</p></li>
+</ul>
+</section>
+<section >
+<h1>Visualization</h1>
+</section>
+<section >
+<h2>Main Idea</h2>
+<ul class="simple">
+<li class="fragment"><p>Show properties of your model as you code</p></li>
+<li class="fragment"><p>See real time graphs as you train models</p></li>
+<li class="fragment"><p>Make convincing figures of your full system</p></li>
+</ul>
+</section>
+<section >
+<h2>Library: Visdom</h2>
+<p>Generic image pasteboard</p>
+<pre data-id="library-visdom"><code data-trim data-noescape class="python">&gt;&gt;&gt; visdom &amp;</code></pre>
+</section>
+<section >
+<h2>Protip: Multiplexing</h2>
+<ul class="simple">
+<li class="fragment"><p>When coding you will often need multiple windows</p></li>
+<li class="fragment"><p>tmux - is a generic option for doing this</p></li>
+<li class="fragment"><p><a class="reference external" href="https://edricteo.com/tmux-tutorial/">https://edricteo.com/tmux-tutorial/</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Code Snippet</h2>
+<p>Visdom windows</p>
+<pre data-id="code-snippet"><code data-trim data-noescape class="python">import visdom
+vis = visdom.Visdom()
+vis.text('Hello, world!', win=&quot;hello&quot;)</code></pre>
+</section>
+<section >
+<h2>Practical Advice</h2>
+<p>Many other ML tailored options</p>
+<ul class="simple">
+<li class="fragment"><p>Tensorboard</p></li>
+<li class="fragment"><p>Hosted services: Weights and Biases, Comet</p></li>
+</ul>
+</section>
+<section >
+<h2>Later in the Semester</h2>
+<ul class="simple">
+<li class="fragment"><p>Lecture on more ML visualization</p></li>
+<li class="fragment"><p>More specialized and custom visual design</p></li>
+</ul>
+</section>
+<section >
+<h1>Datasets</h1>
+</section>
+<section >
+<h2>Sneak Preview</h2>
+<ul class="simple">
+<li class="fragment"><p>Task 0.5: Intro to our first ML problem</p></li>
+<li class="fragment"><p>Basic separation of points on a graph</p></li>
+<li class="fragment"><p>Manual classifier</p></li>
+</ul>
+</section>
+<section >
+<h2>Sneak Preview</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=gauss&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.91939&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;learningRate_hide=true&amp;regularizationRate_hide=true&amp;batchSize_hide=true&amp;noise_hide=true&amp;discretize_hide=true&amp;regularization_hide=true&amp;activation_hide=true">Playground</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Modules</h1>
+</section>
+<section >
+<h2>Managing Shapes</h2>
+<p>Inception - Standard for Image Recognition</p>
+<a class="reference internal image-reference" href="inception_v3.png"><img alt="inception_v3.png" src="inception_v3.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Real World Examples</h2>
+<p>Block from Inception</p>
+<pre data-id="real-world-examples"><code data-trim data-noescape class="python">class Inception3(nn.Module):
+
+  def __init__(self, num_classes=1000, aux_logits=True, transform_input=False,
+               inception_blocks=None, init_weights=None):
+      super(Inception3, self).__init__()
+      ...
+      conv_block = inception_blocks[0]
+      inception_a = inception_blocks[1]
+      inception_b = inception_blocks[2]
+      inception_c = inception_blocks[3]
+      inception_d = inception_blocks[4]
+      inception_e = inception_blocks[5]
+      inception_aux = inception_blocks[6]
+
+      self.aux_logits = aux_logits
+      self.transform_input = transform_input
+      self.Conv2d_1a_3x3 = conv_block(3, 32, kernel_size=3, stride=2)
+      self.Conv2d_2a_3x3 = conv_block(32, 32, kernel_size=3)
+      self.Conv2d_2b_3x3 = conv_block(32, 64, kernel_size=3, padding=1)
+      self.maxpool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+      self.Conv2d_3b_1x1 = conv_block(64, 80, kernel_size=1)
+      self.Conv2d_4a_3x3 = conv_block(80, 192, kernel_size=3)
+      self.maxpool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+      self.Mixed_5b = inception_a(192, pool_features=32)
+      self.Mixed_5c = inception_a(256, pool_features=64)
+      self.Mixed_5d = inception_a(288, pool_features=64)
+      self.Mixed_6a = inception_b(288)
+      self.Mixed_6b = inception_c(768, channels_7x7=128)
+      self.Mixed_6c = inception_c(768, channels_7x7=160)
+      self.Mixed_6d = inception_c(768, channels_7x7=160)
+      self.Mixed_6e = inception_c(768, channels_7x7=192)
+      if aux_logits:
+          self.AuxLogits = inception_aux(768, num_classes)
+      self.Mixed_7a = inception_d(768)
+      self.Mixed_7b = inception_e(1280)
+      self.Mixed_7c = inception_e(2048)
+      self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+      self.dropout = nn.Dropout()
+      self.fc = nn.Linear(2048, num_classes)</code></pre>
+</section>
+<section >
+<h2>Modules</h2>
+<ul class="simple">
+<li class="fragment"><p>Mini-language for building shapes</p></li>
+<li class="fragment"><p>Stores and accesses elements of the model</p></li>
+<li class="fragment"><p>Object-oriented style to maintain data</p></li>
+</ul>
+</section>
+<section >
+<h2>Module Storage</h2>
+<p>Stores three things:</p>
+<ul class="simple">
+<li class="fragment"><p>Parameters</p></li>
+<li class="fragment"><p>Submodules</p></li>
+<li class="fragment"><p>Generic Python attributes</p></li>
+</ul>
+</section>
+<section >
+<h2>Parameters</h2>
+<ul class="simple">
+<li class="fragment"><p>Everything that is learned in the model</p></li>
+<li class="fragment"><p>Controlled and changed outside the class</p></li>
+</ul>
+</section>
+<section >
+<h2>Submodules</h2>
+<ul class="simple">
+<li class="fragment"><p>Other modules that are called</p></li>
+<li class="fragment"><p>Store their own parameters and submodules</p></li>
+<li class="fragment"><p>Together forms a tree</p></li>
+</ul>
+</section>
+<section >
+<h2>Everything Else</h2>
+<ul class="simple">
+<li class="fragment"><p>Modules act mostly like standard python objects</p></li>
+<li class="fragment"><p>You can have additional information stored</p></li>
+</ul>
+</section>
+<section >
+<h2>Homework Note</h2>
+<ul class="simple">
+<li class="fragment"><p>Must be recursive implementation</p></li>
+<li class="fragment"><p>Have to walk the full tree</p></li>
+</ul>
+</section>
+<section >
+<h2>Module Example</h2>
+<p>Simple</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<pre><code data-trim data-noescape class="python">class MyModule(minitorch.Module):
+    def __init__(self, arg):
+        super().__init__()
+
+        self.parameter1 = Parameter(15)
+
+        self.data = 25
+
+        self.sub_module = OtherModule(arg, arg+10)
+print(MyModule)</code></pre>
+</div>
+<div class="cell_output docutils container">
+<pre><code data-trim data-noescape class="python">&lt;class '__main__.MyModule'&gt;
+</code></pre>
+</div>
+</div>
+</section>
+<section >
+<h2>How does this work?</h2>
+<ul class="simple">
+<li class="fragment"><p>Internally <code class="code docutils literal notranslate"><span class="pre">Module</span></code> spies to find <code class="code docutils literal notranslate"><span class="pre">Parameter</span></code> and <code class="code docutils literal notranslate"><span class="pre">Module</span></code> objects</p></li>
+<li class="fragment"><p>A list is stored internally.</p></li>
+<li class="fragment"><p>Implemented through Python magic methods</p></li>
+</ul>
+</section>
+<section >
+<h2>Interception Code</h2>
+<p>Module construction</p>
+<pre data-id="interception-code"><code data-trim data-noescape class="python">def __setattr__(self, key, val):
+ if isinstance(val, Parameter):
+     self.__dict__[&quot;_parameters&quot;][key] = val
+ elif isinstance(val, Module):
+     self.__dict__[&quot;_modules&quot;][key] = val
+ else:
+     super().__setattr__(key, val)</code></pre>
+<p>All subclasses <em>must</em> begin their initialization by calling</p>
+<pre data-id="interception-code"><code data-trim data-noescape class="python">super().__init__()</code></pre>
+</section>
+<section >
+<h2>Module Example</h2>
+<p>Modules</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">class Module1(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.p1 = Parameter(5)
+        self.a = Module2()
+        self.b = Module3()
+
+class Module2(Module):
+    def __init__(self):
+        super().__init__()
+        self.p2 = Parameter(10)
+
+class Module3(Module):
+    def __init__(self):
+        super().__init__()
+        self.c = Module4()
+
+class Module4(Module):
+    def __init__(self):
+        super().__init__()
+        self.p3 = Parameter(15)</code></pre>
+</section>
+<section >
+<h2>Module Naming</h2>
+<img alt="_images/module.png" src="_images/module.png" />
+</section>
+<section >
+<h2>Real World Examples</h2>
+<img alt="gpt2.png" src="gpt2.png" />
+</section>
+<section >
+<h2>Real World Examples</h2>
+<p>Block from GPT-2</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">class Block(nn.Module):
+  def __init__(self, n_ctx, config, scale=False):
+      super().__init__()
+      hidden_size = config.n_embd
+      inner_dim = config.n_inner if config.n_inner is not None else 4 * hidden_size
+      self.ln_1 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
+      self.attn = Attention(hidden_size, n_ctx, config, scale)
+      self.ln_2 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
+      if config.add_cross_attention:
+          self.crossattention = Attention(hidden_size, n_ctx, config, scale, is_cross_attention=True)
+          self.ln_cross_attn = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
+      self.mlp = MLP(inner_dim, config)</code></pre>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

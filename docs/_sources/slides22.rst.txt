@@ -1,0 +1,312 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 22
+------------
+
+   Convolution
+
+
+Dates
+------
+
+.. revealjs_fragments::
+
+   * Guest Lecture
+   * Last Assignment...
+   * Due December 2
+
+
+Module 4
+---------
+
+  `GitHub <https://classroom.github.com/classrooms/68973473-mle/assignments/minitorch-4>`_
+
+
+Lecture
+=========
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Images
+   * Convolution
+   * Channels
+
+
+Images
+======
+
+Data Set
+-------------
+
+
+.. image:: figs/Conv/mnist.png
+           :align: center
+           :width: 200px
+
+
+Data Labels
+------------
+
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Conv/im2.png
+           :align: center
+           :width: 200px
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 500px
+
+
+Three Challenges
+------------------
+
+.. revealjs_fragments::
+
+   1) How do we handle input features? (Convolution, 4.2)
+   2) How do we look at variable-size areas? (Pooling 4.3)
+   3) How do we predict multiple labels? (Softmax 4.4)
+
+
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+
+.. image:: mnist.png
+           :align: center
+           :width: 400px
+
+Challenge 1: Input Representation
+----------------------------------
+
+.. image:: mnistregion.png
+           :align: center
+           :width: 400px
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/176195>`_
+
+
+Convolution
+=============
+
+Challenge
+----------
+
+   How do we handle locality in features?
+
+Example
+--------
+
+https://poloclub.github.io/cnn-explainer/
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv@3x.png
+           :align: center
+           :width: 400px
+
+Intuition
+----------
+
+.. revealjs_fragments::
+
+   * Same neural network as before
+   * Brute force, run it everywhere
+   * Hope to detect important patterns and combine them
+
+
+Simplification
+---------------
+
+.. revealjs_fragments::
+
+   * 1D Line
+   * 1 Hidden
+
+
+Convolution Forward
+--------------------
+
+.. image:: figs/Conv/conv1d.png
+           :align: center
+
+Computation
+-----------
+
+Output Values ::
+
+  output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+  output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+  output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]
+
+
+Alternative View
+-----------------
+
+Unroll ::
+
+  input = minitorch.tensor([1, 2, 3, 4, 5, 6])
+  input = unroll(input, K)
+  print(input)
+
+  [[1, 2, 3],
+   [2, 3, 4],
+   [3, 4, 5],
+   [4, 5, 6],
+   [5, 6, 0],
+   [6, 0, 0],
+   ]
+
+
+Alternative View
+-----------------
+
+Unroll + zip + reduce ::
+
+  weight = minitorch.tensor([5, 2, 3])
+  output = (input @ weight.view(K, 1)).view(T)
+  print(output)
+
+  [18, ..., 30 ]
+
+Alternative View
+-----------------
+
+.. image:: figs/Conv/convvec.png
+           :align: center
+
+
+Gradient
+---------
+
+Output Values ::
+
+  output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+  output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+  output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]
+
+Gradient values ::
+
+  grad_input[2] = weight[0] * grad_output[2] + weight[1] * grad_output[1]  + weight[2] * grad_output[0]
+
+
+Conv Back - Input
+------------------
+
+Reverse the convolutional anchor
+
+.. image:: figs/Conv/conv1dback.png
+           :align: center
+
+
+Gradient of Weight
+------------------
+
+Output Values ::
+
+  output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+  output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+  output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]
+
+Gradient values ::
+
+  grad_weight[2] = grad_output[0] * input[2]  + grad_output[1] * input[3] + grad_output[2] * input[4]
+
+
+Conv Back - Weight
+------------------
+
+.. image:: figs/Conv/conv1dback2.png
+           :align: center
+
+
+Channels
+=========
+
+Intuition
+------------
+
+* Each position may have multiple values
+* These may be meaningful - i.e. color channels
+* These may be learned - i.e. hidden states
+
+Key Points
+----------
+
+* Convolution is a Linear applied to all channels in position
+* If weight is length K and there are 10 channels, the input to the linear
+  is 10 * K.
+* Output channels are just like the output of the Linear.
+
+Graphical Representation
+-------------------------
+
+.. image:: figs/Conv/channels.png
+           :align: center
+           :width: 400px
+
+Mathematical View
+-----------------
+
+Code (note matmul on `in_channels * K`) ::
+
+    input = minitorch.rand(in_channels, T)
+    weight = minitorch.rand(out_channels, in_channels, K)
+    input = unroll(input, K).permute(1, 2, 0)
+    output = (weight.view(out_channels, in_channels * K) @ input.view(in_channels * K, T))
+
+Implementation
+--------------
+
+.. revealjs_fragments::
+
+   * All about understanding sizes.
+   * Should be similar to matmul, start with output
+   * If outside boundaries, use 0
+
+Applications
+------------
+
+1D convolution is very highly used
+
+NLP
+----
+
+.. image:: sentcnn.png
+   :align: center
+
+
+Speech Recognition
+-------------------
+
+.. image:: speech.png
+   :align: center
+
+
+
+Q&A
+----

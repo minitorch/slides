@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 16</h2>
+<blockquote>
+<div><p>General Efficiency</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Motivation: NLP</p></li>
+<li class="fragment"><p>Efficiency Hurdles</p></li>
+<li class="fragment"><p>Fast Math</p></li>
+</ul>
+</section>
+<section >
+<h1>NLP</h1>
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>Challenge: Length Dimension</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/170331">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Intuition: Split 1</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Intuition: Split 2</h2>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Motivation</h2>
+<ul class="simple">
+<li class="fragment"><p>More splits, more flexibility</p></li>
+<li class="fragment"><p>Faster code, more splits.</p></li>
+</ul>
+</section>
+<section >
+<h1>Efficiency</h1>
+</section>
+<section >
+<h2>Context</h2>
+<ul class="simple">
+<li class="fragment"><p>We now have a pytorch</p></li>
+<li class="fragment"><p>All wrappers around <cite>ops</cite></p></li>
+<li class="fragment"><p>Need to make <cite>ops</cite> fast</p></li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<p>Optimize the heck out of:</p>
+<ul class="simple">
+<li class="fragment"><p>map</p></li>
+<li class="fragment"><p>zip</p></li>
+<li class="fragment"><p>reduce</p></li>
+</ul>
+</section>
+<section >
+<h2>Code</h2>
+<p>Example map</p>
+<pre data-id="code"><code data-trim data-noescape class="python">for i in range(len(out)):
+    count(i, out_shape, out_index)
+    broadcast_index(out_index, out_shape, in_shape, in_index)
+    o = index_to_position(out_index, out_strides)
+    j = index_to_position(in_index, in_strides)
+    out[o] = fn(in_storage[j])</code></pre>
+</section>
+<section >
+<h2>Why are Python (and friends) &quot;slow&quot;?</h2>
+<ul class="simple">
+<li class="fragment"><p>Function calls</p></li>
+<li class="fragment"><p>Types</p></li>
+<li class="fragment"><p>Loops</p></li>
+</ul>
+</section>
+<section >
+<h2>Function Calls</h2>
+<ul class="simple">
+<li><p>Function calls are not free and don't get <cite>inlined</cite></p></li>
+<li><p>Checks for args, special keywords and variable lists</p></li>
+<li><p>Methods check for overrides and class inheritance</p></li>
+</ul>
+</section>
+<section >
+<h2>Types</h2>
+<p>Critical code</p>
+<pre data-id="types"><code data-trim data-noescape class="python">out[o] = in_storage[j] + 3</code></pre>
+<ul class="simple">
+<li><p>Doesn't know type of <cite>in_storage[j]</cite></p></li>
+<li><p>May need to coerce 3 to float or raise error</p></li>
+<li><p>May even call <cite>__add__</cite> or <cite>__ladd__</cite>!</p></li>
+</ul>
+</section>
+<section >
+<h2>Loops</h2>
+<ul class="simple">
+<li><p>Loops are always run as is.</p></li>
+<li><p>Can't combine similar loops or pull out constant computation.</p></li>
+<li><p>Very hard to run anything in parallel.</p></li>
+</ul>
+</section>
+<section >
+<h2>Other</h2>
+<p>Many other slow things...</p>
+<ul class="simple">
+<li><p>Lists</p></li>
+<li><p>Classes</p></li>
+<li><p>Magic of all kind</p></li>
+</ul>
+</section>
+<section >
+<h1>Fast Math</h1>
+</section>
+<section >
+<h2>Alternative 1: Low-level</h2>
+<p>Pros:</p>
+<ul class="simple">
+<li><p>Fastest option</p></li>
+<li><p>Commonly used</p></li>
+</ul>
+<p>Cons: Harder to modify</p>
+<p>Example: Torch, Numpy</p>
+</section>
+<section >
+<h2>Alternative 2: New Languages</h2>
+<p>Pros:</p>
+<ul class="simple">
+<li><p>Keeps code simple</p></li>
+<li><p>Can be quite fast</p></li>
+</ul>
+<p>Cons: Lose tools and experience</p>
+<p>Example: Julia</p>
+</section>
+<section >
+<h2>Alternative 3: Compile Python</h2>
+<p>Pros:</p>
+<ul class="simple">
+<li><p>&quot;Same&quot; language</p></li>
+<li><p>Integrate code</p></li>
+</ul>
+<p>Cons: A bit hacky :)</p>
+<p>Example: Numba</p>
+</section>
+<section >
+<h2>Numba</h2>
+<ul class="simple">
+<li><p>Python library for speeding up numerical python</p></li>
+<li><p>API: Higher-order functions to produce fast mathmatical code</p></li>
+<li><p><a class="reference external" href="https://numba.pydata.org/numba-doc/latest/user/5minguide.html">Numba</a></p></li>
+</ul>
+</section>
+<section >
+<h2>How does it work?</h2>
+<p>Work</p>
+<pre data-id="how-does-it-work"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in range(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit()(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
+</section>
+<section >
+<h2>Terminology : JIT Compiler</h2>
+<ul class="simple">
+<li><p>Just-in-time</p></li>
+<li><p>Waits until you call a function to compile it</p></li>
+<li><p>Specializes code based on the argument types given.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology : LLVM</h2>
+<ul class="simple">
+<li><p>Underlying compiler framework to generate code</p></li>
+<li><p>Used by many different languages (C++, Swift, Rust, ...)</p></li>
+<li><p>Generates efficient machine code for the system</p></li>
+</ul>
+</section>
+<section >
+<h2>What do we lose?</h2>
+<ul class="simple">
+<li><p><cite>njit</cite> will fail for many python operations</p></li>
+<li><p>No lists, classes, python functions allowed</p></li>
+<li><p>Any different types will cause recompilation</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ul class="simple">
+<li><p>Use Python for general operations</p></li>
+<li><p>Use Numba for the core tensor ops</p></li>
+<li><p>Allow users to add new Numba functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Code Transformation</h2>
+<p>Transform</p>
+<pre data-id="code-transformation"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in prange(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit(parallel=True)(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h1>Module 3</h1>
+</section>
+<section >
+<h2>Task 3.1</h2>
+<blockquote>
+<div><p>Parallel</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Task 3.2</h2>
+<blockquote>
+<div><p>Matrix Mult</p>
+</div></blockquote>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Task 3.3</h2>
+<img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" />
+</section>
+<section >
+<h2>Task 3.4</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Task 3.5</h2>
+<blockquote>
+<div><p>Train</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

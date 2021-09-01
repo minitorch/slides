@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 20</h2>
+<blockquote>
+<div><p>All About GPU 2</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Admin</h2>
+<ul class="simple">
+<li class="fragment"><p>HW 2 grades</p></li>
+<li class="fragment"><p>Quiz Grades</p></li>
+</ul>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Memory</p></li>
+<li class="fragment"><p>CUDA Efficiency</p></li>
+<li class="fragment"><p>Efficiency Tricks</p></li>
+</ul>
+</section>
+<section >
+<h1>Memory</h1>
+</section>
+<section >
+<h2>Stack</h2>
+<ul class="simple">
+<li class="fragment"><p>Threads: Run the code</p></li>
+<li class="fragment"><p>Block: Groups &quot;close&quot; threads</p></li>
+<li class="fragment"><p>Grid: All the thread blocks</p></li>
+<li class="fragment"><p>Total Threads: <cite>threads_per_block</cite> x <cite>total_blocks</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Thread Names</h2>
+<a class="reference internal image-reference" href="_images/threadid&#64;3x.png"><img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Block Names</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Memory</h2>
+<ul class="simple">
+<li><p>CUDA also has a memory stack</p></li>
+<li><p>Local &gt; Shared &gt; Global</p></li>
+<li><p>Fast code does minimal global reads</p></li>
+</ul>
+</section>
+<section >
+<h2>Local Memory</h2>
+<a class="reference internal image-reference" href="_images/local mem&#64;3x.png"><img alt="_images/local mem&#64;3x.png" class="align-center" src="_images/local mem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Example</h2>
+<p>Code</p>
+<pre data-id="example"><code data-trim data-noescape class="python">def local_fn(out, a):
+  local = numba.cuda.local.array(10, numba.int32)
+  local[0] = 10
+  local[5] = 20
+local_fn = numba.cuda.jit()(local_fn)
+local_fn[BLOCKS, THREADS](out, a)</code></pre>
+</section>
+<section >
+<h2>Block Shared Memory</h2>
+<a class="reference internal image-reference" href="_images/sharedmem&#64;3x.png"><img alt="_images/sharedmem&#64;3x.png" class="align-center" src="_images/sharedmem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Example</h2>
+<p>Code</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">def block_fn(out, a):
+  shared = numba.cuda.shared.array(10, numba.int32)
+  shared[0] = 10
+  numba.cuda.syncthreads()
+  shared[5] = 20
+block_fn = numba.cuda.jit()(block_fn)
+block_fn[BLOCKS, THREADS](out, a)</code></pre>
+</section>
+<section >
+<h2>Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/173803">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Constraints</h2>
+<ul class="simple">
+<li><p>Memory must be typed</p></li>
+<li><p>Memory must be <em>constant</em> size</p></li>
+<li><p>Memory must be relatively small</p></li>
+</ul>
+</section>
+<section >
+<h2>Thinking about Speed</h2>
+<ul class="simple">
+<li><p>Algorithms: Reduce computation complexity</p></li>
+<li><p>Typical: Remove loops, code operations</p></li>
+</ul>
+</section>
+<section >
+<h2>GPU</h2>
+<ul class="simple">
+<li><p>Lots of parallelism for computation</p></li>
+<li><p>Challenge: reduce memory reads</p></li>
+<li><p>Local &gt; Shared &gt; Global</p></li>
+</ul>
+</section>
+<section >
+<h2>Sliding Average</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="sliding-average"><code data-trim data-noescape class="python">sub_size = 2
+a = [4, 2, 5, 6, 2, 4]
+out = [3, 3.5, 5.5, 4, 3]</code></pre>
+</section>
+<section >
+<h2>Example: Local Sum</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="example-local-sum"><code data-trim data-noescape class="python">def slide_py(out, a):
+   for i in range(out.size):
+       out[i] = 0
+       for j in range(sub_size):
+           out[i] += a[i + j]
+       out[i] = out[i] / sub_size</code></pre>
+</section>
+<section >
+<h2>Example: Parallel Local Sum</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="example-parallel-local-sum"><code data-trim data-noescape class="python">def slide_numba(out, a):
+   for i in numba.prange(out.size):
+       out[i] = 0
+       for j in range(sub_size):
+           out[i] += a[i + j]
+       out[i] = out[i] / sub_size</code></pre>
+</section>
+<section >
+<h2>Planning for CUDA</h2>
+<ul class="simple">
+<li><p>Count up the memory accesses</p></li>
+<li><p>How many global / shared / local reads?</p></li>
+<li><p>Can we make move things to be more local?</p></li>
+</ul>
+</section>
+<section >
+<h2>Basic CUDA</h2>
+<p>Compute CUDA</p>
+<pre data-id="basic-cuda"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       out[i] = 0
+       for j in range(sub_size):
+            out[i] += a[i + j]
+       out[i] = out[i] / sub_size</code></pre>
+</section>
+<section >
+<h2>Planning for CUDA</h2>
+<ul class="simple">
+<li><p><cite>sub_size</cite> global reads per thread</p></li>
+<li><p><cite>sub_size</cite> global writes per thread</p></li>
+<li><p>Each is being read too many times.</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ul class="simple">
+<li><p>Use blocks to move from global to shared</p></li>
+<li><p>Use thread to move from shared to local</p></li>
+</ul>
+</section>
+<section >
+<h2>Better CUDA</h2>
+<p>One global write per thread</p>
+<pre data-id="better-cuda"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       temp = 0
+       for j in range(sub_size):
+            temp += a[i + j]
+       out[i] = temp / sub_size</code></pre>
+</section>
+<section >
+<h2>Pattern</h2>
+<p>Copy from global to shared</p>
+<pre data-id="pattern"><code data-trim data-noescape class="python">local_idx = numba.cuda.threadIdx.x
+shared[local_idx] = a[i]
+numba.cuda.syncthreads()</code></pre>
+</section>
+<section >
+<h2>Better CUDA</h2>
+<p>Two global reads per thread</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   shared = numba.cuda.shared.array(THREADS + sub_size)
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   local_idx = numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       shared[local_idx] = a[i]
+       if local_idx &lt; sub_size and i + THREADS &lt; a.size::
+           shared[local_idx  + THREADS] = a[i + THREADS]
+       numba.cuda.syncthreads()
+       temp = 0
+       for j in range(sub_size):
+            temp += shared[local_idx + j]
+       out[i] = temp / sub_size</code></pre>
+</section>
+<section >
+<h2>Counts</h2>
+<ul class="simple">
+<li><p>Significantly reduced global reads and writes</p></li>
+<li><p>Needed block shared memory to do this</p></li>
+</ul>
+</section>
+<section >
+<h2>Example 2: Broadcasted Zip</h2>
+<img alt="_images/zip broad.png" src="_images/zip broad.png" />
+</section>
+<section >
+<h2>Example 2: Broadcasted Zip</h2>
+<p>Zip</p>
+<pre data-id="id6"><code data-trim data-noescape class="python">I, J = out.shape
+def zip_py(out, a, b):
+   for i in range(I):
+       for j in range(J):
+           out[i, j] = a[i] * b[j]</code></pre>
+</section>
+<section >
+<h2>Simple CUDA</h2>
+<p>Compute CUDA</p>
+<pre data-id="simple-cuda"><code data-trim data-noescape class="python">def zip_cuda(out, a, b):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   j = numba.cuda.blockIdx.y * THREADS \
+       + numba.cuda.threadIdx.y
+
+   out[i, j] = a[i] * b[j]</code></pre>
+</section>
+<section >
+<h2>Example 2: Broadcasted Zip</h2>
+<p>Assume we know that I is very large, J is very small.</p>
+<img alt="_images/zip broad.png" src="_images/zip broad.png" />
+</section>
+<section >
+<h2>Alternative CUDA</h2>
+<p>Compute CUDA (small J, large I)</p>
+<pre data-id="alternative-cuda"><code data-trim data-noescape class="python">def zip_cuda(out, a, b):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   shared = numba.cuda.shared.array(J)
+
+   if i &lt; J:
+       shared[local_idx] = b[j]
+
+   numba.cuda.syncthreads()
+   for j in range(J):
+       out[i, j] = a[i] * shared[j]</code></pre>
+</section>
+<section >
+<h2>Matrix Multiplication</h2>
+<ul class="simple">
+<li><p>Major operation to implement on CUDA</p></li>
+<li><p>Every cell needs to be used multiple times</p></li>
+<li><p>Lots of tricks to make it efficient...</p></li>
+</ul>
+</section>
+<section >
+<h1>General Efficiency</h1>
+</section>
+<section >
+<h2>Pedagogy</h2>
+<ul class="simple">
+<li class="fragment"><p>Module-3 will require some optimizations</p></li>
+<li class="fragment"><p>These are up to you to implement.</p></li>
+<li class="fragment"><p>Try first on CPU</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Map</h2>
+<ul class="simple">
+<li class="fragment"><p>When do you need to index?</p></li>
+<li class="fragment"><p>When do you need to broadcast?</p></li>
+<li class="fragment"><p>Can you directly utilize storage?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Zip</h2>
+<ul class="simple">
+<li class="fragment"><p>When can you avoid indexing?</p></li>
+<li class="fragment"><p>When can you avoid broadcasting?</p></li>
+<li class="fragment"><p>When does zip become a (fast) map?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Reduce</h2>
+<ul class="simple">
+<li class="fragment"><p>Special cases: dimension reduce + full reduce, how do they differ?</p></li>
+<li class="fragment"><p>Do we need to call index everytime?</p></li>
+<li class="fragment"><p>Do we need to write to global memory every time?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Matmul</h2>
+<ul class="simple">
+<li class="fragment"><p>Inner loop is key: can we optimize it?</p></li>
+<li class="fragment"><p>Key special case: Batch Matrix-Vector.</p></li>
+<li class="fragment"><p>GPU?</p></li>
+</ul>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

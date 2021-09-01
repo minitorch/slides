@@ -1,0 +1,13 @@
+
+==================
+ MiniTorch |logo|
+==================
+
+.. |logo| image:: match.png
+           :width: 40pt
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents
+
+   slides_intro

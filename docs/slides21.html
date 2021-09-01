@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 21</h2>
+<blockquote>
+<div><p>Synthesis</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Efficiency</p></li>
+<li class="fragment"><p>Overview</p></li>
+<li class="fragment"><p>Image Classification</p></li>
+</ul>
+</section>
+<section >
+<h1>Efficiency</h1>
+</section>
+<section >
+<h2>Constraints</h2>
+<ul class="simple">
+<li><p>Memory must be typed</p></li>
+<li><p>Memory must be <em>constant</em> size</p></li>
+<li><p>Memory must be relatively small</p></li>
+</ul>
+</section>
+<section >
+<h2>GPU</h2>
+<ul class="simple">
+<li><p>Lots of parallelism for computation</p></li>
+<li><p>Challenge: reduce memory reads</p></li>
+<li><p>Local &gt; Shared &gt; Global</p></li>
+</ul>
+</section>
+<section >
+<h2>Counts</h2>
+<ul class="simple">
+<li><p>Significantly reduced global reads and writes</p></li>
+<li><p>Needed block shared memory to do this</p></li>
+</ul>
+</section>
+<section >
+<h2>Sliding Average</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="sliding-average"><code data-trim data-noescape class="python">sub_size = 2
+a = [4, 2, 5, 6, 2, 4]
+out = [3, 3.5, 5.5, 4, 3]</code></pre>
+</section>
+<section >
+<h2>Example: Local Sum</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="example-local-sum"><code data-trim data-noescape class="python">def slide_py(out, a):
+   for i in range(out.size):
+       out[i] = 0
+       for j in range(sub_size):
+           out[i] += a[i + j]
+       out[i] = out[i] / sub_size</code></pre>
+</section>
+<section >
+<h2>CUDA</h2>
+<ul class="simple">
+<li><p>Each thread handles 1 output position</p></li>
+<li><p>Copy data from array to shared memory (be sure to handle edges)</p></li>
+<li><p>Threads loop in parallel doing averaging</p></li>
+<li><p>Write out at the end</p></li>
+</ul>
+</section>
+<section >
+<h2>Better CUDA</h2>
+<p>Two global reads per thread</p>
+<pre data-id="better-cuda"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   shared = numba.cuda.shared.array(THREADS + sub_size)
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   local_idx = numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       shared[local_idx] = a[i]
+       if local_idx &lt; sub_size and i + THREADS &lt; a.size:
+           shared[local_idx  + THREADS] = a[i + THREADS]
+       numba.cuda.syncthreads()
+       temp = 0
+       for j in range(sub_size):
+            temp += shared[local_idx + j]
+       out[i] = temp / sub_size</code></pre>
+</section>
+<section >
+<h2>Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/174714">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Suggestions: Map</h2>
+<ul class="simple">
+<li class="fragment"><p>When do you need to index?</p></li>
+<li class="fragment"><p>When do you need to broadcast?</p></li>
+<li class="fragment"><p>Can you directly utilize storage?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Zip</h2>
+<ul class="simple">
+<li class="fragment"><p>When can you avoid indexing?</p></li>
+<li class="fragment"><p>When can you avoid broadcasting?</p></li>
+<li class="fragment"><p>When does zip become a (fast) map?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Reduce</h2>
+<ul class="simple">
+<li class="fragment"><p>Special cases: dimension reduce + full reduce, how do they differ?</p></li>
+<li class="fragment"><p>Do we need to call index everytime?</p></li>
+<li class="fragment"><p>Do we need to write to global memory every time?</p></li>
+</ul>
+</section>
+<section >
+<h2>Suggestions: Matmul</h2>
+<ul class="simple">
+<li class="fragment"><p>Inner loop is key: can we optimize it?</p></li>
+<li class="fragment"><p>Key special case: Batch Matrix-Vector.</p></li>
+<li class="fragment"><p>GPU?</p></li>
+</ul>
+</section>
+<section >
+<h1>Overview</h1>
+</section>
+<section >
+<h2>Where we are at</h2>
+<ul class="simple">
+<li class="fragment"><p>Testing, Visualization, Math</p></li>
+<li class="fragment"><p>Scalars, Autodifferentiation</p></li>
+<li class="fragment"><p>Tensors, Gradients</p></li>
+<li class="fragment"><p>Parallel, Hardware</p></li>
+</ul>
+</section>
+<section >
+<h2>Next Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Build a real model</p></li>
+</ul>
+</section>
+<section >
+<h2>What more?</h2>
+<ul class="simple">
+<li class="fragment"><p>General framework to build tools</p></li>
+<li class="fragment"><p>Can learn through all sorts of functional transformations</p></li>
+<li class="fragment"><p>Can target different predictions and loss functions</p></li>
+</ul>
+</section>
+<section >
+<h1>Architecture</h1>
+</section>
+<section >
+<h2>Goal: Image Recognition</h2>
+</section>
+<section >
+<h2>Data Set</h2>
+<a class="reference internal image-reference" href="_images/mnist.png"><img alt="_images/mnist.png" class="align-center" src="_images/mnist.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Labels</h2>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/im2.png"><img alt="_images/im2.png" class="align-center" src="_images/im2.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<a class="reference internal image-reference" href="_images/data1.png"><img alt="_images/data1.png" class="align-center" src="_images/data1.png" style="width: 250px;" /></a>
+<a class="reference internal image-reference" href="_images/data2.png"><img alt="_images/data2.png" class="align-center" src="_images/data2.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Strategy</h2>
+<p>Build a neural network to classify these</p>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Three Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>How do we handle input features?</p></li>
+<li class="fragment"><p>How do we look at variable-size areas?</p></li>
+<li class="fragment"><p>How do we predict multiple labels?</p></li>
+</ol>
+</section>
+<section >
+<h2>Network</h2>
+<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing">https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<a class="reference internal image-reference" href="mnist.png"><img alt="mnist.png" class="align-center" src="mnist.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv&#64;3x.png"><img alt="_images/conv&#64;3x.png" class="align-center" src="_images/conv&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv2&#64;3x.png"><img alt="_images/conv2&#64;3x.png" class="align-center" src="_images/conv2&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<a class="reference internal image-reference" href="mnistregion.png"><img alt="mnistregion.png" class="align-center" src="mnistregion.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: Variable Size Area</h2>
+<a class="reference internal image-reference" href="_images/pool2d&#64;3x.png"><img alt="_images/pool2d&#64;3x.png" class="align-center" src="_images/pool2d&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: Variable Size Area</h2>
+<a class="reference internal image-reference" href="_images/pool2d&#64;3x.png"><img alt="_images/pool2d&#64;3x.png" class="align-center" src="_images/pool2d&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: MNist Zoom</h2>
+<a class="reference internal image-reference" href="mnistzoom.png"><img alt="mnistzoom.png" class="align-center" src="mnistzoom.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 3: Multiple Output</h2>
+<a class="reference internal image-reference" href="_images/value.png"><img alt="_images/value.png" class="align-center" src="_images/value.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/softmax.png"><img alt="_images/softmax.png" class="align-center" src="_images/softmax.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 3: Multiple Output</h2>
+<a class="reference internal image-reference" href="hist.png"><img alt="hist.png" class="align-center" src="hist.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Update</h2>
+<ul class="simple">
+<li><p>HW deadline moved to Wednesday next week</p></li>
+<li><p>One breaking errata (one line of code)</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture 19</h2>
+<blockquote>
+<div><p>All About GPU</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: CUDA</p></li>
+<li class="fragment"><p>Threads</p></li>
+<li class="fragment"><p>Memory</p></li>
+</ul>
+</section>
+<section >
+<h1>Threads</h1>
+</section>
+<section >
+<h2>CUDA</h2>
+<ul class="simple">
+<li class="fragment"><p>NVidia's programming language for GPU</p></li>
+<li class="fragment"><p>Compute Unified Device Architecture</p></li>
+<li class="fragment"><p>Like standard programming but in parallel</p></li>
+</ul>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<img alt="_images/thread&#64;3x.png" class="align-center" src="_images/thread&#64;3x.png" />
+</section>
+<section >
+<h2>Thread code</h2>
+<p>Code</p>
+<pre data-id="thread-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, 1](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<img alt="_images/block1d&#64;3x.png" class="align-center" src="_images/block1d&#64;3x.png" />
+</section>
+<section >
+<h2>Threads code</h2>
+<p>Code</p>
+<pre data-id="threads-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, 10](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<a class="reference internal image-reference" href="_images/blockdim&#64;3x.png"><img alt="_images/blockdim&#64;3x.png" class="align-center" src="_images/blockdim&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Threads code</h2>
+<p>Code</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, (10, 10)](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Block code</h2>
+<p>Code</p>
+<pre data-id="block-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[(10, 10), (10, 10)](a, b)</code></pre>
+</section>
+<section >
+<h2>Check</h2>
+<p>Code:</p>
+<pre data-id="check"><code data-trim data-noescape class="python">def printer(a):
+  print(&quot;hello!&quot;)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[10, 10](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="output"><code data-trim data-noescape class="python">hello!
+hello!
+hello!
+hello!
+hello!
+...</code></pre>
+</section>
+<section >
+<h2>Stack</h2>
+<ul class="simple">
+<li class="fragment"><p>Threads: Run the code</p></li>
+<li class="fragment"><p>Block: Groups &quot;close&quot; threads</p></li>
+<li class="fragment"><p>Grid: All the thread blocks</p></li>
+<li class="fragment"><p>Total Threads: <cite>threads_per_block</cite> x <cite>total_blocks</cite></p></li>
+</ul>
+</section>
+<section >
+<h1>Thread Names</h1>
+</section>
+<section >
+<h2>CUDA Code</h2>
+<ul class="simple">
+<li class="fragment"><p>Every thread runs simultaneously</p></li>
+<li class="fragment"><p>(Roughly) in lockstep</p></li>
+<li class="fragment"><p>How can we get anything done?</p></li>
+</ul>
+</section>
+<section >
+<h2>Thread Names</h2>
+<a class="reference internal image-reference" href="_images/threadid&#64;3x.png"><img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Thread Names</h2>
+<p>Printing code:</p>
+<pre data-id="id6"><code data-trim data-noescape class="python">def printer(a):
+  print(numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[1, (10, 10)](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">6 3
+7 3
+8 3
+9 3
+0 4
+1 4
+2 4
+3 4
+4 4</code></pre>
+</section>
+<section >
+<h2>Block Names</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Thread Names</h2>
+<p>Printing code:</p>
+<pre data-id="id8"><code data-trim data-noescape class="python">def printer(a):
+  print(numba.cuda.blockIdx.x,
+        numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[10, (10, 10)](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">7 6 9
+7 7 9
+7 8 9
+7 9 9
+2 6 9
+2 7 9</code></pre>
+</section>
+<section >
+<h2>What's my name?</h2>
+<p>Name</p>
+<pre data-id="what-s-my-name"><code data-trim data-noescape class="python">BLOCKS_X = 32
+BLOCKS_Y = 32
+THREADS_X = 10
+THREADS_Y = 10
+def fn(a):
+  x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+  y = numba.cuda.blockIdx.y * THREADS_Y + numba.cuda.threadIdx.y
+  ...
+fn = numba.cuda.jit()(fn)
+fn[(BLOCKS_X, BLOCKS_Y), (THREADS_X, THREAD_Y)](a)</code></pre>
+</section>
+<section >
+<h2>Simple Map</h2>
+<p>Map</p>
+<pre data-id="simple-map"><code data-trim data-noescape class="python">BLOCKS_X = 32
+THREADS_X = 32
+def fn(out, a):
+  x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+  if x &gt;=0 and x &lt; a.size:
+    out[x] = a[x] + 10
+fn = numba.cuda.jit()(fn)
+fn[BLOCKS_X, THREADS_X](a)</code></pre>
+</section>
+<section >
+<h2>Guards</h2>
+<p>Guards</p>
+<pre data-id="guards"><code data-trim data-noescape class="python">x = numba.cuda.blockIdx.x * BLOCKS_X + numba.cuda.threadIdx.x
+if x &gt;=0 and x &lt; a.size:</code></pre>
+</section>
+<section >
+<h2>Map Guard</h2>
+<a class="reference internal image-reference" href="_images/map&#64;3x.png"><img alt="_images/map&#64;3x.png" class="align-center" src="_images/map&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h1>Communication</h1>
+</section>
+<section >
+<h2>Memory</h2>
+<ul class="simple">
+<li><p>CUDA also has a memory stack</p></li>
+<li><p>Local &gt; Shared &gt; Global</p></li>
+<li><p>Fast code does minimal global reads</p></li>
+</ul>
+</section>
+<section >
+<h2>Local Memory</h2>
+<a class="reference internal image-reference" href="_images/local mem&#64;3x.png"><img alt="_images/local mem&#64;3x.png" class="align-center" src="_images/local mem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Example</h2>
+<p>Code</p>
+<pre data-id="example"><code data-trim data-noescape class="python">def local_fn(out, a):
+  local = numba.cuda.local.array(10, numba.int32)
+  local[0] = 10
+  local[5] = 20
+local_fn = numba.cuda.jit()(local_fn)
+local_fn[BLOCKS, THREADS](out, a)</code></pre>
+</section>
+<section >
+<h2>Constraints</h2>
+<ul class="simple">
+<li><p>Memory must be typed</p></li>
+<li><p>Memory must be <em>constant</em> size</p></li>
+<li><p>Memory must be relatively small</p></li>
+</ul>
+</section>
+<section >
+<h2>BAD Example</h2>
+<p>Code</p>
+<pre data-id="bad-example"><code data-trim data-noescape class="python">def local_fn(out, a):
+  local = numba.cuda.local.array(a.size, numba.int32)
+  local[0] = 10
+  local[5] = 20
+local_fn = numba.cuda.jit()(local_fn)
+local_fn[BLOCKS, THREADS](out, a)</code></pre>
+</section>
+<section >
+<h2>Block Shared Memory</h2>
+<a class="reference internal image-reference" href="_images/sharedmem&#64;3x.png"><img alt="_images/sharedmem&#64;3x.png" class="align-center" src="_images/sharedmem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Example</h2>
+<p>Code</p>
+<pre data-id="id10"><code data-trim data-noescape class="python">def block_fn(out, a):
+  shared = numba.cuda.shared.array(10, numba.int32)
+  shared[0] = 10
+  numba.cuda.syncthreads()
+  shared[5] = 20
+block_fn = numba.cuda.jit()(block_fn)
+block_fn[BLOCKS, THREADS](out, a)</code></pre>
+</section>
+<section >
+<h2>Colab</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV">https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Real Example</h2>
+<p>code</p>
+<pre data-id="real-example"><code data-trim data-noescape class="python">def sum(out, a):
+  shared = numba.cuda.shared.array(32, numba.float32)
+  i = 32 * numba.cuda.blockIdx.x + numba.cuda.threadIdx.x
+  if i &lt; a.size:
+      shared[i] = a[i]
+      cur = 1
+      for i in range(5):
+          numba.cuda.syncthreads()
+          if i % 2 == 0:
+              shared[i // (cur*2)] = shared[i // cur] + \
+                                     shared[(i // cur) + 1]
+          cur *= 2
+  numba.cuda.syncthreads()
+  if i == 0:
+      out[0] = shared[0]</code></pre>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>
