@@ -40,7 +40,7 @@
 <h1>Machine Learning Engineering</h1>
 </section>
 <section >
-<h2>Lecture 4</h2>
+<h2>Module 0.2</h2>
 <blockquote>
 <div><p>Models and Modules</p>
 </div></blockquote>
@@ -49,143 +49,106 @@
 <h2>Class Note</h2>
 <ul class="simple">
 <li><p>You need to link your GitHub account</p></li>
-<li><p>Still 25 students with unlinked accounts</p></li>
+<li><p>Still 9 students with unlinked accounts</p></li>
+<li><p><a class="reference external" href="https://classroom.github.com/classrooms/68973473-mle-2021/assignments/mle-module-0">Link</a></p></li>
 </ul>
-</section>
-<section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/152502">Quiz</a></p>
-</div></blockquote>
 </section>
 <section >
 <h2>Outline</h2>
 <ul class="simple">
-<li class="fragment"><p>Visualization</p></li>
-<li class="fragment"><p>Datasets</p></li>
-<li class="fragment"><p>Modules</p></li>
+<li><p>Modules</p></li>
+<li><p>Visualization</p></li>
+<li><p>Datasets</p></li>
 </ul>
-</section>
-<section >
-<h1>Visualization</h1>
-</section>
-<section >
-<h2>Main Idea</h2>
-<ul class="simple">
-<li class="fragment"><p>Show properties of your model as you code</p></li>
-<li class="fragment"><p>See real time graphs as you train models</p></li>
-<li class="fragment"><p>Make convincing figures of your full system</p></li>
-</ul>
-</section>
-<section >
-<h2>Library: Visdom</h2>
-<p>Generic image pasteboard</p>
-<pre data-id="library-visdom"><code data-trim data-noescape class="python">&gt;&gt;&gt; visdom &amp;</code></pre>
-</section>
-<section >
-<h2>Protip: Multiplexing</h2>
-<ul class="simple">
-<li class="fragment"><p>When coding you will often need multiple windows</p></li>
-<li class="fragment"><p>tmux - is a generic option for doing this</p></li>
-<li class="fragment"><p><a class="reference external" href="https://edricteo.com/tmux-tutorial/">https://edricteo.com/tmux-tutorial/</a></p></li>
-</ul>
-</section>
-<section >
-<h2>Code Snippet</h2>
-<p>Visdom windows</p>
-<pre data-id="code-snippet"><code data-trim data-noescape class="python">import visdom
-vis = visdom.Visdom()
-vis.text('Hello, world!', win=&quot;hello&quot;)</code></pre>
-</section>
-<section >
-<h2>Practical Advice</h2>
-<p>Many other ML tailored options</p>
-<ul class="simple">
-<li class="fragment"><p>Tensorboard</p></li>
-<li class="fragment"><p>Hosted services: Weights and Biases, Comet</p></li>
-</ul>
-</section>
-<section >
-<h2>Later in the Semester</h2>
-<ul class="simple">
-<li class="fragment"><p>Lecture on more ML visualization</p></li>
-<li class="fragment"><p>More specialized and custom visual design</p></li>
-</ul>
-</section>
-<section >
-<h1>Datasets</h1>
-</section>
-<section >
-<h2>Sneak Preview</h2>
-<ul class="simple">
-<li class="fragment"><p>Task 0.5: Intro to our first ML problem</p></li>
-<li class="fragment"><p>Basic separation of points on a graph</p></li>
-<li class="fragment"><p>Manual classifier</p></li>
-</ul>
-</section>
-<section >
-<h2>Sneak Preview</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=gauss&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.91939&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;learningRate_hide=true&amp;regularizationRate_hide=true&amp;batchSize_hide=true&amp;noise_hide=true&amp;discretize_hide=true&amp;regularization_hide=true&amp;activation_hide=true">Playground</a></p>
-</div></blockquote>
 </section>
 <section >
 <h1>Modules</h1>
 </section>
 <section >
-<h2>Managing Shapes</h2>
-<p>Inception - Standard for Image Recognition</p>
-<a class="reference internal image-reference" href="inception_v3.png"><img alt="inception_v3.png" src="inception_v3.png" style="width: 400px;" /></a>
+<h2>Image Models</h2>
+<img alt="https://research.fb.com/wp-content/uploads/2018/01/mask-detectron-post.jpg" src="https://research.fb.com/wp-content/uploads/2018/01/mask-detectron-post.jpg" />
 </section>
 <section >
-<h2>Real World Examples</h2>
-<p>Block from Inception</p>
-<pre data-id="real-world-examples"><code data-trim data-noescape class="python">class Inception3(nn.Module):
-
-  def __init__(self, num_classes=1000, aux_logits=True, transform_input=False,
-               inception_blocks=None, init_weights=None):
-      super(Inception3, self).__init__()
-      ...
-      conv_block = inception_blocks[0]
-      inception_a = inception_blocks[1]
-      inception_b = inception_blocks[2]
-      inception_c = inception_blocks[3]
-      inception_d = inception_blocks[4]
-      inception_e = inception_blocks[5]
-      inception_aux = inception_blocks[6]
-
-      self.aux_logits = aux_logits
-      self.transform_input = transform_input
-      self.Conv2d_1a_3x3 = conv_block(3, 32, kernel_size=3, stride=2)
-      self.Conv2d_2a_3x3 = conv_block(32, 32, kernel_size=3)
-      self.Conv2d_2b_3x3 = conv_block(32, 64, kernel_size=3, padding=1)
-      self.maxpool1 = nn.MaxPool2d(kernel_size=3, stride=2)
-      self.Conv2d_3b_1x1 = conv_block(64, 80, kernel_size=1)
-      self.Conv2d_4a_3x3 = conv_block(80, 192, kernel_size=3)
-      self.maxpool2 = nn.MaxPool2d(kernel_size=3, stride=2)
-      self.Mixed_5b = inception_a(192, pool_features=32)
-      self.Mixed_5c = inception_a(256, pool_features=64)
-      self.Mixed_5d = inception_a(288, pool_features=64)
-      self.Mixed_6a = inception_b(288)
-      self.Mixed_6b = inception_c(768, channels_7x7=128)
-      self.Mixed_6c = inception_c(768, channels_7x7=160)
-      self.Mixed_6d = inception_c(768, channels_7x7=160)
-      self.Mixed_6e = inception_c(768, channels_7x7=192)
-      if aux_logits:
-          self.AuxLogits = inception_aux(768, num_classes)
-      self.Mixed_7a = inception_d(768)
-      self.Mixed_7b = inception_e(1280)
-      self.Mixed_7c = inception_e(2048)
-      self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-      self.dropout = nn.Dropout()
-      self.fc = nn.Linear(2048, num_classes)</code></pre>
+<h2>Image Recognition</h2>
+<img alt="https://www.apriorit.com/images/articles/applying_inception_v3/figure-1.jpg" src="https://www.apriorit.com/images/articles/applying_inception_v3/figure-1.jpg" />
 </section>
 <section >
-<h2>Modules</h2>
+<h2>Text Generation</h2>
+<blockquote>
+<div> <blockquote style="align:center" class="twitter-tweet"> <a href="https://twitter.com/sharifshameem/status/1282676454690451457?ref_src=twsrc%5Etfw"></a></blockquote>
+
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></div></blockquote>
+</section>
+<section >
+<h2>Text Generation</h2>
+<img alt="https://qjjnh3a9hpo1nukrg1fwoh71-wpengine.netdna-ssl.com/wp-content/uploads/2020/02/1_KOtMC1xDW2kEg9YHvhTSXwedited.jpeg" src="https://qjjnh3a9hpo1nukrg1fwoh71-wpengine.netdna-ssl.com/wp-content/uploads/2020/02/1_KOtMC1xDW2kEg9YHvhTSXwedited.jpeg" />
+</section>
+<section >
+<h2>Model</h2>
 <ul class="simple">
-<li class="fragment"><p>Mini-language for building shapes</p></li>
-<li class="fragment"><p>Stores and accesses elements of the model</p></li>
-<li class="fragment"><p>Object-oriented style to maintain data</p></li>
+<li><p>For our purposes, a model is a parameterized function.</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}m(x; \theta)\\x \text{ - input}\\m \text{ - model}\end{aligned}\end{align} \]</div>
+<ul class="simple">
+<li><p>Initial Focus</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\theta \text{ - parameters}\]</div>
+</section>
+<section >
+<h2>Parameters</h2>
+<ul class="simple">
+<li><p>Model is just code.</p></li>
+<li><p>Parameters are everything that you learned.</p></li>
+<li><p>Modern parameters sets are both:</p>
+<ul>
+<li><p>Large</p></li>
+<li><p>Complex</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section >
+<h2>Growth in Parameter Size</h2>
+<img alt="https://ruder.io/content/images/2021/01/large_models.png" src="https://ruder.io/content/images/2021/01/large_models.png" />
+<p>(I have to update this graph every year)</p>
+</section>
+<section >
+<h2>Complex</h2>
+<p>Inception - Table of precise sizes</p>
+<a class="reference internal image-reference" href="_images/inception_v3.png"><img alt="_images/inception_v3.png" src="_images/inception_v3.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Specifying Parameters</h2>
+<ul class="simple">
+<li><p>Datastructures to specify parameters</p></li>
+<li><p>Requirements</p>
+<ul>
+<li><p>Independent of implementation</p></li>
+<li><p>Compositional</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section >
+<h2>Data Structure</h2>
+<ul class="simple">
+<li><p>Torch choice - Module Trees</p></li>
+<li><p>Each Module owns a set of parameters</p></li>
+<li><p>Each Module has submodules that own parameters</p></li>
+</ul>
+</section>
+<section >
+<h2>Module Trees</h2>
+<p>Benefits</p>
+<ul class="simple">
+<li><p>Can extract all parameters without knowing about Modules</p></li>
+<li><p>Can use mix and match Modules for different tasks</p></li>
+</ul>
+<p>Downsides</p>
+<ul class="simple">
+<li><p>Verbose, repeats some functionality of declaration and use.</p></li>
 </ul>
 </section>
 <section >
@@ -220,13 +183,6 @@ vis.text('Hello, world!', win=&quot;hello&quot;)</code></pre>
 </ul>
 </section>
 <section >
-<h2>Homework Note</h2>
-<ul class="simple">
-<li class="fragment"><p>Must be recursive implementation</p></li>
-<li class="fragment"><p>Have to walk the full tree</p></li>
-</ul>
-</section>
-<section >
 <h2>Module Example</h2>
 <p>Simple</p>
 <div class="jupyter_cell jupyter_container docutils container">
@@ -239,21 +195,26 @@ vis.text('Hello, world!', win=&quot;hello&quot;)</code></pre>
 
         self.data = 25
 
-        self.sub_module = OtherModule(arg, arg+10)
-print(MyModule)</code></pre>
+        self.sub_module = OtherModule(arg, arg+10)</code></pre>
 </div>
 <div class="cell_output docutils container">
-<pre><code data-trim data-noescape class="python">&lt;class '__main__.MyModule'&gt;
-</code></pre>
 </div>
 </div>
 </section>
 <section >
 <h2>How does this work?</h2>
 <ul class="simple">
-<li class="fragment"><p>Internally <code class="code docutils literal notranslate"><span class="pre">Module</span></code> spies to find <code class="code docutils literal notranslate"><span class="pre">Parameter</span></code> and <code class="code docutils literal notranslate"><span class="pre">Module</span></code> objects</p></li>
-<li class="fragment"><p>A list is stored internally.</p></li>
-<li class="fragment"><p>Implemented through Python magic methods</p></li>
+<li><p>Internally <code class="code docutils literal notranslate"><span class="pre">Module</span></code> spies to find <code class="code docutils literal notranslate"><span class="pre">Parameter</span></code> and <code class="code docutils literal notranslate"><span class="pre">Module</span></code> objects</p></li>
+<li><p>A list is stored internally.</p></li>
+<li><p>Implemented through Python magic methods</p></li>
+</ul>
+</section>
+<section >
+<h2>Detail: Magic Methods</h2>
+<ul class="simple">
+<li><p>Any method that starts and ends with __</p></li>
+<li><p>Used to override default behavior of the language.</p></li>
+<li><p>We will use for many things, including operator overloading</p></li>
 </ul>
 </section>
 <section >
@@ -295,17 +256,41 @@ class Module4(Module):
         self.p3 = Parameter(15)</code></pre>
 </section>
 <section >
+<h2>Parameter Naming</h2>
+<ul class="simple">
+<li><p>Every parameter in a model has a unique name.</p></li>
+<li><p>Naming is determined by walking the tree.</p></li>
+<li><p>Names are prefixed by the path from the root.</p></li>
+</ul>
+</section>
+<section >
 <h2>Module Naming</h2>
 <img alt="_images/module.png" src="_images/module.png" />
 </section>
 <section >
-<h2>Real World Examples</h2>
-<img alt="gpt2.png" src="gpt2.png" />
+<h2>Other Module Metadata</h2>
+<ul class="simple">
+<li><p>Other information can be communicated through the tree.</p></li>
+<li><p>Common example: Is the model in train or test mode?</p></li>
+</ul>
+</section>
+<section >
+<h2>Homework Note</h2>
+<ul class="simple">
+<li><p>Must be recursive implementation</p></li>
+<li><p>Have to walk the full tree</p></li>
+<li><p>(Companies love this as an interview question!)</p></li>
+</ul>
 </section>
 <section >
 <h2>Real World Examples</h2>
-<p>Block from GPT-2</p>
-<pre data-id="id5"><code data-trim data-noescape class="python">class Block(nn.Module):
+<p>Diagram from GPT (You shouldn't know this yet.. )</p>
+<img alt="_images/gpt2.png" src="_images/gpt2.png" />
+</section>
+<section >
+<h2>Real World Examples</h2>
+<p><a class="reference external" href="https://huggingface.co/transformers/_modules/transformers/modeling_gpt2.html">Code from GPT-2</a></p>
+<pre data-id="id4"><code data-trim data-noescape class="python">class Block(nn.Module):
   def __init__(self, n_ctx, config, scale=False):
       super().__init__()
       hidden_size = config.n_embd
@@ -317,6 +302,119 @@ class Module4(Module):
           self.crossattention = Attention(hidden_size, n_ctx, config, scale, is_cross_attention=True)
           self.ln_cross_attn = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
       self.mlp = MLP(inner_dim, config)</code></pre>
+</section>
+<section >
+<h2>Real World Examples</h2>
+<p>Tabular style description:</p>
+<a class="reference internal image-reference" href="_images/inception_v3.png"><img alt="_images/inception_v3.png" src="_images/inception_v3.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Real World Examples</h2>
+<p><a class="reference external" href="https://pytorch.org/vision/stable/_modules/torchvision/models/inception.html">Block from Inception</a></p>
+<pre data-id="id6"><code data-trim data-noescape class="python">class Inception3(nn.Module):
+
+  def __init__(self, num_classes=1000, aux_logits=True, transform_input=False,
+               inception_blocks=None, init_weights=None):
+      super(Inception3, self).__init__()
+      ...
+      self.aux_logits = aux_logits
+      self.transform_input = transform_input
+      self.Conv2d_1a_3x3 = conv_block(3, 32, kernel_size=3, stride=2)
+      self.Conv2d_2a_3x3 = conv_block(32, 32, kernel_size=3)
+      self.Conv2d_2b_3x3 = conv_block(32, 64, kernel_size=3, padding=1)
+      self.maxpool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+      self.Conv2d_3b_1x1 = conv_block(64, 80, kernel_size=1)
+      self.Conv2d_4a_3x3 = conv_block(80, 192, kernel_size=3)
+      self.maxpool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+      self.Mixed_5b = inception_a(192, pool_features=32)
+      self.Mixed_5c = inception_a(256, pool_features=64)
+      self.Mixed_5d = inception_a(288, pool_features=64)
+      self.Mixed_6a = inception_b(288)
+      self.Mixed_6b = inception_c(768, channels_7x7=128)
+      self.Mixed_6c = inception_c(768, channels_7x7=160)
+      self.Mixed_6d = inception_c(768, channels_7x7=160)
+      self.Mixed_6e = inception_c(768, channels_7x7=192)
+      if aux_logits:
+          self.AuxLogits = inception_aux(768, num_classes)
+      self.Mixed_7a = inception_d(768)
+      self.Mixed_7b = inception_e(1280)
+      self.Mixed_7c = inception_e(2048)
+      self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+      self.dropout = nn.Dropout()
+      self.fc = nn.Linear(2048, num_classes)</code></pre>
+</section>
+<section >
+<h1>Visualization</h1>
+</section>
+<section >
+<h2>Main Idea</h2>
+<ul class="simple">
+<li><p>Show properties of your model as you code</p></li>
+<li><p>See real time graphs as you train models</p></li>
+<li><p>Make convincing figures of your full system</p></li>
+</ul>
+</section>
+<section >
+<h2>Library: Streamlit</h2>
+<p>Easy to use Python GUI</p>
+<pre data-id="library-streamlit"><code data-trim data-noescape class="python">&gt;&gt;&gt; streamlit run app.py -- 0</code></pre>
+</section>
+<section >
+<h2>Code Snippet</h2>
+<p>Streamlit windows</p>
+<pre data-id="code-snippet"><code data-trim data-noescape class="python">import streamlit as st
+st.write(&quot;## Sandbox for Model Training&quot;)
+...
+st.plotly_chart(fig)</code></pre>
+</section>
+<section >
+<h2>Gotchas</h2>
+<ul class="simple">
+<li><p>Changes to the visualization code will autoupdate</p></li>
+<li><p>Changes to the library will not autoupdate</p></li>
+</ul>
+</section>
+<section >
+<h2>Other Options</h2>
+<p>Many other ML tailored options</p>
+<ul class="simple">
+<li><p>Tensorboard</p></li>
+<li><p>Hosted services: Weights and Biases, Comet</p></li>
+</ul>
+</section>
+<section >
+<h1>Datasets</h1>
+</section>
+<section >
+<h2>Sneak Preview</h2>
+<ul class="simple">
+<li><p>Task 0.5: Intro to our first ML problem</p></li>
+<li><p>Basic separation of points on a graph</p></li>
+<li><p>Manual classifier</p></li>
+</ul>
+</section>
+<section >
+<h2>Datasets</h2>
+<ul class="simple">
+<li><p>Simple</p></li>
+<li><p>Diag</p></li>
+<li><p>Split</p></li>
+<li><p>Xor</p></li>
+</ul>
+</section>
+<section >
+<h2>Parameter Knobs</h2>
+<ul class="simple">
+<li><p>W1</p></li>
+<li><p>W2</p></li>
+<li><p>Bias</p></li>
+</ul>
+</section>
+<section >
+<h2>Sneak Preview</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=gauss&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.91939&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;learningRate_hide=true&amp;regularizationRate_hide=true&amp;batchSize_hide=true&amp;noise_hide=true&amp;discretize_hide=true&amp;regularization_hide=true&amp;activation_hide=true">Playground</a></p>
+</div></blockquote>
 </section>
 <section >
 <h2>Q&amp;A</h2>
