@@ -16,11 +16,6 @@ Module 1.1
   Learning With Derivatives
 
 
-Lecture
-=========
-
-
-
 
 
 Review: Model
@@ -88,77 +83,6 @@ Outline
    * Model Fit
    * Derivatives
    
-Module-1
-=========
-
-Module-1 Learning Objectives
------------------------------
-
-.. revealjs_fragments::
-
-   * Practical understanding of derivatives
-   * Dive into autodifferentiation
-   * Parameters and their usage
-
-
-Module-1: What is it?
------------------------------
-
-.. revealjs_fragments::
-
-   * Numerical and symbolic derivatives
-   * Implement our numerical class
-   * Implement autodifferentiation
-
-Module-1: Review
------------------------------
-
-.. revealjs_fragments::
-
-   * Review `differentiation rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
-   * Everything is scalars for now (no "gradients")
-
-
-Module-1 Overview
----------------------
-
-.. revealjs_fragments::
-
-   * 5 Tasks
-
-Task 1.1: Numerical Derivatives
----------------------------------
-
-.. image:: figs/Grad/approx.png
-           :align: center
-
-
-Task 1.2: Scalars
-------------------
-
-.. image:: images/expgraph.png
-   :align: center
-
-Task 1.3: Chain Rule
----------------------
-
-.. image:: figs/Autograd/autograd3.png
-           :align: center
-
-Task 1.4: Backpropagation
---------------------------
-
-.. image:: figs/Autograd/backprop6.png
-           :align: center
-
-Task 1.5: Classifier Training
--------------------------------
-
-.. image:: images/complete.png
-
-
-
-
 Model Fitting
 =============
 
@@ -458,6 +382,77 @@ Multipleargs Difference
 
 
                    
+Module-1
+=========
+
+Module-1 Learning Objectives
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Practical understanding of derivatives
+   * Dive into autodifferentiation
+   * Parameters and their usage
+
+
+Module-1: What is it?
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Numerical and symbolic derivatives
+   * Implement our numerical class
+   * Implement autodifferentiation
+
+Module-1: Review
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Review `differentiation rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+   * Everything is scalars for now (no "gradients")
+
+
+Module-1 Overview
+---------------------
+
+.. revealjs_fragments::
+
+   * 5 Tasks
+
+Task 1.1: Numerical Derivatives
+---------------------------------
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+
+Task 1.2: Scalars
+------------------
+
+.. image:: images/expgraph.png
+   :align: center
+
+Task 1.3: Chain Rule
+---------------------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+Task 1.4: Backpropagation
+--------------------------
+
+.. image:: figs/Autograd/backprop6.png
+           :align: center
+
+Task 1.5: Classifier Training
+-------------------------------
+
+.. image:: images/complete.png
+
+
+
+
 
 
 Q&A

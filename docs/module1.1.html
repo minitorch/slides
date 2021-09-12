@@ -43,9 +43,6 @@
 </div></blockquote>
 </section>
 <section >
-<h1>Lecture</h1>
-</section>
-<section >
 <h2>Review: Model</h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://minitorch.github.io/mlprimer.html">https://minitorch.github.io/mlprimer.html</a></p></li>
@@ -93,58 +90,6 @@ linear_model(x)</code></pre>
 <li class="fragment"><p>Model Fit</p></li>
 <li class="fragment"><p>Derivatives</p></li>
 </ul>
-</section>
-<section >
-<h1>Module-1</h1>
-</section>
-<section >
-<h2>Module-1 Learning Objectives</h2>
-<ul class="simple">
-<li class="fragment"><p>Practical understanding of derivatives</p></li>
-<li class="fragment"><p>Dive into autodifferentiation</p></li>
-<li class="fragment"><p>Parameters and their usage</p></li>
-</ul>
-</section>
-<section >
-<h2>Module-1: What is it?</h2>
-<ul class="simple">
-<li class="fragment"><p>Numerical and symbolic derivatives</p></li>
-<li class="fragment"><p>Implement our numerical class</p></li>
-<li class="fragment"><p>Implement autodifferentiation</p></li>
-</ul>
-</section>
-<section >
-<h2>Module-1: Review</h2>
-<ul class="simple">
-<li class="fragment"><p>Review <a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">differentiation rules</a></p></li>
-<li class="fragment"><p>Everything is scalars for now (no &quot;gradients&quot;)</p></li>
-</ul>
-</section>
-<section >
-<h2>Module-1 Overview</h2>
-<ul class="simple">
-<li class="fragment"><p>5 Tasks</p></li>
-</ul>
-</section>
-<section >
-<h2>Task 1.1: Numerical Derivatives</h2>
-<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
-</section>
-<section >
-<h2>Task 1.2: Scalars</h2>
-<img alt="_images/expgraph.png" class="align-center" src="_images/expgraph.png" />
-</section>
-<section >
-<h2>Task 1.3: Chain Rule</h2>
-<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
-</section>
-<section >
-<h2>Task 1.4: Backpropagation</h2>
-<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
-</section>
-<section >
-<h2>Task 1.5: Classifier Training</h2>
-<img alt="_images/complete.png" src="_images/complete.png" />
 </section>
 <section >
 <h1>Model Fitting</h1>
@@ -303,7 +248,7 @@ d_f = derivative(f)</code></pre>
 <section >
 <h2>Issues</h2>
 <p>How do we handle higher-order functions?</p>
-<pre data-id="id7"><code data-trim data-noescape class="python">def derivative(fn):
+<pre data-id="id6"><code data-trim data-noescape class="python">def derivative(fn):
     def inner(x):
         ...
     return inner
@@ -335,6 +280,58 @@ d_f = derivative(f)</code></pre>
 <div class="math notranslate nohighlight">
 \[f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}\]</div>
 <img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h1>Module-1</h1>
+</section>
+<section >
+<h2>Module-1 Learning Objectives</h2>
+<ul class="simple">
+<li class="fragment"><p>Practical understanding of derivatives</p></li>
+<li class="fragment"><p>Dive into autodifferentiation</p></li>
+<li class="fragment"><p>Parameters and their usage</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: What is it?</h2>
+<ul class="simple">
+<li class="fragment"><p>Numerical and symbolic derivatives</p></li>
+<li class="fragment"><p>Implement our numerical class</p></li>
+<li class="fragment"><p>Implement autodifferentiation</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: Review</h2>
+<ul class="simple">
+<li class="fragment"><p>Review <a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">differentiation rules</a></p></li>
+<li class="fragment"><p>Everything is scalars for now (no &quot;gradients&quot;)</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1 Overview</h2>
+<ul class="simple">
+<li class="fragment"><p>5 Tasks</p></li>
+</ul>
+</section>
+<section >
+<h2>Task 1.1: Numerical Derivatives</h2>
+<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h2>Task 1.2: Scalars</h2>
+<img alt="_images/expgraph.png" class="align-center" src="_images/expgraph.png" />
+</section>
+<section >
+<h2>Task 1.3: Chain Rule</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Task 1.4: Backpropagation</h2>
+<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
+</section>
+<section >
+<h2>Task 1.5: Classifier Training</h2>
+<img alt="_images/complete.png" src="_images/complete.png" />
 </section>
 <section >
 <h1>Q&amp;A</h1>
