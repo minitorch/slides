@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Machine Learning Engineering</title>
+  <title>Module 1.3 - Neural Networks</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -32,208 +32,31 @@
   </head><body>
     <div class="reveal">
         <div class="slides">
-            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
-<link rel="stylesheet" href="_static/default.css"><section >
-<h1>Machine Learning Engineering</h1>
+            <section >
+<h1>Module 1.3 - Neural Networks</h1>
 </section>
 <section >
 <h2>Module 1.3</h2>
 <blockquote>
-<div><p>Autodifferentiation</p>
+<div><p>Neural Networks</p>
 </div></blockquote>
 </section>
 <section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/158322">Quiz</a></p>
-</div></blockquote>
+<h1>Lecture</h1>
 </section>
 <section >
 <h2>Outline</h2>
 <ul class="simple">
-<li class="fragment"><p>Review: Functions</p></li>
-<li class="fragment"><p>Chain Rule</p></li>
-<li class="fragment"><p>Backward</p></li>
-<li class="fragment"><p>Backpropagation</p></li>
+<li class="fragment"><p>Review: Backpropagation</p></li>
+<li class="fragment"><p>Neural Networks</p></li>
+<li class="fragment"><p>Model Training</p></li>
 </ul>
-</section>
-<section >
-<h1>Functions</h1>
-</section>
-<section >
-<h2>Review: Functions</h2>
-<ul>
-<li><p>Function <span class="math notranslate nohighlight">\(f(x) = x \times 5\)</span></p></li>
-<li><p>Implementation</p>
-<pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
-
-    &#64;staticmethod
-    def forward(ctx, x):
-        return x * 5</code></pre>
-</li>
-<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number)</p></li>
-</ul>
-</section>
-<section >
-<h2>Multi-arg Functions</h2>
-<p>Code</p>
-<pre data-id="multi-arg-functions"><code data-trim data-noescape class="python">class Mul(ScalarFunction):
-    &#64;staticmethod
-    def forward(ctx, x, y):
-        return x * y</code></pre>
-<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
-</section>
-<section >
-<h1>Chain Rule</h1>
-</section>
-<section >
-<h2>Python Details</h2>
-<ul>
-<li><p>Use <cite>apply</cite> for the above Functions</p>
-<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
-y = minitorch.Scalar(5., name=&quot;y&quot;)
-z = TimesFive.apply(x)
-out = TimesFive.apply(z)</code></pre>
-</li>
-<li><p>Apply unwraps, calls, and wraps again</p></li>
-</ul>
-</section>
-<section >
-<h2>Chaining Boxes</h2>
-<p>Chaining</p>
-<pre data-id="chaining-boxes"><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
-g_x = G.apply(x)
-f_g_x = F.apply(g_x)</code></pre>
-<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
-</section>
-<section >
-<h2>Chain Rule</h2>
-<ul class="simple">
-<li><p>Compute derivative from chain</p></li>
-</ul>
-<div class="math notranslate nohighlight">
-\[f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))\]</div>
-<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
-</section>
-<section >
-<h2>Chain Rule</h2>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{eqnarray*}
-y &amp;=&amp; g(x) \\
-d_{out} &amp;=&amp; f'(y) \\
-f'_x(g(x)) &amp;=&amp;  g'(x) \times d_{out} \\
-\end{eqnarray*}\end{split}\]</div>
-<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
-</section>
-<section >
-<h2>Two Arguments: Chain</h2>
-<div class="math notranslate nohighlight">
-\[\begin{split} \begin{eqnarray*}
-f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
-f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
-\end{eqnarray*}\end{split}\]</div>
-<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
-</section>
-<section >
-<h2>Two Arguments: Chain</h2>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{eqnarray*}
-z &amp;=&amp; g(x, y) \\
-d_{out} &amp;=&amp; f'(z) \\
-f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times d_{out} \\
-f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times d_{out}
-\end{eqnarray*}\end{split}\]</div>
-<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
-</section>
-<section >
-<h2>Coding Derivatives</h2>
-<ul class="simple">
-<li><p>For each <span class="math notranslate nohighlight">\(f\)</span> or <span class="math notranslate nohighlight">\(g\)</span>  we need to also provide <span class="math notranslate nohighlight">\(f'\)</span> and <span class="math notranslate nohighlight">\(g'\)</span></p></li>
-<li><p>This part can be done through local symbolic or numeric differentiation</p></li>
-</ul>
-<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
-</section>
-<section >
-<h2>Picture</h2>
-<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
-</section>
-<section >
-<h2>Code</h2>
-<ul>
-<li><p>Backward use <span class="math notranslate nohighlight">\(g'\)</span></p></li>
-<li><p>Returns <span class="math notranslate nohighlight">\(g'(x) \times d_{out}\)</span></p>
-<pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
-  &#64;staticmethod
-  def forward(ctx, x):
-     return x * 5
-
-  &#64;staticmethod
-   def backward(ctx, d_out):
-     g_prime = 5
-     return g_prime * d_out</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Code</h2>
-<ul>
-<li><p>What about <span class="math notranslate nohighlight">\(g(x, y)\)</span></p></li>
-<li><p>Returns <span class="math notranslate nohighlight">\(g'_x(x,y) \times d_{out}\)</span></p>
-<pre><code data-trim data-noescape class="python">class AddTimes2(ScalarFunction):
-    &#64;staticmethod
-    def forward(ctx, x, y):
-        return x + 2 * y
-
-    &#64;staticmethod
-    def backward(ctx, d_out):
-        g_prime_x = 1
-        g_prime_y = 2
-        return g_prime_x * d_out, g_prime_y * d_out</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Code</h2>
-<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
-</section>
-<section >
-<h2>Handling Variables</h2>
-<p>Consider a function <cite>Square</cite></p>
-<ul>
-<li><p><span class="math notranslate nohighlight">\(g(x) = x^2\)</span> that squares x</p></li>
-<li><p>Derivative function uses variable <span class="math notranslate nohighlight">\(g'(x) = 2 \times x\)</span></p></li>
-<li><p>However backward doesn't take args</p>
-<pre><code data-trim data-noescape class="python">def backward(ctx, d_out):</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Context</h2>
-<p>Arguments to backward must be saved in context.</p>
-<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
-    &#64;staticmethod
-    def forward(ctx, x):
-        ctx.save_for_backward(x)
-        return x * x
-
-    &#64;staticmethod
-    def backward(ctx, d_out):
-        x = ctx.saved_values
-        f_prime = 2 * x
-        return f_prime * d_out</code></pre>
-</section>
-<section >
-<h2>Context Internals</h2>
-<p>Run <cite>Square</cite></p>
-<pre data-id="context-internals"><code data-trim data-noescape class="python">x = minitorch.Scalar(10)
-x_2  = Square.apply(x)
-x_2.history.context</code></pre>
 </section>
 <section >
 <h1>Backpropagation</h1>
 </section>
 <section >
-<h2>Full Graph</h2>
+<h2>Math View</h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray*}
 z &amp;=&amp; x \times y \\
@@ -242,12 +65,15 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 <img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
 </section>
 <section >
-<h2>Method</h2>
-<ul class="simple">
-<li class="fragment"><p>Graph propagation</p></li>
-<li class="fragment"><p><a class="reference external" href="https://en.wikipedia.org/wiki/Breadth-first_search">breadth-first search</a></p></li>
-<li class="fragment"><p>Ensure flow to original Variables.</p></li>
-</ul>
+<h2>Code View</h2>
+<pre data-id="code-view"><code data-trim data-noescape class="python">def h(x, y):
+   z = x * y
+   return z.log() + z.exp()
+x = minitorch.Scalar(5.)
+y = minitorch.Scalar(3.)
+h(x, y).backward(1)
+print(x.derivative)</code></pre>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
 </section>
 <section >
 <h2>Terminology</h2>
@@ -258,20 +84,29 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 </ul>
 </section>
 <section >
+<h2>Method</h2>
+<ul class="simple">
+<li class="fragment"><p>Graph propagation on Variables</p></li>
+<li class="fragment"><p><a class="reference external" href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search</a> i.e. Queue</p></li>
+<li class="fragment"><p>Ensure flow to original Variables</p></li>
+</ul>
+</section>
+<section >
 <h2>Algorithm</h2>
+<p>Start with final Variable / derivative (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
 <ol class="loweralpha simple">
-<li><p>if the Variable is a leaf, add its final derivative</p></li>
-<li><p>if the Variable is not a leaf,</p>
+<li><p>if Variable is a leaf, add derivative to .derivative</p></li>
+<li><p>if Variable is not a leaf,</p>
 <ol class="arabic simple">
-<li><p>Apply chainrule as derivative as <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
-<li><p>Loop through all the previous Variables</p></li>
-<li><p>Add to the queue.</p></li>
+<li><p>Apply chainrule with <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
+<li><p>Add non-constant Variables to queue</p></li>
 </ol>
 </li>
 </ol>
 </section>
 <section >
 <h2>Example</h2>
+<p>Red -&gt; Pending Variables / derivatives (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
 <img alt="_images/backprop2.png" class="align-center" src="_images/backprop2.png" />
 </section>
 <section >
@@ -295,7 +130,177 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 <img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
 </section>
 <section >
-<h1>Q&amp;A</h1>
+<h2>Caveats</h2>
+<ul class="simple">
+<li><p>Simple implementation</p></li>
+<li><p>Many optimizations, alternatives</p></li>
+<li><p>Works for most NNs</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/160489">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Neural Networks</h1>
+</section>
+<section >
+<h2>Reminder</h2>
+<ul class="simple">
+<li><p>Dataset - Data to fit</p></li>
+<li><p>Model - Shape of fit</p></li>
+<li><p>Loss - Goodness of fit</p></li>
+</ul>
+</section>
+<section >
+<h2>Linear Model Example</h2>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Loss Function</h2>
+<a class="reference internal image-reference" href="_images/distance.png"><img alt="_images/distance.png" class="align-center" src="_images/distance.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Example Dataset</h2>
+<a class="reference internal image-reference" href="_images/sector2.png"><img alt="_images/sector2.png" class="align-center" src="_images/sector2.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Harder Datasets</h2>
+<ul class="simple">
+<li><p>Model may be too &quot;weak&quot;</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Neural Networks</h2>
+<ul class="simple">
+<li class="fragment"><p>New <em>model</em></p></li>
+<li class="fragment"><p>Uses repeated linear splits of data</p></li>
+<li class="fragment"><p>Produces non-linear separators</p></li>
+<li class="fragment"><p>Loss will not change</p></li>
+</ul>
+</section>
+<section >
+<h2>Intuition: Neural Networks</h2>
+<ol class="arabic simple">
+<li><p>Apply many linear seperators</p></li>
+<li><p>Reshape the data space based on results</p></li>
+<li><p>Apply a linear model on new space</p></li>
+</ol>
+</section>
+<section >
+<h2>Starting Point</h2>
+<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Intuition: Split 1</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Intuition: Split 2</h2>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Reshape: ReLU</h2>
+<a class="reference internal image-reference" href="_images/relu2.png"><img alt="_images/relu2.png" class="align-center" src="_images/relu2.png" style="width: 600px;" /></a>
+<p>Key: Non-linear function</p>
+</section>
+<section >
+<h2>Split 1</h2>
+<a class="reference internal image-reference" href="_images/relu.png"><img alt="_images/relu.png" class="align-center" src="_images/relu.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Split 2</h2>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Zoomed Out</h2>
+<a class="reference internal image-reference" href="_images/mlpgraph.png"><img alt="_images/mlpgraph.png" class="align-center" src="_images/mlpgraph.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Math View</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+h_ 1 &amp;=&amp; \text{ReLU}(x_1 \times w^0_1 + x_2 \times w^0_2 + b^0) \\
+h_ 2 &amp;=&amp; \text{ReLU}(x_1 \times w^1_1 + x_2 \times w^1_2 + b^1)\\
+m(x_1, x_2) &amp;=&amp; h_1 \times w_1 + h_2 \times w_2 + b
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Math View (Alt)</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Code View</h2>
+<p>Linear</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">class Linear(minitorch.Module):
+  def __init__(self):
+      super().__init__()
+      self.w_1 = minitorch.Parameter(minitorch.Scalar())
+      self.w_2 = minitorch.Parameter(minitorch.Scalar())
+      self.b = minitorch.Parameter(minitorch.Scalar())
+
+  def forward(self, inputs):
+      return (inputs[0] * self.w_1.value +
+             inputs[1] * self.w_2.value +
+             self.b.value)</code></pre>
+</section>
+<section >
+<h2>Code View</h2>
+<p>Model</p>
+<pre data-id="id10"><code data-trim data-noescape class="python">class Network(minitorch.Module):
+  def __init__(self):
+      super().__init__()
+      self.unit1 = Linear()
+      self.unit2 = Linear()
+      self.unit3 = Linear()
+
+  def forward(self, x):
+      h_1 = self.unit1.foward(x).relu()
+      h_2 = self.unit2.foward(x).relu()
+      return self.unit3.foward([h_1, h_2])</code></pre>
+</section>
+<section >
+<h2>Training</h2>
+<pre data-id="training"><code data-trim data-noescape class="python">model = Network()
+...
+model.named_parameters()</code></pre>
+<ul class="simple">
+<li><p>All the parameters in model are leaf Variables</p></li>
+<li><p>Computing backward on loss fills their derivative</p></li>
+</ul>
+</section>
 
         </div>
     </div>

@@ -1,39 +1,13 @@
+
+
 Module 1.2 - Autodifferentiation
-=============================================
+=================================
 
 
-Lecture 7
+Module 1.2
 ------------
 
   Autodifferentiation
-
-
-Lab Session
-============
-
-
-Topics
--------
-
-* Python internals
-* ML Review
-* Preview
-
-
-Lecture
-=========
-
-Derivative Types
-===================
-
-Loss
-------
-
-.. image:: figs/Graphs/move.png
-           :align: center
-           :width: 400px
-
-
 
 Symbolic Derivative
 ---------------------
@@ -49,44 +23,9 @@ Symbolic Derivative
 
 * `Differentiation Rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
 
-Issues
---------
 
-
-How do we handle higher-order functions? ::
-
-   def derivative(fn):
-       def inner(x):
-           ...
-       return inner
-
-   d_f = derivative(f)
-
-
-Definition of Derivative
-------------------------
-
-
-.. image:: figs/Grad/tangent.png
-           :align: center
-
-
-.. math ::
-
-    f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}
-
-Difference
---------------------
-
-* Approximate limit with small value
-
-.. math ::
-
-    f'(x) \approx  \frac{f(x + \epsilon) - f(x)}{\epsilon}
-
-
-Central Difference
---------------------
+Numerical Derivative
+----------------------
 
 .. math ::
 
@@ -94,36 +33,6 @@ Central Difference
 
 .. image:: figs/Grad/approx.png
            :align: center
-
-Multipleargs Difference
-------------------------
-
-.. math ::
-
-    f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}
-
-.. image:: figs/Grad/approx.png
-           :align: center
-
-
-
-
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/156345>`_
-
-
-Outline
----------
-
-.. revealjs_fragments::
-
-   * Numerical Derivatives
-   * Variables
-   * Functions
-
-
 
 Autodifferentiation
 ==========================
@@ -138,121 +47,28 @@ Goal
    * Automatically compute any derivative
    * Use this to fit models
 
-Are these symbolic derivatives?
--------------------------------
-
-No
-
-.. revealjs_fragments::
-
-   * Don't get out mathematical function
-
-Are these numerical derivatives?
--------------------------------
-
-No
-
-.. revealjs_fragments::
-
-   * Don't need to run samples nearby
-
-Downsides
-----------
-
-.. revealjs_fragments::
-
-   * Needs more information than numerical derivatives
-   * Needs to execute function unlike symbolic derivatives
-   * Requires overriding number system
-
-Derivative Checks
---------------------
-
-*  Property: All three of these should roughly match
-
-
-Strategy
------------
-
-.. revealjs_fragments::
-
-  1. Replace numbers with  `Variables`.
-  2. Replace mathematical function with `Functions`.
-  3. `Variables` track which `Functions` were applied
-
-
-Autodifferentiation
--------------------
-
-* Apply chain rule to the constructed graph
-* Code derivatives in to the graph
-
-
-Variables and Functions
-==========================
-
-"Wrapping"
-----------
-
-* Class wraps around numbers ::
-
-      class Scalar(Variable):
-          def __init__(self, value):
-               self.value = value
-          ...
-
-Goal
------
-
-.. revealjs_fragments::
-
-   * Act like a numerical value to user
-   * Record operations applied
-   * Hide access to internal storage
-
-How to make a Variable
-------------------------
-
-* Just wrap a standard value  ::
-
-    x_1 = minitorch.Scalar(x_1)
-    x_1.name = "x_1" # Optional for debugging
-
-
-How to update a Variable
-------------------------
-
-* Have to use a Function  ::
-
-    x_1 = minitorch.Scalar(x_1)
-    x_1.name = "x_1"
-
-    z = f.apply(x_1)
-
-Box Diagrams
--------------
-
-.. image:: figs/Autograd/autograd1.png
-           :align: center
-
 Box Diagrams
 -------------
 
 .. image:: figs/Autograd/autograd2.png
            :align: center
+                   
 
-Code Demo
+Lecture Quiz
 -------------
 
+  `Quiz`_
 
-How does this Work
--------------------
 
-* Arrows are Variables
-* Boxes  are Functions
+Outline
+---------
 
-.. image:: figs/Autograd/chain1.png
-           :align: center
+.. revealjs_fragments::
+
+   * Chain Rule
+   * Backward
+   * Backpropagation
+
 
 Functions
 ==========
@@ -370,6 +186,274 @@ Code
           def backward(ctx, d_out):
               return d_out, 2 * d_out
 
+
+Chain Rule
+===========
+
+
+Python Details
+------------------
+
+* Use `apply` for the above Functions ::
+
+   x = minitorch.Scalar(10., name="x")
+   y = minitorch.Scalar(5., name="y")
+   z = TimesFive.apply(x)
+   out = TimesFive.apply(z)
+
+* Apply unwraps, calls, and wraps again
+
+Chaining Boxes
+---------------
+
+Chaining ::
+
+   x = minitorch.Scalar(10., name="x")
+   g_x = G.apply(x)
+   f_g_x = F.apply(g_x)
+
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+
+
+
+Chain Rule
+-----------
+
+* Compute derivative from chain
+
+.. math ::
+
+    f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+
+Chain Rule
+-----------
+
+.. math::
+
+   \begin{eqnarray*}
+   y &=& g(x) \\
+   d_{out} &=& f'(y) \\
+   f'_x(g(x)) &=&  g'(x) \times d_{out} \\
+   \end{eqnarray*}
+
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+Two Arguments: Chain
+--------------------
+.. math::
+
+   \begin{eqnarray*}
+  f'_x(g(x, y)) &=& g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
+  f'_y(g(x, y)) &=& g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
+  \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+
+Two Arguments: Chain
+---------------------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& g(x, y) \\
+   d_{out} &=& f'(z) \\
+   f'_x(g(x, y)) &=& g_x'(x, y) \times d_{out} \\
+   f'_y(g(x, y)) &=& g_y'(x, y) \times d_{out}
+   \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+Coding Derivatives
+--------------------
+
+* For each :math:`f` or :math:`g`  we need to also provide :math:`f'` and :math:`g'`
+* This part can be done through local symbolic or numeric differentiation
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+
+Picture
+----------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+Code
+------
+
+* Backward use :math:`g'`
+* Returns :math:`g'(x) \times d_{out}` ::
+
+    class TimesFive(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+         return x * 5
+
+      @staticmethod
+       def backward(ctx, d_out):
+         g_prime = 5
+         return g_prime * d_out
+
+
+Code
+----------
+
+* What about :math:`g(x, y)`
+* Returns :math:`g'_x(x,y) \times d_{out}` ::
+
+
+      class AddTimes2(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x + 2 * y
+
+          @staticmethod
+          def backward(ctx, d_out):
+              g_prime_x = 1
+              g_prime_y = 2
+              return g_prime_x * d_out, g_prime_y * d_out
+
+Code
+----------
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+Handling Variables
+--------------------
+
+Consider a function `Square`
+
+* :math:`g(x) = x^2` that squares x
+* Derivative function uses variable :math:`g'(x) = 2 \times x`
+* However backward doesn't take args ::
+
+    def backward(ctx, d_out):
+
+Context
+----------
+
+Arguments to backward must be saved in context. ::
+
+  class Square(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+          ctx.save_for_backward(x)
+          return x * x
+
+      @staticmethod
+      def backward(ctx, d_out):
+          x = ctx.saved_values
+          f_prime = 2 * x
+          return f_prime * d_out
+
+Context Internals
+-----------------
+
+Run `Square` ::
+
+   x = minitorch.Scalar(10)
+   x_2  = Square.apply(x)
+   x_2.history.context
+
+Backpropagation
+=================
+
+Full Graph
+-----------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& x \times y \\
+   h(x, y) &=& \log(z) + \exp(z)
+   \end{eqnarray*}
+
+
+.. image:: figs/Autograd/backprop1.png
+           :align: center
+
+Method
+------
+
+.. revealjs_fragments::
+
+   * Graph propagation
+   * `breadth-first search <https://en.wikipedia.org/wiki/Breadth-first_search>`_
+   * Ensure flow to original Variables.
+
+Terminology
+------------
+
+.. revealjs_fragments::
+
+   * Leaf: Variable created from scratch
+   * Non-Leaf: Variable created with a Function
+   * Constant: Term passed in that is not a variable
+
+Algorithm
+----------
+
+a. if the Variable is a leaf, add its final derivative
+b. if the Variable is not a leaf,
+
+   1) Apply chainrule as derivative as :math:`d_{out}`
+   2) Loop through all the previous Variables
+   3) Add to the queue.
+
+
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop2.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop3.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop4.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop5.png
+           :align: center
+Example
+-----------
+
+.. image:: figs/Autograd/backprop6.png
+           :align: center
+Example
+-----------
+
+.. image:: figs/Autograd/backprop7.png
+           :align: center
 
 
 Q&A
