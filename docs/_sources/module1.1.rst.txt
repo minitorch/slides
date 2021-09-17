@@ -1,9 +1,4 @@
 
-.. raw:: html
-
-   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
-   <link rel="stylesheet" href="_static/default.css">
-
 
 Machine Learning Engineering
 =============================================
@@ -68,21 +63,45 @@ Math
 
 
 
-   
+Loss
+--------
+
+.. revealjs_fragments::
+
+   * Loss weights our incorrect points
+   * Function of distance from boundary
+
+     :math:`L(w_1, w_2, b)` is loss, function of parameters.
+
+
+Sigmoid
+--------
+
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 600px
+
+.. revealjs_fragments::
+
+   * Weight distance by sigmoid
+   * Combines loss of all points
+
+           
 Lecture Quiz
 -------------
 
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/155694>`_
+  `Quiz`
 
 Outline
 ---------
 
 .. revealjs_fragments::
 
-   * Module 1
+
    * Model Fit
    * Derivatives
-   
+   * Module 1   
+
 Model Fitting
 =============
 
@@ -208,11 +227,12 @@ Subscript indicates variable
 
 .. math ::
 
-   f'_x(x, y) = 1
+   f_x'(x, y) = 1
 
 .. math ::
 
-   f'_y(x, y) = 2
+   f_y'(x, y) = 2
+
 
 
 Intuition: Derivative
@@ -297,89 +317,137 @@ Approximating Derivative
 .. image:: figs/Grad/approx.png
            :align: center
 
-Derivative Types
-===================
 
-Loss
-------
-
-.. image:: figs/Graphs/move.png
-           :align: center
-           :width: 400px
+Autodifferentiation
+==========================
 
 
+Goal
+-------
 
-Symbolic Derivative
----------------------
+.. revealjs_fragments::
 
-.. math ::
+   * Write down arbitrary (python) functions
+   * Automatically compute any derivative
+   * Use this to fit models
 
-   f(x) = \sin(2 x)
+Are these symbolic derivatives?
+-------------------------------
 
+No
 
-.. math ::
+.. revealjs_fragments::
 
-    f'(x) = 2 \times \cos(2 x)
+   * Don't get out mathematical function
 
-* `Differentiation Rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+Are these numerical derivatives?
+-------------------------------
 
-Issues
---------
+No
 
+.. revealjs_fragments::
 
-How do we handle higher-order functions? ::
+   * Don't need to run samples nearby
 
-   def derivative(fn):
-       def inner(x):
-           ...
-       return inner
+Downsides
+----------
 
-   d_f = derivative(f)
+.. revealjs_fragments::
 
+   * Needs more information than numerical derivatives
+   * Needs to execute function unlike symbolic derivatives
+   * Requires overriding number system
 
-Definition of Derivative
-------------------------
-
-
-.. image:: figs/Grad/tangent.png
-           :align: center
-
-
-.. math ::
-
-    f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}
-
-Difference
+Derivative Checks
 --------------------
 
-* Approximate limit with small value
-
-.. math ::
-
-    f'(x) \approx  \frac{f(x + \epsilon) - f(x)}{\epsilon}
+*  Property: All three of these should roughly match
 
 
-Central Difference
---------------------
+Strategy
+-----------
 
-.. math ::
+.. revealjs_fragments::
 
-    f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}
+  1. Replace numbers with  `Variables`.
+  2. Replace mathematical function with `Functions`.
+  3. `Variables` track which `Functions` were applied
 
-.. image:: figs/Grad/approx.png
-           :align: center
 
-Multipleargs Difference
+Autodifferentiation
+-------------------
+
+* Apply chain rule to the constructed graph
+* Code derivatives in to the graph
+
+
+Variables and Functions
+==========================
+
+"Wrapping"
+----------
+
+* Class wraps around numbers ::
+
+      class Scalar(Variable):
+          def __init__(self, value):
+               self.value = value
+          ...
+
+Goal
+-----
+
+.. revealjs_fragments::
+
+   * Act like a numerical value to user
+   * Record operations applied
+   * Hide access to internal storage
+
+How to make a Variable
 ------------------------
 
-.. math ::
+* Just wrap a standard value  ::
 
-    f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}
+    x_1 = minitorch.Scalar(x_1)
+    x_1.name = "x_1" # Optional for debugging
 
-.. image:: figs/Grad/approx.png
+
+How to update a Variable
+------------------------
+
+* Have to use a Function  ::
+
+    x_1 = minitorch.Scalar(x_1)
+    x_1.name = "x_1"
+
+    z = f.apply(x_1)
+
+Box Diagrams
+-------------
+
+.. image:: figs/Autograd/autograd1.png
            :align: center
 
+Box Diagrams
+-------------
 
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+Code Demo
+-------------
+
+
+How does this Work
+-------------------
+
+* Arrows are Variables
+* Boxes  are Functions
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+                   
 
                    
 Module-1

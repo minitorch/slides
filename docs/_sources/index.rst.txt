@@ -10,4 +10,9 @@
    :maxdepth: 3
    :caption: Contents
 
-   slides_intro
+   module0.0
+   module0.1
+   module0.2
+   module1.0
+   module1.1
+   module1.2

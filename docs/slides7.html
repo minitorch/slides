@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
-    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/default.css" />
@@ -122,121 +122,6 @@ d_f = derivative(f)</code></pre>
 <div class="math notranslate nohighlight">
 \[f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}\]</div>
 <img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
-</section>
-<section >
-<h1>Autodifferentiation</h1>
-</section>
-<section >
-<h2>Goal</h2>
-<ul class="simple">
-<li class="fragment"><p>Write down arbitrary (python) functions</p></li>
-<li class="fragment"><p>Automatically compute any derivative</p></li>
-<li class="fragment"><p>Use this to fit models</p></li>
-</ul>
-</section>
-<section >
-<h2>Are these symbolic derivatives?</h2>
-<p>No</p>
-<ul class="simple">
-<li class="fragment"><p>Don't get out mathematical function</p></li>
-</ul>
-</section>
-<section >
-<h2>Are these numerical derivatives?</h2>
-<p>No</p>
-<ul class="simple">
-<li class="fragment"><p>Don't need to run samples nearby</p></li>
-</ul>
-</section>
-<section >
-<h2>Downsides</h2>
-<ul class="simple">
-<li class="fragment"><p>Needs more information than numerical derivatives</p></li>
-<li class="fragment"><p>Needs to execute function unlike symbolic derivatives</p></li>
-<li class="fragment"><p>Requires overriding number system</p></li>
-</ul>
-</section>
-<section >
-<h2>Derivative Checks</h2>
-<ul class="simple">
-<li><p>Property: All three of these should roughly match</p></li>
-</ul>
-</section>
-<section >
-<h2>Strategy</h2>
-<ol class="arabic simple">
-<li class="fragment"><p>Replace numbers with  <cite>Variables</cite>.</p></li>
-<li class="fragment"><p>Replace mathematical function with <cite>Functions</cite>.</p></li>
-<li class="fragment"><p><cite>Variables</cite> track which <cite>Functions</cite> were applied</p></li>
-</ol>
-</section>
-<section >
-<h2>Autodifferentiation</h2>
-<ul class="simple">
-<li><p>Apply chain rule to the constructed graph</p></li>
-<li><p>Code derivatives in to the graph</p></li>
-</ul>
-</section>
-<section >
-<h1>Variables and Functions</h1>
-</section>
-<section >
-<h2>&quot;Wrapping&quot;</h2>
-<ul>
-<li><p>Class wraps around numbers</p>
-<pre><code data-trim data-noescape class="python">class Scalar(Variable):
-    def __init__(self, value):
-         self.value = value
-    ...</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Goal</h2>
-<ul class="simple">
-<li class="fragment"><p>Act like a numerical value to user</p></li>
-<li class="fragment"><p>Record operations applied</p></li>
-<li class="fragment"><p>Hide access to internal storage</p></li>
-</ul>
-</section>
-<section >
-<h2>How to make a Variable</h2>
-<ul>
-<li><p>Just wrap a standard value</p>
-<pre><code data-trim data-noescape class="python">x_1 = minitorch.Scalar(x_1)
-x_1.name = &quot;x_1&quot; # Optional for debugging</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>How to update a Variable</h2>
-<ul>
-<li><p>Have to use a Function</p>
-<pre><code data-trim data-noescape class="python">x_1 = minitorch.Scalar(x_1)
-x_1.name = &quot;x_1&quot;
-
-z = f.apply(x_1)</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Box Diagrams</h2>
-<img alt="_images/autograd1.png" class="align-center" src="_images/autograd1.png" />
-</section>
-<section >
-<h2>Box Diagrams</h2>
-<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
-</section>
-<section >
-<h2>Code Demo</h2>
-</section>
-<section >
-<h2>How does this Work</h2>
-<ul class="simple">
-<li><p>Arrows are Variables</p></li>
-<li><p>Boxes  are Functions</p></li>
-</ul>
-<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
 </section>
 <section >
 <h1>Functions</h1>

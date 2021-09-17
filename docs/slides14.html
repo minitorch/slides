@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
-    <link rel="stylesheet" href="_static/revealjs4/dist/theme/black.css" type="text/css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/default.css" />
@@ -209,11 +209,11 @@ m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
 </section>
 <section >
 <h2>Layer 1: Weight</h2>
-<img alt="_images/weight.png" class="align-center" src="_images/weight.png" />
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 </section>
 <section >
 <h2>Layer 1: Bias</h2>
-<img alt="_images/bias.png" class="align-center" src="_images/bias.png" />
+<img alt="_images/bias1.png" class="align-center" src="_images/bias1.png" />
 </section>
 <section >
 <h2>Key Task</h2>
@@ -231,12 +231,12 @@ m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
 <p>Step 2</p>
 <pre data-id="compute-derivatives"><code data-trim data-noescape class="python">(loss.sum().view(1)).backward()
 print(model.layer1.w_1.value.grad)</code></pre>
-<img alt="_images/weight.png" class="align-center" src="_images/weight.png" />
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 </section>
 <section >
 <h2>Layer 1: Weight Grad</h2>
-<img alt="_images/weight.png" class="align-center" src="_images/weight.png" />
-<img alt="_images/weight.png" class="align-center" src="_images/weight.png" />
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 </section>
 <section >
 <h2>Update Parameters</h2>
