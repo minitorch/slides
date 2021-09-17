@@ -5,7 +5,7 @@
    <link rel="stylesheet" href="_static/default.css">
 
 
-Machine Learning Engineering
+Module 0.1 - Fundamentals
 =============================================
 
 

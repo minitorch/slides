@@ -1,5 +1,5 @@
 
-Machine Learning Engineering
+Module 1.0 - Mini-ML
 =============================================
 
 

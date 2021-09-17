@@ -15,7 +15,7 @@
 
    
 
-Machine Learning Engineering
+Module 0.2 - Models and Modules
 =============================================
 
 

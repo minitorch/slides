@@ -3,16 +3,22 @@
  MiniTorch |logo|
 ==================
 
-.. |logo| image:: match.png
+.. |logo| image:: images/match.png
            :width: 40pt
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Contents
+Module 0
+========
 
-   module0.0
-   module0.1
-   module0.2
-   module1.0
-   module1.1
-   module1.2
+* :doc:`module0.0`
+* :doc:`module0.1`
+* :doc:`module0.2`
+
+Module 1
+========
+
+* :doc:`module1.0`
+* :doc:`module1.1`
+* :doc:`module1.2`
+* :doc:`module1.3`
+* :doc:`module1.4`
+  
