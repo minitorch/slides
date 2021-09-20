@@ -34,30 +34,37 @@ Numerical Derivative
 .. image:: figs/Grad/approx.png
            :align: center
 
-Autodifferentiation
-==========================
 
 
-Goal
--------
+Autodifferentiation Goals
+----------------------------
 
 .. revealjs_fragments::
 
    * Write down arbitrary (python) functions
-   * Automatically compute any derivative
-   * Use this to fit models
+   * Programmatically compute the derivative 
+   * Two passes: run function, compute derivative
 
+Box Diagrams
+-------------
+
+.. image:: figs/Autograd/autograd1.png
+           :align: center
+
+     
 Box Diagrams
 -------------
 
 .. image:: figs/Autograd/autograd2.png
            :align: center
+
+
                    
 
 Lecture Quiz
 -------------
 
-  `Quiz`_
+  `Quiz`
 
 
 Outline
@@ -65,13 +72,100 @@ Outline
 
 .. revealjs_fragments::
 
-   * Chain Rule
+   * Variables and Functions
    * Backward
+   * Chain Rule
    * Backpropagation
 
 
-Functions
-==========
+Autodifferentiation
+--------------------
+
+* Two pass strategy
+
+* Forward Pass - Compute arbitrary function
+
+* Backward Pass - Compute derivatives of function
+
+Forward Pass
+--------------------
+
+* Run mathematical code
+
+* Collects result and computation graph
+
+.. image:: figs/Autograd/backprop1.png
+           :align: center
+
+  
+Backward Pass
+--------------------
+
+* Uses computation graph to compute derivatives
+
+* Happens internally in our system. 
+
+.. image:: figs/Autograd/backprop7.png
+           :align: center
+
+
+Example : Linear Model
+-----------------------
+
+* Our forward computes 
+
+.. math::
+   {\cal L}(w, b) = - \log \sigma(x;w, b)
+
+where
+
+.. math::
+   m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b
+
+* Our backward computes
+
+.. math::
+  {\cal L}'_w(w, b) \ \   {\cal L}'_b(w, b)
+
+
+
+  
+     
+Functions and Variables
+=======================
+
+
+
+Strategy
+-----------
+
+Need to collect all the computation
+
+.. revealjs_fragments::
+
+  1. Replace numbers with  `Variables`.
+  2. Replace mathematical function with `Functions`.
+  3. `Variables` track which `Functions` were applied
+
+"Wrapping"
+----------
+
+* Class wraps around numbers ::
+
+      class Scalar(Variable):
+          def __init__(self, value):
+               self.value = value
+          ...
+
+Goal
+-----
+
+.. revealjs_fragments::
+
+   * Act like a numerical value to user
+   * Record operations applied
+   * Hide access to internal storage
+
 
 
 Functions
@@ -80,8 +174,13 @@ Functions
 .. revealjs_fragments::
 
    * Functions are implemented as static classes
-   * User implements `forward` and `backward` methods
-   * Forward is :math:`f` and backward is :math:`f'`
+     
+   * We implement hidden `forward` and `backward` methods
+
+   * User calls `apply` which handles wrapping / unwrapping 
+   
+
+     
 
 Functions
 -----------
@@ -97,7 +196,7 @@ Functions
               return x * 5
 
 
-* :math:`x` is unwrapped (python number)
+* :math:`x` is unwrapped (python number) and return is a number
 
 Multi-arg Functions
 ----------------------
@@ -131,15 +230,33 @@ Tricks
 
     out2 = x * y
 
+* Many functions e.g. `sub` can be implemented with other calls.
+
+
+Notes
+------------------
+
+* Since each operation creates a new variable, there are no loops.
+
+* Cannot modify a variable! Graph only gets larger. 
 
 Backwards
 ==========
 
-Coding Derivatives
---------------------
+How do we get derivatives?
+--------------------------
+
+* Base case: compute derivatives for single functions
+
+* Inductive case: define how to propagate a derivative 
+
+
+  
+Base Case: Coding Derivatives
+-----------------------------
 
 * For each :math:`f` we need to also provide :math:`f'`
-* This part can be done through local symbolic or numeric differentiation
+* This part can be done through local symbolic or even numeric differentiation
 
 .. image:: figs/Autograd/autograd3.png
            :align: center
@@ -186,6 +303,52 @@ Code
           def backward(ctx, d_out):
               return d_out, 2 * d_out
 
+What is Context?
+------------------
+
+* Promise -> context on `forward` is given to `backward`
+
+* May be called at different times. 
+              
+              
+Handling Variables
+--------------------
+
+Consider a function `Square`
+
+* :math:`g(x) = x^2` that squares x
+* Derivative function uses variable :math:`g'(x) = 2 \times x`
+* However backward doesn't take args ::
+
+    def backward(ctx, d_out):
+
+Context
+----------
+
+Arguments to backward must be saved in context. ::
+
+  class Square(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+          ctx.save_for_backward(x)
+          return x * x
+
+      @staticmethod
+      def backward(ctx, d_out):
+          x = ctx.saved_values
+          f_prime = 2 * x
+          return f_prime * d_out
+
+Context Internals
+-----------------
+
+Run `Square` ::
+
+   x = minitorch.Scalar(10)
+   x_2  = Square.apply(x)
+   x_2.history.context
+
+              
 
 Chain Rule
 ===========
@@ -196,8 +359,8 @@ Python Details
 
 * Use `apply` for the above Functions ::
 
-   x = minitorch.Scalar(10., name="x")
-   y = minitorch.Scalar(5., name="y")
+   x = minitorch.Scalar(10.)
+   y = minitorch.Scalar(5.)
    z = TimesFive.apply(x)
    out = TimesFive.apply(z)
 
@@ -215,8 +378,6 @@ Chaining ::
 
 .. image:: figs/Autograd/chain1.png
            :align: center
-
-
 
 
 Chain Rule
@@ -239,16 +400,51 @@ Chain Rule
 .. math::
 
    \begin{eqnarray*}
-   y &=& g(x) \\
-   d_{out} &=& f'(y) \\
+   z &=& g(x) \\
+   d_{out} &=& f'(z) \\
    f'_x(g(x)) &=&  g'(x) \times d_{out} \\
    \end{eqnarray*}
-
 
 
 .. image:: figs/Autograd/chain2.png
            :align: center
 
+Example: Chain Rule
+--------------------
+
+Chaining
+
+.. math::
+  
+  log(x)^2
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+.. math::
+   
+   f(z) = z^2\\
+   g(x) = log(x)\\
+                   
+Example: Chain Rule
+--------------------
+
+.. math::
+
+   f'(z) = 2z \times 1 \\
+   g'(x) =  1 / x
+
+   
+.. image:: figs/Autograd/chain2.png
+           :align: center
+                   
+
+What is the combination?
+
+.. math::
+
+   f'_x(g(x))
+                   
 Two Arguments: Chain
 --------------------
 .. math::
@@ -279,6 +475,40 @@ Two Arguments: Chain
            :align: center
 
 
+Example: Chain Rule
+--------------------
+
+Chaining
+
+.. math::
+  
+  (x * y)^2
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+.. math::
+   
+   f(z) = z^2\\
+   g(x, y) = (x * y)\\
+
+
+Example: Chain Rule
+--------------------
+
+.. math::
+
+   f'(z) = 2z \times 1\\
+
+
+What is the combination?
+
+.. math::
+
+   f'_x(g(x, y)) \\
+   f'_y(g(x, y)) \\
+
+   
 Coding Derivatives
 --------------------
 
@@ -337,42 +567,6 @@ Code
            :align: center
 
 
-Handling Variables
---------------------
-
-Consider a function `Square`
-
-* :math:`g(x) = x^2` that squares x
-* Derivative function uses variable :math:`g'(x) = 2 \times x`
-* However backward doesn't take args ::
-
-    def backward(ctx, d_out):
-
-Context
-----------
-
-Arguments to backward must be saved in context. ::
-
-  class Square(ScalarFunction):
-      @staticmethod
-      def forward(ctx, x):
-          ctx.save_for_backward(x)
-          return x * x
-
-      @staticmethod
-      def backward(ctx, d_out):
-          x = ctx.saved_values
-          f_prime = 2 * x
-          return f_prime * d_out
-
-Context Internals
------------------
-
-Run `Square` ::
-
-   x = minitorch.Scalar(10)
-   x_2  = Square.apply(x)
-   x_2.history.context
 
 Backpropagation
 =================
@@ -397,7 +591,7 @@ Method
 .. revealjs_fragments::
 
    * Graph propagation
-   * `breadth-first search <https://en.wikipedia.org/wiki/Breadth-first_search>`_
+   * `Topological Sorting <http://wikipedia.org/wiki/Topological_sorting>`_
    * Ensure flow to original Variables.
 
 Terminology
@@ -412,14 +606,27 @@ Terminology
 Algorithm
 ----------
 
-a. if the Variable is a leaf, add its final derivative
-b. if the Variable is not a leaf,
+0. Call topological sort to get an order
+1. For each node in order, pull a completed Variable and
+   derivative from the queue:
 
-   1) Apply chainrule as derivative as :math:`d_{out}`
-   2) Loop through all the previous Variables
-   3) Add to the queue.
+   a. if the Variable is a leaf, add its final derivative (`accumulate_derivative`)
+      and loop to (1)
+   b. if the Variable is not a leaf,
 
+      1) call `.backprop_step` on the last function that created it with
+         derivative as :math:`d_{out}`
+      2) loop through all the Variables+derivative produced by the chain
+         rule
+      3) accumulate derivative for the Variable (check `.unique_id`)
 
+Example
+-----------
+
+.. image:: figs/Autograd/backprop1.png
+           :align: center
+
+         
 
 Example
 -----------

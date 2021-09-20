@@ -58,15 +58,16 @@
 <img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
 </section>
 <section >
-<h1>Autodifferentiation</h1>
-</section>
-<section >
-<h2>Goal</h2>
+<h2>Autodifferentiation Goals</h2>
 <ul class="simple">
 <li class="fragment"><p>Write down arbitrary (python) functions</p></li>
-<li class="fragment"><p>Automatically compute any derivative</p></li>
-<li class="fragment"><p>Use this to fit models</p></li>
+<li class="fragment"><p>Programmatically compute the derivative</p></li>
+<li class="fragment"><p>Two passes: run function, compute derivative</p></li>
 </ul>
+</section>
+<section >
+<h2>Box Diagrams</h2>
+<img alt="_images/autograd1.png" class="align-center" src="_images/autograd1.png" />
 </section>
 <section >
 <h2>Box Diagrams</h2>
@@ -75,26 +76,95 @@
 <section >
 <h2>Lecture Quiz</h2>
 <blockquote>
-<div><p><a href="#id18"><span class="problematic" id="id19">`Quiz`_</span></a></p>
+<div><p><cite>Quiz</cite></p>
 </div></blockquote>
 </section>
 <section >
 <h2>Outline</h2>
 <ul class="simple">
-<li class="fragment"><p>Chain Rule</p></li>
+<li class="fragment"><p>Variables and Functions</p></li>
 <li class="fragment"><p>Backward</p></li>
+<li class="fragment"><p>Chain Rule</p></li>
 <li class="fragment"><p>Backpropagation</p></li>
 </ul>
 </section>
 <section >
-<h1>Functions</h1>
+<h2>Autodifferentiation</h2>
+<ul class="simple">
+<li><p>Two pass strategy</p></li>
+<li><p>Forward Pass - Compute arbitrary function</p></li>
+<li><p>Backward Pass - Compute derivatives of function</p></li>
+</ul>
+</section>
+<section >
+<h2>Forward Pass</h2>
+<ul class="simple">
+<li><p>Run mathematical code</p></li>
+<li><p>Collects result and computation graph</p></li>
+</ul>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Backward Pass</h2>
+<ul class="simple">
+<li><p>Uses computation graph to compute derivatives</p></li>
+<li><p>Happens internally in our system.</p></li>
+</ul>
+<img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
+</section>
+<section >
+<h2>Example : Linear Model</h2>
+<ul class="simple">
+<li><p>Our forward computes</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[{\cal L}(w, b) = - \log \sigma(x;w, b)\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b\]</div>
+<ul class="simple">
+<li><p>Our backward computes</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[{\cal L}'_w(w, b) \ \   {\cal L}'_b(w, b)\]</div>
+</section>
+<section >
+<h1>Functions and Variables</h1>
+</section>
+<section >
+<h2>Strategy</h2>
+<p>Need to collect all the computation</p>
+<ol class="arabic simple">
+<li class="fragment"><p>Replace numbers with  <cite>Variables</cite>.</p></li>
+<li class="fragment"><p>Replace mathematical function with <cite>Functions</cite>.</p></li>
+<li class="fragment"><p><cite>Variables</cite> track which <cite>Functions</cite> were applied</p></li>
+</ol>
+</section>
+<section >
+<h2>&quot;Wrapping&quot;</h2>
+<ul>
+<li><p>Class wraps around numbers</p>
+<pre><code data-trim data-noescape class="python">class Scalar(Variable):
+    def __init__(self, value):
+         self.value = value
+    ...</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Act like a numerical value to user</p></li>
+<li class="fragment"><p>Record operations applied</p></li>
+<li class="fragment"><p>Hide access to internal storage</p></li>
+</ul>
 </section>
 <section >
 <h2>Functions</h2>
 <ul class="simple">
 <li class="fragment"><p>Functions are implemented as static classes</p></li>
-<li class="fragment"><p>User implements <cite>forward</cite> and <cite>backward</cite> methods</p></li>
-<li class="fragment"><p>Forward is <span class="math notranslate nohighlight">\(f\)</span> and backward is <span class="math notranslate nohighlight">\(f'\)</span></p></li>
+<li class="fragment"><p>We implement hidden <cite>forward</cite> and <cite>backward</cite> methods</p></li>
+<li class="fragment"><p>User calls <cite>apply</cite> which handles wrapping / unwrapping</p></li>
 </ul>
 </section>
 <section >
@@ -108,7 +178,7 @@
     def forward(ctx, x):
         return x * 5</code></pre>
 </li>
-<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number)</p></li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number) and return is a number</p></li>
 </ul>
 </section>
 <section >
@@ -138,16 +208,31 @@ out = TimesFive.apply(z)</code></pre>
 <li><p>Use operator overloading to ensure that functions are called</p>
 <pre><code data-trim data-noescape class="python">out2 = x * y</code></pre>
 </li>
+<li><p>Many functions e.g. <cite>sub</cite> can be implemented with other calls.</p></li>
+</ul>
+</section>
+<section >
+<h2>Notes</h2>
+<ul class="simple">
+<li><p>Since each operation creates a new variable, there are no loops.</p></li>
+<li><p>Cannot modify a variable! Graph only gets larger.</p></li>
 </ul>
 </section>
 <section >
 <h1>Backwards</h1>
 </section>
 <section >
-<h2>Coding Derivatives</h2>
+<h2>How do we get derivatives?</h2>
+<ul class="simple">
+<li><p>Base case: compute derivatives for single functions</p></li>
+<li><p>Inductive case: define how to propagate a derivative</p></li>
+</ul>
+</section>
+<section >
+<h2>Base Case: Coding Derivatives</h2>
 <ul class="simple">
 <li><p>For each <span class="math notranslate nohighlight">\(f\)</span> we need to also provide <span class="math notranslate nohighlight">\(f'\)</span></p></li>
-<li><p>This part can be done through local symbolic or numeric differentiation</p></li>
+<li><p>This part can be done through local symbolic or even numeric differentiation</p></li>
 </ul>
 <img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
 </section>
@@ -190,14 +275,54 @@ out = TimesFive.apply(z)</code></pre>
 </ul>
 </section>
 <section >
+<h2>What is Context?</h2>
+<ul class="simple">
+<li><p>Promise -&gt; context on <cite>forward</cite> is given to <cite>backward</cite></p></li>
+<li><p>May be called at different times.</p></li>
+</ul>
+</section>
+<section >
+<h2>Handling Variables</h2>
+<p>Consider a function <cite>Square</cite></p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(g(x) = x^2\)</span> that squares x</p></li>
+<li><p>Derivative function uses variable <span class="math notranslate nohighlight">\(g'(x) = 2 \times x\)</span></p></li>
+<li><p>However backward doesn't take args</p>
+<pre><code data-trim data-noescape class="python">def backward(ctx, d_out):</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Context</h2>
+<p>Arguments to backward must be saved in context.</p>
+<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x):
+        ctx.save_for_backward(x)
+        return x * x
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        x = ctx.saved_values
+        f_prime = 2 * x
+        return f_prime * d_out</code></pre>
+</section>
+<section >
+<h2>Context Internals</h2>
+<p>Run <cite>Square</cite></p>
+<pre data-id="context-internals"><code data-trim data-noescape class="python">x = minitorch.Scalar(10)
+x_2  = Square.apply(x)
+x_2.history.context</code></pre>
+</section>
+<section >
 <h1>Chain Rule</h1>
 </section>
 <section >
 <h2>Python Details</h2>
 <ul>
 <li><p>Use <cite>apply</cite> for the above Functions</p>
-<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
-y = minitorch.Scalar(5., name=&quot;y&quot;)
+<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10.)
+y = minitorch.Scalar(5.)
 z = TimesFive.apply(x)
 out = TimesFive.apply(z)</code></pre>
 </li>
@@ -225,11 +350,31 @@ f_g_x = F.apply(g_x)</code></pre>
 <h2>Chain Rule</h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray*}
-y &amp;=&amp; g(x) \\
-d_{out} &amp;=&amp; f'(y) \\
+z &amp;=&amp; g(x) \\
+d_{out} &amp;=&amp; f'(z) \\
 f'_x(g(x)) &amp;=&amp;  g'(x) \times d_{out} \\
 \end{eqnarray*}\end{split}\]</div>
 <img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[log(x)^2\]</div>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x) = log(x)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1 \\
+g'(x) =  1 / x\end{split}\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[f'_x(g(x))\]</div>
 </section>
 <section >
 <h2>Two Arguments: Chain</h2>
@@ -250,6 +395,25 @@ f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times d_{out} \\
 f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times d_{out}
 \end{eqnarray*}\end{split}\]</div>
 <img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[(x * y)^2\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x, y) = (x * y)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1\\\end{split}\]</div>
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'_x(g(x, y)) \\
+f'_y(g(x, y)) \\\end{split}\]</div>
 </section>
 <section >
 <h2>Coding Derivatives</h2>
@@ -303,39 +467,6 @@ f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times d_{out}
 <img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
 </section>
 <section >
-<h2>Handling Variables</h2>
-<p>Consider a function <cite>Square</cite></p>
-<ul>
-<li><p><span class="math notranslate nohighlight">\(g(x) = x^2\)</span> that squares x</p></li>
-<li><p>Derivative function uses variable <span class="math notranslate nohighlight">\(g'(x) = 2 \times x\)</span></p></li>
-<li><p>However backward doesn't take args</p>
-<pre><code data-trim data-noescape class="python">def backward(ctx, d_out):</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Context</h2>
-<p>Arguments to backward must be saved in context.</p>
-<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
-    &#64;staticmethod
-    def forward(ctx, x):
-        ctx.save_for_backward(x)
-        return x * x
-
-    &#64;staticmethod
-    def backward(ctx, d_out):
-        x = ctx.saved_values
-        f_prime = 2 * x
-        return f_prime * d_out</code></pre>
-</section>
-<section >
-<h2>Context Internals</h2>
-<p>Run <cite>Square</cite></p>
-<pre data-id="context-internals"><code data-trim data-noescape class="python">x = minitorch.Scalar(10)
-x_2  = Square.apply(x)
-x_2.history.context</code></pre>
-</section>
-<section >
 <h1>Backpropagation</h1>
 </section>
 <section >
@@ -351,7 +482,7 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 <h2>Method</h2>
 <ul class="simple">
 <li class="fragment"><p>Graph propagation</p></li>
-<li class="fragment"><p><a class="reference external" href="https://en.wikipedia.org/wiki/Breadth-first_search">breadth-first search</a></p></li>
+<li class="fragment"><p><a class="reference external" href="http://wikipedia.org/wiki/Topological_sorting">Topological Sorting</a></p></li>
 <li class="fragment"><p>Ensure flow to original Variables.</p></li>
 </ul>
 </section>
@@ -365,16 +496,29 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 </section>
 <section >
 <h2>Algorithm</h2>
+<ol class="arabic simple" start="0">
+<li><p>Call topological sort to get an order</p></li>
+<li><p>For each node in order, pull a completed Variable and
+derivative from the queue:</p>
 <ol class="loweralpha simple">
-<li><p>if the Variable is a leaf, add its final derivative</p></li>
+<li><p>if the Variable is a leaf, add its final derivative (<cite>accumulate_derivative</cite>)
+and loop to (1)</p></li>
 <li><p>if the Variable is not a leaf,</p>
 <ol class="arabic simple">
-<li><p>Apply chainrule as derivative as <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
-<li><p>Loop through all the previous Variables</p></li>
-<li><p>Add to the queue.</p></li>
+<li><p>call <cite>.backprop_step</cite> on the last function that created it with
+derivative as <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
+<li><p>loop through all the Variables+derivative produced by the chain
+rule</p></li>
+<li><p>accumulate derivative for the Variable (check <cite>.unique_id</cite>)</p></li>
 </ol>
 </li>
 </ol>
+</li>
+</ol>
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
 </section>
 <section >
 <h2>Example</h2>
