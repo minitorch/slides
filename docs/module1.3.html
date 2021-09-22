@@ -169,6 +169,11 @@ g'(x) =  1 / x\end{split}\]</div>
 <section >
 <h2>Two Arguments: Chain</h2>
 <div class="math notranslate nohighlight">
+\[f(g(x, y))\]</div>
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
 \[\begin{split} \begin{eqnarray*}
 f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
 f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
@@ -206,6 +211,20 @@ g'_y(x, y) = x \\\end{split}\]</div>
 <div class="math notranslate nohighlight">
 \[\begin{split}f'_x(g(x, y)) = 2 z y\\
 f'_y(g(x, y)) = 2 z x \\\end{split}\]</div>
+</section>
+<section >
+<h2>Multivariable Chain</h2>
+<div class="math notranslate nohighlight">
+\[f(g(x), h(x))\]</div>
+</section>
+<section >
+<h2>Multivariable Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z_1 &amp;=&amp; g(x) \\
+z_2 &amp;=&amp; h(x) \\
+f'_x(g(x), h(y)) &amp;=&amp; g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
+\end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
 <h2>Coding Derivatives</h2>
@@ -279,7 +298,7 @@ we may need to apply chain rule multiple times</p></li>
 <section >
 <h2>Topological Sorting</h2>
 <p>Pseudocode</p>
-<pre data-id="id9"><code data-trim data-noescape class="python">visit(last)
+<pre data-id="id11"><code data-trim data-noescape class="python">visit(last)
 
 function visit(node n)
   if n has a mark then return
