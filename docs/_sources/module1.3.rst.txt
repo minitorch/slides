@@ -1,37 +1,287 @@
+Module 1.2 - Backprop
+=================================
 
 
-Module 1.3 - Neural Networks
-=============================================
-
-
-Module 1.3
+Module 1.2
 ------------
 
-  Neural Networks
-
-
-Lecture
-=========
+  Backprop
 
 
 
+Functions
+-----------
 
+* Function :math:`f(x) = x \times 5`
+
+* Implementation ::
+
+      class TimesFive(ScalarFunction):
+
+          @staticmethod
+          def forward(ctx, x):
+              return x * 5
+
+
+* :math:`x` is unwrapped (python number) and return is a number
+
+Multi-arg Functions
+----------------------
+
+Code ::
+
+      class Mul(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x * y
+
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+
+Context
+----------
+
+Arguments to backward must be saved in context. ::
+
+  class Square(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+          ctx.save_for_backward(x)
+          return x * x
+
+      @staticmethod
+      def backward(ctx, d_out):
+          x = ctx.saved_values
+          f_prime = 2 * x
+          return f_prime * d_out
+
+Picture
+----------
+
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+                   
+
+                   
+Lecture Quiz
+-------------
+
+  `Quiz`
+
+                   
 Outline
 ---------
 
 .. revealjs_fragments::
 
-   * Review: Backpropagation
-   * Neural Networks
-   * Model Training
+   * Variables and Functions
+   * Backward
+   * Chain Rule
+
+
+How do we get derivatives?
+--------------------------
+
+* Base case: compute derivatives for single functions
+
+* Inductive case: define how to propagate a derivative 
+
+     
+Chain Rule
+===========
+
+
+Python Details
+------------------
+
+* Use `apply` for the above Functions ::
+
+   x = minitorch.Scalar(10.)
+   z = TimesFive.apply(x)
+   out = TimesFive.apply(z)
+
+* Apply unwraps, calls, and wraps again
+
+Chaining Boxes
+---------------
+
+Chaining ::
+
+   x = minitorch.Scalar(10., name="x")
+   g_x = G.apply(x)
+   f_g_x = F.apply(g_x)
+
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+
+Chain Rule
+-----------
+
+* Compute derivative from chain
+
+.. math ::
+
+    f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+
+Chain Rule
+-----------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& g(x) \\
+   d_{out} &=& f'(z) \\
+   f'_x(g(x)) &=& g'(x) \times d_{out} \\
+   \end{eqnarray*}
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+Example: Chain Rule
+--------------------
+
+Chaining
+
+.. math::
+  
+  log(x)^2
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+.. math::
+   
+   f(z) = z^2\\
+   g(x) = log(x)\\
+                   
+Example: Chain Rule
+--------------------
+
+.. math::
+
+   f'(z) = 2z \times 1 \\
+   g'(x) =  1 / x
+
+   
+.. image:: figs/Autograd/chain2.png
+           :align: center
+                   
+
+What is the combination?
+
+.. math::
+
+   f'_x(g(x))
+                   
+Two Arguments: Chain
+--------------------
+.. math::
+
+   \begin{eqnarray*}
+  f'_x(g(x, y)) &=& g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
+  f'_y(g(x, y)) &=& g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
+  \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+
+Two Arguments: Chain
+---------------------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& g(x, y) \\
+   d_{out} &=& f'(z) \\
+   f'_x(g(x, y)) &=& g_x'(x, y) \times d_{out} \\
+   f'_y(g(x, y)) &=& g_y'(x, y) \times d_{out}
+   \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+Example: Chain Rule
+--------------------
+
+Chaining
+
+.. math::
+  
+  (x * y)^2
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+.. math::
+   
+   f(z) = z^2\\
+   g(x, y) = (x * y)\\
+
+
+Example: Chain Rule
+--------------------
+
+.. math::
+
+   f'(z) = 2z \times 1\\
+   g'_x(x, y) = y \\
+   g'_y(x, y) = x \\
+
+What is the combination?
+
+.. math::
+
+   f'_x(g(x, y)) = 2 z y\\
+   f'_y(g(x, y)) = 2 z x \\
+
+   
+Coding Derivatives
+--------------------
+
+* For each :math:`f` or :math:`g`  we need to also provide :math:`f'` and :math:`g'`
+* This part can be done through local symbolic or numeric differentiation
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+
+Picture
+----------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+
 
 Backpropagation
-================
+=================
+
+Goal
+------
+
+* Efficient implementation of chain-rule
+
+* Assume access to the graph.
+
+* Goal: Call backward once per variable / d_out
 
 
-
-
-Math View
+Full Graph
 -----------
 
 .. math::
@@ -45,22 +295,75 @@ Math View
 .. image:: figs/Autograd/backprop1.png
            :align: center
 
-Code View
+Tool
+-------------
+
+If we have:
+
+*  the derivative with respect to a Variable
+*  the Function that created the Variable
+
+We can apply the chain rule through that function.
+
+Step
 -----------
 
-.. code::
-
-   def h(x, y):
-      z = x * y
-      return z.log() + z.exp()
-   x = minitorch.Scalar(5.)
-   y = minitorch.Scalar(3.)
-   h(x, y).backward(1)
-   print(x.derivative)
-
-
-.. image:: figs/Autograd/backprop1.png
+.. image:: figs/Autograd/backprop3.png
            :align: center
+
+.. image:: figs/Autograd/backprop4.png
+           :align: center
+                   
+Issue
+----------
+
+Order matters!
+
+* If we proceed without finishing a variable,
+  we may need to apply chain rule multiple times
+
+Desired property: all derivatives for a variable before backward.
+
+Ordering Step
+--------------
+
+* Do not process any Variable until all downstream Variables are done.
+
+* Collect a list of the Variables first.
+
+
+Topological Sorting
+---------------------
+
+* `Topological Sorting <http://wikipedia.org/wiki/Topological_sorting>`_
+
+* High-level -> Run depth first search and mark nodes.
+
+
+Topological Sorting
+---------------------
+
+Pseudocode :: 
+
+  visit(last)
+
+  function visit(node n)
+    if n has a mark then return
+        
+    for each node m with an edge from n to m do
+        visit(m)
+        
+    mark n with a permanent mark
+    add n to list
+
+    
+Backpropagation
+----------------
+
+.. revealjs_fragments::
+
+   * Graph propagation
+   * Ensure flow to original Variables.
 
 Terminology
 ------------
@@ -71,34 +374,36 @@ Terminology
    * Non-Leaf: Variable created with a Function
    * Constant: Term passed in that is not a variable
 
-
-Method
-------
+Algorithm: Outer Loop
+-----------------------
 
 .. revealjs_fragments::
 
-   * Graph propagation on Variables
-   * `Breadth-first search <https://en.wikipedia.org/wiki/Breadth-first_search>`_ i.e. Queue
-   * Ensure flow to original Variables
+ 0. Call topological sort 
+ 1. Create dict of Variables and derivatives
+ 2. For each node in backward order:
 
+Algorithm: Inner Loop
+----------------------
 
-Algorithm
-----------
+a. if Variable is leaf, add its final derivative
+b. if the Variable is not a leaf,
 
-Start with final Variable / derivative (:math:`d_{out}`)
-
-a. if Variable is a leaf, add derivative to .derivative
-b. if Variable is not a leaf,
-
-   1) Apply chainrule with :math:`d_{out}`
-   2) Add non-constant Variables to queue
-
+      1) call backward with :math:`d_{out}`
+      2) loop through all the Variables+derivative 
+      3) accumulate derivatives for the Variable
 
 
 Example
 -----------
 
-Red -> Pending Variables / derivatives (:math:`d_{out}`)
+.. image:: figs/Autograd/backprop1.png
+           :align: center
+
+         
+
+Example
+-----------
 
 .. image:: figs/Autograd/backprop2.png
            :align: center
@@ -131,72 +436,9 @@ Example
 .. image:: figs/Autograd/backprop7.png
            :align: center
 
-Caveats
---------
-
-* Simple implementation
-* Many optimizations, alternatives
-* Works for most NNs
-
-
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/160489>`_
-
-
 
 Neural Networks
 =================
-Reminder
-----------
-
-* Dataset - Data to fit
-* Model - Shape of fit
-* Loss - Goodness of fit
-
-
-Linear Model Example
---------------
-
-* Parameters
-
-.. image:: figs/Graphs/weight.png
-           :align: center
-           :width: 400px
-
-
-.. image:: figs/Graphs/bias.png
-           :align: center
-           :width: 400px
-
-
-
-Loss Function
---------------
-
-
-.. image:: figs/Graphs/distance.png
-           :align: center
-           :width: 350px
-
-Example Dataset
-----------------
-
-.. image:: figs/Graphs/sector2.png
-           :align: center
-           :width: 350px
-
-
-Harder Datasets
-----------------
-
-* Model may be too "weak"
-
-.. image:: figs/Graphs/splitfail.png
-           :align: center
-           :width: 300px
-
 
 
 Neural Networks
@@ -210,100 +452,19 @@ Neural Networks
    * Loss will not change
 
 
-Intuition: Neural Networks
---------------------------
+  
+Training
+---------
 
-1) Apply many linear seperators
-2) Reshape the data space based on results
-3) Apply a linear model on new space
+.. code ::
 
+   model = Network()
+   ...
+   model.named_parameters()
 
-Starting Point
---------------------------
+* All the parameters in model are leaf Variables
+* Computing backward on loss fills their derivative
 
-
-.. image:: figs/Graphs/splitfail.png
-           :align: center
-           :width: 300px
-
-
-
-Intuition: Split 1
---------------------------
-
-
-.. image:: figs/Graphs/split1.png
-           :align: center
-           :width: 300px
-
-
-Intuition: Split 2
---------------------------
-
-.. image:: figs/Graphs/split2.png
-           :align: center
-           :width: 300px
-
-
-
-Reshape: ReLU
---------------
-
-.. image:: figs/Graphs/relu2.png
-           :align: center
-           :width: 600px
-
-Key: Non-linear function
-
-Split 1
---------------
-
-.. image:: figs/Graphs/relu.png
-           :align: center
-           :width: 400px
-
-
-.. image:: figs/Graphs/split1.png
-           :align: center
-           :width: 300px
-
-Split 2
---------------
-
-.. image:: figs/Graphs/split2.png
-           :align: center
-           :width: 300px
-
-
-Final Layer
---------------
-.. image:: figs/Graphs/split1.png
-           :align: center
-           :width: 200px
-
-.. image:: figs/Graphs/split2.png
-           :align: center
-           :width: 200px
-
-
-.. image:: figs/Graphs/mlpmid.png
-           :align: center
-           :width: 300px
-
-Final Layer
---------------
-
-.. image:: figs/Graphs/mlpmid.png
-           :align: center
-           :width: 300px
-
-
-Zoomed Out
---------------
-
-.. image:: figs/Graphs/mlpgraph.png
-           :align: center
-           :width: 300px
 
 
 Math View
@@ -335,53 +496,17 @@ Math View (Alt)
 Parameters:
  :math:`w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1`
 
+Code
+-----
+
+* Code in `run_scalar.py`
 
 
-Code View
-----------
+Code
+-----
 
-Linear ::
-
-  class Linear(minitorch.Module):
-    def __init__(self):
-        super().__init__()
-        self.w_1 = minitorch.Parameter(minitorch.Scalar())
-        self.w_2 = minitorch.Parameter(minitorch.Scalar())
-        self.b = minitorch.Parameter(minitorch.Scalar())
-
-    def forward(self, inputs):
-        return (inputs[0] * self.w_1.value +
-               inputs[1] * self.w_2.value +
-               self.b.value)
-Code View
-----------
-
-Model ::
-
-  class Network(minitorch.Module):
-    def __init__(self):
-        super().__init__()
-        self.unit1 = Linear()
-        self.unit2 = Linear()
-        self.unit3 = Linear()
-
-    def forward(self, x):
-        h_1 = self.unit1.foward(x).relu()
-        h_2 = self.unit2.foward(x).relu()
-        return self.unit3.foward([h_1, h_2])
-
-
-Training
----------
-
-.. code ::
-
-   model = Network()
-   ...
-   model.named_parameters()
-
-* All the parameters in model are leaf Variables
-* Computing backward on loss fills their derivative
-
-
+* Optim to move the parameters.
   
+Q&A
+=====
+

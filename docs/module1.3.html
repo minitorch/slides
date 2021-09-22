@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 1.3 - Neural Networks</title>
+  <title>Module 1.2 - Backprop</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -33,30 +33,205 @@
     <div class="reveal">
         <div class="slides">
             <section >
-<h1>Module 1.3 - Neural Networks</h1>
+<h1>Module 1.2 - Backprop</h1>
 </section>
 <section >
-<h2>Module 1.3</h2>
+<h2>Module 1.2</h2>
 <blockquote>
-<div><p>Neural Networks</p>
+<div><p>Backprop</p>
 </div></blockquote>
 </section>
 <section >
-<h1>Lecture</h1>
+<h2>Functions</h2>
+<ul>
+<li><p>Function <span class="math notranslate nohighlight">\(f(x) = x \times 5\)</span></p></li>
+<li><p>Implementation</p>
+<pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
+
+    &#64;staticmethod
+    def forward(ctx, x):
+        return x * 5</code></pre>
+</li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number) and return is a number</p></li>
+</ul>
+</section>
+<section >
+<h2>Multi-arg Functions</h2>
+<p>Code</p>
+<pre data-id="multi-arg-functions"><code data-trim data-noescape class="python">class Mul(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x, y):
+        return x * y</code></pre>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+</section>
+<section >
+<h2>Context</h2>
+<p>Arguments to backward must be saved in context.</p>
+<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x):
+        ctx.save_for_backward(x)
+        return x * x
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        x = ctx.saved_values
+        f_prime = 2 * x
+        return f_prime * d_out</code></pre>
+</section>
+<section >
+<h2>Picture</h2>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><cite>Quiz</cite></p>
+</div></blockquote>
 </section>
 <section >
 <h2>Outline</h2>
 <ul class="simple">
-<li class="fragment"><p>Review: Backpropagation</p></li>
-<li class="fragment"><p>Neural Networks</p></li>
-<li class="fragment"><p>Model Training</p></li>
+<li class="fragment"><p>Variables and Functions</p></li>
+<li class="fragment"><p>Backward</p></li>
+<li class="fragment"><p>Chain Rule</p></li>
 </ul>
+</section>
+<section >
+<h2>How do we get derivatives?</h2>
+<ul class="simple">
+<li><p>Base case: compute derivatives for single functions</p></li>
+<li><p>Inductive case: define how to propagate a derivative</p></li>
+</ul>
+</section>
+<section >
+<h1>Chain Rule</h1>
+</section>
+<section >
+<h2>Python Details</h2>
+<ul>
+<li><p>Use <cite>apply</cite> for the above Functions</p>
+<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10.)
+z = TimesFive.apply(x)
+out = TimesFive.apply(z)</code></pre>
+</li>
+<li><p>Apply unwraps, calls, and wraps again</p></li>
+</ul>
+</section>
+<section >
+<h2>Chaining Boxes</h2>
+<p>Chaining</p>
+<pre data-id="chaining-boxes"><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
+g_x = G.apply(x)
+f_g_x = F.apply(g_x)</code></pre>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+</section>
+<section >
+<h2>Chain Rule</h2>
+<ul class="simple">
+<li><p>Compute derivative from chain</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+</section>
+<section >
+<h2>Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; g(x) \\
+d_{out} &amp;=&amp; f'(z) \\
+f'_x(g(x)) &amp;=&amp; g'(x) \times d_{out} \\
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[log(x)^2\]</div>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x) = log(x)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1 \\
+g'(x) =  1 / x\end{split}\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[f'_x(g(x))\]</div>
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split} \begin{eqnarray*}
+f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
+f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; g(x, y) \\
+d_{out} &amp;=&amp; f'(z) \\
+f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times d_{out} \\
+f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times d_{out}
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[(x * y)^2\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x, y) = (x * y)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1\\
+g'_x(x, y) = y \\
+g'_y(x, y) = x \\\end{split}\]</div>
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'_x(g(x, y)) = 2 z y\\
+f'_y(g(x, y)) = 2 z x \\\end{split}\]</div>
+</section>
+<section >
+<h2>Coding Derivatives</h2>
+<ul class="simple">
+<li><p>For each <span class="math notranslate nohighlight">\(f\)</span> or <span class="math notranslate nohighlight">\(g\)</span>  we need to also provide <span class="math notranslate nohighlight">\(f'\)</span> and <span class="math notranslate nohighlight">\(g'\)</span></p></li>
+<li><p>This part can be done through local symbolic or numeric differentiation</p></li>
+</ul>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Picture</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
 </section>
 <section >
 <h1>Backpropagation</h1>
 </section>
 <section >
-<h2>Math View</h2>
+<h2>Goal</h2>
+<ul class="simple">
+<li><p>Efficient implementation of chain-rule</p></li>
+<li><p>Assume access to the graph.</p></li>
+<li><p>Goal: Call backward once per variable / d_out</p></li>
+</ul>
+</section>
+<section >
+<h2>Full Graph</h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray*}
 z &amp;=&amp; x \times y \\
@@ -65,15 +240,62 @@ h(x, y) &amp;=&amp; \log(z) + \exp(z)
 <img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
 </section>
 <section >
-<h2>Code View</h2>
-<pre data-id="code-view"><code data-trim data-noescape class="python">def h(x, y):
-   z = x * y
-   return z.log() + z.exp()
-x = minitorch.Scalar(5.)
-y = minitorch.Scalar(3.)
-h(x, y).backward(1)
-print(x.derivative)</code></pre>
-<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+<h2>Tool</h2>
+<p>If we have:</p>
+<ul class="simple">
+<li><p>the derivative with respect to a Variable</p></li>
+<li><p>the Function that created the Variable</p></li>
+</ul>
+<p>We can apply the chain rule through that function.</p>
+</section>
+<section >
+<h2>Step</h2>
+<img alt="_images/backprop3.png" class="align-center" src="_images/backprop3.png" />
+<img alt="_images/backprop4.png" class="align-center" src="_images/backprop4.png" />
+</section>
+<section >
+<h2>Issue</h2>
+<p>Order matters!</p>
+<ul class="simple">
+<li><p>If we proceed without finishing a variable,
+we may need to apply chain rule multiple times</p></li>
+</ul>
+<p>Desired property: all derivatives for a variable before backward.</p>
+</section>
+<section >
+<h2>Ordering Step</h2>
+<ul class="simple">
+<li><p>Do not process any Variable until all downstream Variables are done.</p></li>
+<li><p>Collect a list of the Variables first.</p></li>
+</ul>
+</section>
+<section >
+<h2>Topological Sorting</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://wikipedia.org/wiki/Topological_sorting">Topological Sorting</a></p></li>
+<li><p>High-level -&gt; Run depth first search and mark nodes.</p></li>
+</ul>
+</section>
+<section >
+<h2>Topological Sorting</h2>
+<p>Pseudocode</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">visit(last)
+
+function visit(node n)
+  if n has a mark then return
+
+  for each node m with an edge from n to m do
+      visit(m)
+
+  mark n with a permanent mark
+  add n to list</code></pre>
+</section>
+<section >
+<h2>Backpropagation</h2>
+<ul class="simple">
+<li class="fragment"><p>Graph propagation</p></li>
+<li class="fragment"><p>Ensure flow to original Variables.</p></li>
+</ul>
 </section>
 <section >
 <h2>Terminology</h2>
@@ -84,29 +306,34 @@ print(x.derivative)</code></pre>
 </ul>
 </section>
 <section >
-<h2>Method</h2>
-<ul class="simple">
-<li class="fragment"><p>Graph propagation on Variables</p></li>
-<li class="fragment"><p><a class="reference external" href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search</a> i.e. Queue</p></li>
-<li class="fragment"><p>Ensure flow to original Variables</p></li>
-</ul>
+<h2>Algorithm: Outer Loop</h2>
+<ol class="arabic simple" start="0">
+<li class="fragment"><p>Call topological sort</p></li>
+<li class="fragment"><p>Create dict of Variables and derivatives</p></li>
+<li class="fragment"><p>For each node in backward order:</p></li>
+</ol>
 </section>
 <section >
-<h2>Algorithm</h2>
-<p>Start with final Variable / derivative (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
-<ol class="loweralpha simple">
-<li><p>if Variable is a leaf, add derivative to .derivative</p></li>
-<li><p>if Variable is not a leaf,</p>
-<ol class="arabic simple">
-<li><p>Apply chainrule with <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
-<li><p>Add non-constant Variables to queue</p></li>
+<h2>Algorithm: Inner Loop</h2>
+<ol class="loweralpha">
+<li><p>if Variable is leaf, add its final derivative</p></li>
+<li><p>if the Variable is not a leaf,</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>call backward with <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
+<li><p>loop through all the Variables+derivative</p></li>
+<li><p>accumulate derivatives for the Variable</p></li>
 </ol>
+</div></blockquote>
 </li>
 </ol>
 </section>
 <section >
 <h2>Example</h2>
-<p>Red -&gt; Pending Variables / derivatives (<span class="math notranslate nohighlight">\(d_{out}\)</span>)</p>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Example</h2>
 <img alt="_images/backprop2.png" class="align-center" src="_images/backprop2.png" />
 </section>
 <section >
@@ -130,52 +357,7 @@ print(x.derivative)</code></pre>
 <img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
 </section>
 <section >
-<h2>Caveats</h2>
-<ul class="simple">
-<li><p>Simple implementation</p></li>
-<li><p>Many optimizations, alternatives</p></li>
-<li><p>Works for most NNs</p></li>
-</ul>
-</section>
-<section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/160489">Quiz</a></p>
-</div></blockquote>
-</section>
-<section >
 <h1>Neural Networks</h1>
-</section>
-<section >
-<h2>Reminder</h2>
-<ul class="simple">
-<li><p>Dataset - Data to fit</p></li>
-<li><p>Model - Shape of fit</p></li>
-<li><p>Loss - Goodness of fit</p></li>
-</ul>
-</section>
-<section >
-<h2>Linear Model Example</h2>
-<ul class="simple">
-<li><p>Parameters</p></li>
-</ul>
-<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 400px;" /></a>
-<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 400px;" /></a>
-</section>
-<section >
-<h2>Loss Function</h2>
-<a class="reference internal image-reference" href="_images/distance.png"><img alt="_images/distance.png" class="align-center" src="_images/distance.png" style="width: 350px;" /></a>
-</section>
-<section >
-<h2>Example Dataset</h2>
-<a class="reference internal image-reference" href="_images/sector2.png"><img alt="_images/sector2.png" class="align-center" src="_images/sector2.png" style="width: 350px;" /></a>
-</section>
-<section >
-<h2>Harder Datasets</h2>
-<ul class="simple">
-<li><p>Model may be too &quot;weak&quot;</p></li>
-</ul>
-<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
 </section>
 <section >
 <h2>Neural Networks</h2>
@@ -187,52 +369,14 @@ print(x.derivative)</code></pre>
 </ul>
 </section>
 <section >
-<h2>Intuition: Neural Networks</h2>
-<ol class="arabic simple">
-<li><p>Apply many linear seperators</p></li>
-<li><p>Reshape the data space based on results</p></li>
-<li><p>Apply a linear model on new space</p></li>
-</ol>
-</section>
-<section >
-<h2>Starting Point</h2>
-<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Intuition: Split 1</h2>
-<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Intuition: Split 2</h2>
-<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Reshape: ReLU</h2>
-<a class="reference internal image-reference" href="_images/relu2.png"><img alt="_images/relu2.png" class="align-center" src="_images/relu2.png" style="width: 600px;" /></a>
-<p>Key: Non-linear function</p>
-</section>
-<section >
-<h2>Split 1</h2>
-<a class="reference internal image-reference" href="_images/relu.png"><img alt="_images/relu.png" class="align-center" src="_images/relu.png" style="width: 400px;" /></a>
-<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Split 2</h2>
-<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Final Layer</h2>
-<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 200px;" /></a>
-<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 200px;" /></a>
-<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Final Layer</h2>
-<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Zoomed Out</h2>
-<a class="reference internal image-reference" href="_images/mlpgraph.png"><img alt="_images/mlpgraph.png" class="align-center" src="_images/mlpgraph.png" style="width: 300px;" /></a>
+<h2>Training</h2>
+<pre data-id="training"><code data-trim data-noescape class="python">model = Network()
+...
+model.named_parameters()</code></pre>
+<ul class="simple">
+<li><p>All the parameters in model are leaf Variables</p></li>
+<li><p>Computing backward on loss fills their derivative</p></li>
+</ul>
 </section>
 <section >
 <h2>Math View</h2>
@@ -262,45 +406,19 @@ m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
 </dl>
 </section>
 <section >
-<h2>Code View</h2>
-<p>Linear</p>
-<pre data-id="id9"><code data-trim data-noescape class="python">class Linear(minitorch.Module):
-  def __init__(self):
-      super().__init__()
-      self.w_1 = minitorch.Parameter(minitorch.Scalar())
-      self.w_2 = minitorch.Parameter(minitorch.Scalar())
-      self.b = minitorch.Parameter(minitorch.Scalar())
-
-  def forward(self, inputs):
-      return (inputs[0] * self.w_1.value +
-             inputs[1] * self.w_2.value +
-             self.b.value)</code></pre>
-</section>
-<section >
-<h2>Code View</h2>
-<p>Model</p>
-<pre data-id="id10"><code data-trim data-noescape class="python">class Network(minitorch.Module):
-  def __init__(self):
-      super().__init__()
-      self.unit1 = Linear()
-      self.unit2 = Linear()
-      self.unit3 = Linear()
-
-  def forward(self, x):
-      h_1 = self.unit1.foward(x).relu()
-      h_2 = self.unit2.foward(x).relu()
-      return self.unit3.foward([h_1, h_2])</code></pre>
-</section>
-<section >
-<h2>Training</h2>
-<pre data-id="training"><code data-trim data-noescape class="python">model = Network()
-...
-model.named_parameters()</code></pre>
+<h2>Code</h2>
 <ul class="simple">
-<li><p>All the parameters in model are leaf Variables</p></li>
-<li><p>Computing backward on loss fills their derivative</p></li>
+<li><p>Code in <cite>run_scalar.py</cite></p></li>
 </ul>
 </section>
+<section >
+<h2>Code</h2>
+<ul class="simple">
+<li><p>Optim to move the parameters.</p></li>
+</ul>
+</section>
+<section >
+<h1>Q&amp;A</h1>
 
         </div>
     </div>
