@@ -29,3 +29,6 @@ Module 2 |logo|
 -----------------
 
 * :doc:`module2.0` - `(pdf) <module2.0.html?print-pdf>`_
+* :doc:`module2.1` - `(pdf) <module2.1.html?print-pdf>`_
+* :doc:`module2.2` - `(pdf) <module2.2.html?print-pdf>`_
+* :doc:`module2.3` - `(pdf) <module2.3.html?print-pdf>`_
