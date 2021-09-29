@@ -1,0 +1,501 @@
+
+Module 2.1 - Tensors
+=============================================
+
+Module 2.1
+------------
+
+    Tensor Data
+
+
+Starting Point
+--------------------------
+
+
+.. image:: figs/Graphs/splitfail.png
+           :align: center
+           :width: 300px
+
+
+Final Layer
+--------------
+.. image:: figs/Graphs/split1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Graphs/split2.png
+           :align: center
+           :width: 200px
+
+
+.. image:: figs/Graphs/mlpmid.png
+           :align: center
+           :width: 300px
+
+Final Layer
+--------------
+
+.. image:: figs/Graphs/mlpmid.png
+           :align: center
+           :width: 300px
+
+
+Math View (Alt)
+---------------
+
+.. math::
+
+   \begin{eqnarray*}
+   \text{lin}(x; w, b) &=& x_1 \times w_1 + x_2 \times w_2 + b \\
+   h_ 1 &=& \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+   h_ 2 &=& \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+   m(x_1, x_2) &=& \text{lin}(h; w, b)
+   \end{eqnarray*}
+
+Parameters:
+ :math:`w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1`
+
+    
+
+Quiz
+-------
+    
+
+Outline
+--------
+
+.. revealjs_fragments::
+
+   * Tensors
+   * Views
+   * Strides
+
+Tensors
+================
+
+Tensors?
+--------
+
+What is it?
+
+.. revealjs_fragments::
+
+   * Fancy multi-dimensional arrays
+   * Embedded mathmatical programming language
+
+
+Tensors!
+----------
+
+Key Building Block
+
+* Matlab
+* Numpy
+* Tensorflow, etc.
+
+
+Terminology
+------------
+
+* 0-Dimensional Scalar
+
+* Our standby for Module-0
+
+Terminology
+------------
+
+* 1-Dimensional -  Vector
+
+.. image:: figs/Tensors/vector.png
+           :align: center
+
+
+Terminology
+------------
+
+* 2-Dimensional - Matrix
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+Terminology
+------------
+
+* Arbitrary dimensions - Tensor (Array in numpy)
+
+.. image:: figs/Tensors/tensor.png
+           :align: center
+
+Terminology
+------------
+
+.. revealjs_fragments::
+
+   * Dims - # dimensions (`tensor.dims`)
+   * Shape -  # cells per dimension (`tensor.shape`)
+   * Size - # cells (`tensor.size`)
+
+Example
+------------
+
+* dims: 2
+* shape: (2, 5)
+* size : 10
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+
+Example
+------------
+
+* dims: ?
+* shape: ?
+* size : ?
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+
+Indexing
+------------
+
+* Indexing syntax: `tensor[0, 1, 2]`
+
+.. image:: figs/Tensors/tensor2.png
+           :align: center
+
+
+Convention!
+----------------
+
+In this class
+
+* depth
+* row
+* columns
+
+
+
+                   
+Why not just use lists?
+------------------------
+
+.. revealjs_fragments::
+
+   * Functions to manipulate shape
+   * Mathematical notation
+   * Can act as Variables / Parameters
+   * Efficient control of memory (Module-3)
+
+Shape Maniputation
+------------------
+
+* Permutation
+
+.. image:: figs/Tensors/matrix1.png
+.. image:: figs/Tensors/matrix2.png
+
+
+Shape Maniputation
+---------------------
+
+* Views
+
+.. image:: figs/Tensors/matrix2.png
+.. image:: figs/Tensors/broad.png
+
+
+What's Bad?
+------------
+
+* Hard to grow or shrink
+* Only numerical values
+* Lose comprehensions / python built-ins
+* Shapes are easy to mess up
+
+
+
+
+
+
+Request
+---------
+
+.. revealjs_fragments::
+
+   * No autodifferentiation for now
+   * Only consider standard tensor operations
+   * Add autodiff afterwards
+
+
+Terminology
+------------
+
+* 2-Dimensional - Matrix
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+Terminology
+------------
+
+* Arbitrary dimensions - Tensor
+
+.. image:: figs/Tensors/tensor.png
+           :align: center
+
+Terminology
+------------
+
+.. revealjs_fragments::
+
+   * Dims - # dimensions (`tensor.dims`)
+   * Shape -  # cells per dimension (`tensor.shape`)
+   * Size - # cells (`tensor.size`)
+
+Example
+------------
+
+* dims: 2 / shape: (2, 5) /  size : 10
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+
+Shape Maniputation
+------------------
+
+* Permutation ::
+
+    tensor.permute(1, 0)
+
+.. image:: figs/Tensors/matrix1.png
+.. image:: figs/Tensors/matrix2.png
+
+
+Shape Maniputation
+---------------------
+
+* Views ::
+
+    tensor.view(1, 5, 2)
+
+.. image:: figs/Tensors/matrix2.png
+.. image:: figs/Tensors/broad.png
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/162299>`_
+
+
+Views
+================
+
+Goal
+-----
+
+* Support user api
+* Keep track of tensor properties
+* Setup fast / simple Functions
+
+
+Tensor Usage
+-------------
+
+Unary ::
+
+    new_tensor = tensor.log()
+
+Binary (for now, only same shape) ::
+
+    new_tensor = tensor1 + tensor2
+
+Reductions ::
+
+    new_tensor = tensor.sum()
+
+
+Why not lists?
+---------------
+
+Matrix (5, 2)::
+
+    matrix = [[1, 2], [3, 4], [5, 7], [2, 3], [2, 4]]
+
+View (1, 5, 2) ::
+
+    tensor = [[[matrix[j][i] for i in range(2)]
+                for j in range(5)]]
+
+Transpose (2, 5) ::
+
+    matrix_trans = [[matrix[i][j] for i in range(5)]
+                     for j in range(2)]
+
+Issues
+---------------
+
+* Operators requires copying ::
+
+    matrix_trans = [[matrix[i][j] for i in range(5)]
+                     for j in range(2)]
+
+* Storage shaped based on usage ::
+
+    tensor = [[[matrix[i][j] for i in range(2)]
+                for j in range(5)]]
+
+
+Idea 1: Views
+-----------------
+
+.. revealjs_fragments::
+
+   * Seperate storing information from user view
+
+   * Keep a mapping from users version to storage
+
+Idea 2: Immutable Operations
+----------------------------------------------
+
+.. revealjs_fragments::
+
+   * Minitorch doesn't let you update tensors
+   * All operations return a "new" tensor
+   * Since there are no updates, maybe point to the same storage.
+
+
+Tensor Internals
+=================
+
+
+How does this work
+--------------------
+
+* **Storage** :  1-D array of numbers of length `size`
+
+* **Strides** : tuple that provides the mapping from user `indexing`
+  to the `position` in the 1-D `storage`.
+
+Strides
+--------
+
+.. image:: figs/Tensors/stride2.png
+           :align: center
+           :width: 400px
+
+Strides
+--------
+
+
+.. image:: figs/Tensors/stride1.png
+           :align: center
+           :width: 400px
+
+Strides
+--------
+
+.. image:: figs/Tensors/stride3.png
+           :align: center
+           :width: 400px
+
+
+Which is best?
+----------------
+
+* Can be useful when it is contiguous
+* Bigger strides left
+
+
+Strides
+--------
+
+.. image:: figs/Tensors/stride4.png
+           :align: center
+
+
+Silly Stride Intuition
+-----------------------
+
+* Numerical bases, binary number
+
+
+  1101011
+
+
+Implied strides: (64, 32, 16, 8, 4, 2, 1)
+
+
+Stride Math
+------------
+
+Calculating from strides  ::
+
+  s1 * index1 + s2 * index2 + s3 * index3 ...
+
+Key Operations
+---------------
+
+* Map from index to position (binary -> decimal)
+* Map from position to index (decimal -> binary)
+
+
+Implementation
+----------------
+
+* TensorData : Manager of strides and storage
+
+
+Module-2
+==========
+
+Overview
+----------
+
+.. revealjs_fragments::
+
+   * `tensor.py` - Tensor Variable
+   * `tensor_functions.py` - Tensor Functions
+   * `tensor_data.py` - Storage and Indexing
+   * `tensor_ops.py` - Low-level tensor operations
+
+
+Tasks 2.1: Indexing
+-----------------------
+
+.. image:: figs/Tensors/tensor2.png
+
+
+
+Tasks 2.2: Operations
+-----------------------
+
+.. image:: figs/Ops/zip.png
+           :align: center
+
+
+
+Tasks 2.3:  Autograd
+----------------------
+
+.. image:: figs/Ops/zip\ back.png
+           :align: center
+
+
+Tasks 2.4: Broadcasting
+-------------------------
+
+.. image:: figs/Ops/zip\ broad\ back.png
+
+
+Task 2.5: Training
+-------------------
+
+.. image:: complete.png
+
+  
+Q&A
+-----

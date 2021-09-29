@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 17</h2>
+<blockquote>
+<div><p>Network Efficiency</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Module 3</h1>
+</section>
+<section >
+<h2>Task 3.1</h2>
+<blockquote>
+<div><p>Parallel</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Task 3.2</h2>
+<blockquote>
+<div><p>Matrix Mult</p>
+</div></blockquote>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Numba</p></li>
+<li class="fragment"><p>Operator Fusion</p></li>
+<li class="fragment"><p>MatMul</p></li>
+</ul>
+</section>
+<section >
+<h1>Numba</h1>
+</section>
+<section >
+<h2>Alternative 3: Compile Python</h2>
+<p>Pros:</p>
+<ul class="simple">
+<li><p>&quot;Same&quot; language</p></li>
+<li><p>Integrate code</p></li>
+</ul>
+<p>Cons: A bit hacky :)</p>
+<p>Example: Numba</p>
+</section>
+<section >
+<h2>Function Calls</h2>
+<ul class="simple">
+<li><p>Function calls are not free and don't get <cite>inlined</cite></p></li>
+<li><p>Checks for args, special keywords and variable lists</p></li>
+<li><p>Methods check for overrides and class inheritance</p></li>
+</ul>
+</section>
+<section >
+<h2>Types</h2>
+<p>Critical code</p>
+<pre data-id="types"><code data-trim data-noescape class="python">out[o] = in_storage[j] + 3</code></pre>
+<ul class="simple">
+<li><p>Doesn't know type of <cite>in_storage[j]</cite></p></li>
+<li><p>May need to coerce 3 to float or raise error</p></li>
+<li><p>May even call <cite>__add__</cite> or <cite>__ladd__</cite>!</p></li>
+</ul>
+</section>
+<section >
+<h2>Numba</h2>
+<ul class="simple">
+<li><p>Python library for speeding up numerical python</p></li>
+<li><p>API: Higher-order functions to produce fast mathmatical code</p></li>
+<li><p><a class="reference external" href="https://numba.pydata.org/numba-doc/latest/user/5minguide.html">Numba</a></p></li>
+</ul>
+</section>
+<section >
+<h2>How does it work?</h2>
+<p>Numba</p>
+<pre data-id="how-does-it-work"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in range(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit()(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>What do we lose?</h2>
+<ul class="simple">
+<li><p><cite>njit</cite> will fail for many python operations</p></li>
+<li><p>No lists, classes, python functions allowed</p></li>
+<li><p>Any different types will cause recompilation</p></li>
+</ul>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/170828">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Parallel</h1>
+</section>
+<section >
+<h2>Parallel</h2>
+<ul class="simple">
+<li class="fragment"><p>Run code on multiple threads</p></li>
+<li class="fragment"><p>Particularly suited for map / zip</p></li>
+<li class="fragment"><p>Baby steps towards GPU</p></li>
+</ul>
+</section>
+<section >
+<h2>Parallel Range</h2>
+<ul class="simple">
+<li class="fragment"><p>Replace <cite>for</cite> loops with parallel version</p></li>
+<li class="fragment"><p>Tells compiler it can run in any order</p></li>
+<li class="fragment"><p>Be careful! Ideally these loops don't change anything</p></li>
+</ul>
+</section>
+<section >
+<h2>Code Transformation</h2>
+<p>Transform</p>
+<pre data-id="code-transformation"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in prange(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit(parallel=True)(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>Nondeterminism</h2>
+<ul class="simple">
+<li class="fragment"><p>No guarantee on ordering</p></li>
+<li class="fragment"><p>Need to be careful with reductions</p></li>
+<li class="fragment"><p>Speedups will depend on system</p></li>
+</ul>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
+</section>
+<section >
+<h2>Parallel Bugs</h2>
+<ul class="simple">
+<li class="fragment"><p>Warning! Nasty bugs</p></li>
+<li class="fragment"><p>Tests failing randomly</p></li>
+<li class="fragment"><p>Crashes due to out-of-bounds</p></li>
+</ul>
+</section>
+<section >
+<h2>Parallel Diagnostics</h2>
+<ul class="simple">
+<li><p>Diagnostics give parallel compilation</p></li>
+<li><p>Useful to see if you are getting benefits</p></li>
+</ul>
+</section>
+<section >
+<h1>Operator Fusion</h1>
+</section>
+<section >
+<h2>User API</h2>
+<ul class="simple">
+<li><p>Basic mathematical operations</p></li>
+<li><p>Chained together as boxes with broadcasting</p></li>
+<li><p>Optimize within each individually</p></li>
+</ul>
+</section>
+<section >
+<h2>Fusion</h2>
+<ul class="simple">
+<li><p>Optimization across operator boundary</p></li>
+<li><p>Save speed or memory in by avoiding extra forward/backward</p></li>
+<li><p>Can open even great optimization gains</p></li>
+</ul>
+</section>
+<section >
+<h2>Automatic Fusion</h2>
+<ul class="simple">
+<li><p>Compiled language can automatically fuse operators</p></li>
+<li><p>Major area of research</p></li>
+<li><p>Example: TVM, XLA, ONXX</p></li>
+</ul>
+</section>
+<section >
+<h2>Automatic Fusion</h2>
+<img alt="expgraph2.png" class="align-center" src="expgraph2.png" />
+</section>
+<section >
+<h2>Manual Fusion</h2>
+<ul class="simple">
+<li><p>Utilize a pre-fused operator when needed</p></li>
+<li><p>Standard libraries for implementations</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
+</section>
+<section >
+<h2>Matmul Simple</h2>
+<img alt="_images/matmulsimple.png" class="align-center" src="_images/matmulsimple.png" />
+</section>
+<section >
+<h2>Advantages</h2>
+<ul class="simple">
+<li><p>No three dimensional intermediate</p></li>
+<li><p>No <cite>save_for_backwards</cite></p></li>
+<li><p>Can use core matmul libraries (in the future)</p></li>
+</ul>
+</section>
+<section >
+<h2>Computations</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Starter Code</h2>
+<ul class="simple">
+<li><p>Walk through output.</p></li>
+<li><p>Find row and column of input</p></li>
+<li><p>Simultaneous zip / reduce.</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul back.png" class="align-center" src="_images/matmul back.png" />
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+f(M, N) &amp;=&amp;  M N \\
+g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} N^\top \\
+g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,338 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+
+Lecture 15
+------------
+
+   Sentence Classification
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Training
+   * Simple NLP
+   * Train / Test
+
+
+Training
+=============
+
+Parameter Fitting
+------------------
+
+1. Compute the loss function, :math:`L(w_1, w_2, b)`
+2. See how small changes would change the loss
+3. Update to parameters to locally reduce the loss
+
+
+Batching
+---------
+
+.. image:: figs/NLP/batch.png
+           :align: center
+
+
+Loss
+------
+
+Step 3 Compute Loss ::
+
+    out = model.forward(X).view(data.N)
+    loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()
+
+Compute Derivatives
+--------------------
+
+Step 2 ::
+
+  loss.sum().backward()
+  print(model.layer1.weight.value.grad)
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+
+Update Parameters
+--------------------
+
+Step 3 ::
+
+    for p in model.parameters():
+        if p.value.grad is not None:
+            p.update(p.value - RATE * (p.value.grad / float(data.N)))
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/167152>`_
+
+
+Simple NLP
+=============
+
+Context
+--------
+
+.. revealjs_fragments::
+
+   * What are dimensions for?
+   * What does broadcasting buy us?
+   * What are non-spatial dimensions for?
+
+Natural Language Processing
+----------------------------
+
+* Systems for human language
+* Broad area of study with lots of challenges
+* Heavily uses ML, more in recent years
+
+
+
+Sentiment Classification
+-------------------------
+
+.. revealjs_fragments::
+
+   * Canonical sentence classification problem
+
+   * Given sentence predict sentiment class
+
+   * Key aspects: word polarity
+
+
+Data
+------
+
+.. image:: figs/NLP/negative.png
+           :align: center
+
+.. image:: figs/NLP/positive.png
+           :align: center
+
+
+
+Problem Setup
+---------------
+
+.. revealjs_fragments::
+
+   * Training: Exactly the same as simple
+   * Loss: Exactly the same as simple
+   * Models: Mostly similar to the simple problem.
+
+
+
+Modeling Challenges
+--------------------
+
+.. revealjs_fragments::
+
+   1) Converting words to tensors
+   2) Converting sentences to tensors
+   3) Handling word combinations
+
+
+Word -> Tensors
+===============
+
+
+What is a word?
+----------------
+
+.. revealjs_fragments::
+   * Treat words as index in vocabulary
+   * Represent as a one-hot vector
+
+Challenge1: Vector Form
+------------------------
+
+.. image:: figs/NLP/onehot.png
+           :align: center
+
+
+One-Hot Issue
+--------------
+
+.. revealjs_fragments::
+
+   * Tens of thousands of words
+   * Opposite problem as before, 2-features to 10,000
+   * ``Embedding'' represent high-dim space in low dim
+
+
+Embedding Table
+------------------------
+
+.. image:: figs/NLP/embweight.png
+           :align: center
+
+Intuition: Lookup in Table
+---------------------------
+
+Get word vector ::
+
+  embeddings[word]
+
+* Challenge:  How to compute `backward`
+
+
+Alternative: Lookup by broadcast
+------------------------------------
+
+Get word vector ::
+
+   (embeddings * word_one_hot.view(VOCAB, 1)).sum(0)
+
+
+Embedding One
+------------------------
+
+.. image:: figs/NLP/embone.png
+           :align: center
+
+How does this share information?
+---------------------------------
+
+.. revealjs_fragments::
+   * Similar words have similar embedding dim
+
+   * Dot-product - easy way to tell similarity ::
+
+       (word_emb1 * word_emb2).sum()
+
+   * Differentiable!
+
+
+Embedding Layer
+----------------
+
+Easy to write as a layer ::
+
+  class Embedding(minitorch.Module):
+    def __init__(self, vocab_size, emb_size):
+        super().__init__()
+        self.weights = \
+          minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+        self.vocab_size = vocab_size
+
+    def forward(input):
+        return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)
+
+Where do these come from?
+--------------------------
+
+.. revealjs_fragments::
+
+   * Trained from a different model
+   * Extracted and posted to use
+   * (Many more details in NLP class)
+
+Examples
+-----------
+
+Embeddings ::
+
+  embedding.weights.value.update(pretrained_weights)
+
+* https://projector.tensorflow.org/
+
+Examples
+-----------
+
+Query 1 ::
+
+   ^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$
+
+Query 2 ::
+
+  ^(doctor|patient|lawyer|client|clerk|customer|author|reader)$
+
+
+
+
+Challenge 2 : Sentence Length
+==============================
+
+
+Sentence Length
+-----------------
+
+.. revealjs_fragments::
+
+   * Examples may be of different length
+   * Need to all be converted to vectors and utilized
+
+
+Challenge: Length Dimension
+------------------------------
+
+.. image:: figs/NLP/senthot.png
+           :align: center
+
+Value Transformation
+---------------------
+
+.. revealjs_fragments::
+
+   * batch x length x vocab
+   * batch x length x feature
+   * batch x feature
+   * batch x hidden
+   * batch
+
+Network
+------------------------
+
+.. image:: figs/NLP/sentemb.png
+           :align: center
+
+
+Reduction / "Pooling"
+------------------------
+
+.. image:: figs/NLP/pooling.png
+           :align: center
+
+
+Benefits
+----------
+
+* Extremely simple
+* Embeddings encode key information
+* Have all the tools we need
+
+
+Full Model
+------------------------
+
+.. image:: figs/NLP/full.png
+           :align: center
+
+
+Issues
+------
+
+* Completely ignores relative order
+* Completley ignores absolute order
+* Embeddings for all words, even rare ones
+
+
+
+
+
+
+
+Q&A
+----

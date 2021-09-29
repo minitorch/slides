@@ -1,0 +1,464 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+
+Module 1.1
+------------
+
+  Learning With Derivatives
+
+
+Lecture
+=========
+
+
+
+
+
+Review: Model
+--------------
+
+*  https://minitorch.github.io/mlprimer.html
+
+.. image:: figs/Graphs/model1.png
+           :align: center
+           :width: 350px
+
+
+Review: Parameters
+------------------
+
+
+a. rotating the linear separator ("slope")
+
+
+.. image:: figs/Graphs/weight.png
+           :align: center
+           :width: 500px
+
+Review: Parameters
+------------------
+
+b. changing the separator cutoff ("intercept")
+
+.. image:: figs/Graphs/bias.png
+           :align: center
+           :width: 500px
+
+Math
+------------------
+
+* Linear Model
+
+.. math::
+   m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b
+
+
+.. code::
+
+   def make_linear_model(w, b):
+       def model(x):
+           return 1 if (x[0] * w[0] + x[1] * w[1] + b > 0.0) else 0
+       return model
+   linear_model = make_linear_model([0.1, -0.2], 0.0)
+   linear_model(x)
+
+
+
+   
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/155694>`_
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Module 1
+   * Model Fit
+   * Derivatives
+   
+Module-1
+=========
+
+Module-1 Learning Objectives
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Practical understanding of derivatives
+   * Dive into autodifferentiation
+   * Parameters and their usage
+
+
+Module-1: What is it?
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Numerical and symbolic derivatives
+   * Implement our numerical class
+   * Implement autodifferentiation
+
+Module-1: Review
+-----------------------------
+
+.. revealjs_fragments::
+
+   * Review `differentiation rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+   * Everything is scalars for now (no "gradients")
+
+
+Module-1 Overview
+---------------------
+
+.. revealjs_fragments::
+
+   * 5 Tasks
+
+Task 1.1: Numerical Derivatives
+---------------------------------
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+
+Task 1.2: Scalars
+------------------
+
+.. image:: images/expgraph.png
+   :align: center
+
+Task 1.3: Chain Rule
+---------------------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+Task 1.4: Backpropagation
+--------------------------
+
+.. image:: figs/Autograd/backprop6.png
+           :align: center
+
+Task 1.5: Classifier Training
+-------------------------------
+
+.. image:: images/complete.png
+
+
+
+
+Model Fitting
+=============
+
+
+Start
+------------------------------------
+
+.. image:: figs/Graphs/incorrect.png
+           :align: center
+           :width: 350px
+
+
+Goal
+-----
+
+.. revealjs_fragments::
+
+   * Find parameters that minimize loss
+   * Finalize a fixed model
+
+Fitting
+-----------------
+
+.. revealjs_fragments::
+
+   * Field of optimization
+   * Many, many different approaches
+   * Our focus: `gradient descent`
+
+
+Parameter Fitting
+------------------------------------
+
+1. Compute the loss function, :math:`L(w_1, w_2, b)`
+2. See how small changes would change the loss
+3. Update to parameters to locally reduce the loss
+
+
+Step 1: Compute Loss
+------------------------------------
+
+.. image:: figs/Graphs/pt2.png
+           :align: center
+           :width: 200px
+
+
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 500px
+
+Step 2: Find Direction
+-------------------------
+
+.. image:: figs/Graphs/bias.png
+           :align: center
+           :width: 400px
+
+
+
+Step 3: Update Parameters
+------------------------------------
+
+
+.. image:: figs/Graphs/move.png
+           :align: center
+           :width: 400px
+
+Hard Issues
+------------------------------------
+
+.. revealjs_fragments::
+
+   * Local update, may get stuck for some models
+   * How much do we move?
+   * Can we do better?
+
+Easier Issue
+------------------------------------
+
+.. revealjs_fragments::
+
+   * How do we find good directions?
+
+
+Derivatives
+=============
+
+
+Function Notation
+------------------
+
+.. math ::
+
+   f(x) = \sin(2 x)
+
+
+.. math ::
+
+   g(x) = x + 10
+
+
+
+
+Derivative Notation
+--------------------
+
+.. math ::
+
+    f'(x) = 2 \times \cos(2 x)
+
+.. math ::
+
+    g'(x) = 1
+
+Multiple Arguments
+--------------------
+
+.. math ::
+
+   f(x, y) = x + 2 y
+
+Subscript indicates variable
+
+.. math ::
+
+   f'_x(x, y) = 1
+
+.. math ::
+
+   f'_y(x, y) = 2
+
+
+Intuition: Derivative
+-----------------------
+
+.. math ::
+
+   f(x) = x^2
+
+.. image:: figs/Grad/function.png
+           :align: center
+
+
+Intuition: Derivative
+-----------------------
+
+* Slope of tangeant line
+
+.. math ::
+
+   f'(x) = 2x
+
+.. image:: figs/Grad/tangent.png
+           :align: center
+
+Derivative Types
+===================
+
+
+Symbolic Derivative
+---------------------
+
+.. math ::
+
+   f(x) = \sin(2 x)
+
+
+.. math ::
+
+    f'(x) = 2 \times \cos(2 x)
+
+* `Differentiation Rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+
+Issues
+--------
+
+
+How do we handle higher-order functions? ::
+
+   def derivative(fn):
+       def inner(x):
+           ...
+       return inner
+
+   d_f = derivative(f)
+
+
+Definition of Derivative: Geometry
+----------------------------------
+
+
+.. image:: figs/Grad/tangent.png
+           :align: center
+
+
+.. math ::
+
+    f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}
+
+
+Central Difference
+--------------------
+
+.. math ::
+
+    f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}
+
+
+Approximating Derivative
+----------------------------------
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+Derivative Types
+===================
+
+Loss
+------
+
+.. image:: figs/Graphs/move.png
+           :align: center
+           :width: 400px
+
+
+
+Symbolic Derivative
+---------------------
+
+.. math ::
+
+   f(x) = \sin(2 x)
+
+
+.. math ::
+
+    f'(x) = 2 \times \cos(2 x)
+
+* `Differentiation Rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+
+Issues
+--------
+
+
+How do we handle higher-order functions? ::
+
+   def derivative(fn):
+       def inner(x):
+           ...
+       return inner
+
+   d_f = derivative(f)
+
+
+Definition of Derivative
+------------------------
+
+
+.. image:: figs/Grad/tangent.png
+           :align: center
+
+
+.. math ::
+
+    f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}
+
+Difference
+--------------------
+
+* Approximate limit with small value
+
+.. math ::
+
+    f'(x) \approx  \frac{f(x + \epsilon) - f(x)}{\epsilon}
+
+
+Central Difference
+--------------------
+
+.. math ::
+
+    f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+Multipleargs Difference
+------------------------
+
+.. math ::
+
+    f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+
+
+                   
+
+
+Q&A
+====

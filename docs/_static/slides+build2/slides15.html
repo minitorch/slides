@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 15</h2>
+<blockquote>
+<div><p>Sentence Classification</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Training</p></li>
+<li class="fragment"><p>Simple NLP</p></li>
+<li class="fragment"><p>Train / Test</p></li>
+</ul>
+</section>
+<section >
+<h1>Training</h1>
+</section>
+<section >
+<h2>Parameter Fitting</h2>
+<ol class="arabic simple">
+<li><p>Compute the loss function, <span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span></p></li>
+<li><p>See how small changes would change the loss</p></li>
+<li><p>Update to parameters to locally reduce the loss</p></li>
+</ol>
+</section>
+<section >
+<h2>Batching</h2>
+<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
+</section>
+<section >
+<h2>Loss</h2>
+<p>Step 3 Compute Loss</p>
+<pre data-id="loss"><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
+loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
+</section>
+<section >
+<h2>Compute Derivatives</h2>
+<p>Step 2</p>
+<pre data-id="compute-derivatives"><code data-trim data-noescape class="python">loss.sum().backward()
+print(model.layer1.weight.value.grad)</code></pre>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+</section>
+<section >
+<h2>Update Parameters</h2>
+<p>Step 3</p>
+<pre data-id="update-parameters"><code data-trim data-noescape class="python">for p in model.parameters():
+    if p.value.grad is not None:
+        p.update(p.value - RATE * (p.value.grad / float(data.N)))</code></pre>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/167152">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Simple NLP</h1>
+</section>
+<section >
+<h2>Context</h2>
+<ul class="simple">
+<li class="fragment"><p>What are dimensions for?</p></li>
+<li class="fragment"><p>What does broadcasting buy us?</p></li>
+<li class="fragment"><p>What are non-spatial dimensions for?</p></li>
+</ul>
+</section>
+<section >
+<h2>Natural Language Processing</h2>
+<ul class="simple">
+<li><p>Systems for human language</p></li>
+<li><p>Broad area of study with lots of challenges</p></li>
+<li><p>Heavily uses ML, more in recent years</p></li>
+</ul>
+</section>
+<section >
+<h2>Sentiment Classification</h2>
+<ul class="simple">
+<li class="fragment"><p>Canonical sentence classification problem</p></li>
+<li class="fragment"><p>Given sentence predict sentiment class</p></li>
+<li class="fragment"><p>Key aspects: word polarity</p></li>
+</ul>
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
+</section>
+<section >
+<h2>Problem Setup</h2>
+<ul class="simple">
+<li class="fragment"><p>Training: Exactly the same as simple</p></li>
+<li class="fragment"><p>Loss: Exactly the same as simple</p></li>
+<li class="fragment"><p>Models: Mostly similar to the simple problem.</p></li>
+</ul>
+</section>
+<section >
+<h2>Modeling Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>Converting words to tensors</p></li>
+<li class="fragment"><p>Converting sentences to tensors</p></li>
+<li class="fragment"><p>Handling word combinations</p></li>
+</ol>
+</section>
+<section >
+<h1>Word -&gt; Tensors</h1>
+</section>
+<section >
+<h2>What is a word?</h2>
+<ul class="simple">
+<li class="fragment"><p>Treat words as index in vocabulary</p></li>
+<li class="fragment"><p>Represent as a one-hot vector</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge1: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>One-Hot Issue</h2>
+<ul class="simple">
+<li class="fragment"><p>Tens of thousands of words</p></li>
+<li class="fragment"><p>Opposite problem as before, 2-features to 10,000</p></li>
+<li class="fragment"><p><a href="#id1"><span class="problematic" id="id2">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
+</ul>
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Intuition: Lookup in Table</h2>
+<p>Get word vector</p>
+<pre data-id="intuition-lookup-in-table"><code data-trim data-noescape class="python">embeddings[word]</code></pre>
+<ul class="simple">
+<li><p>Challenge:  How to compute <cite>backward</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Alternative: Lookup by broadcast</h2>
+<p>Get word vector</p>
+<pre data-id="alternative-lookup-by-broadcast"><code data-trim data-noescape class="python">(embeddings * word_one_hot.view(VOCAB, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>How does this share information?</h2>
+<ul>
+<li class="fragment"><p>Similar words have similar embedding dim</p></li>
+<li class="fragment"><p>Dot-product - easy way to tell similarity</p>
+<pre><code data-trim data-noescape class="python">(word_emb1 * word_emb2).sum()</code></pre>
+</li>
+<li class="fragment"><p>Differentiable!</p></li>
+</ul>
+</section>
+<section >
+<h2>Embedding Layer</h2>
+<p>Easy to write as a layer</p>
+<pre data-id="embedding-layer"><code data-trim data-noescape class="python">class Embedding(minitorch.Module):
+  def __init__(self, vocab_size, emb_size):
+      super().__init__()
+      self.weights = \
+        minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+      self.vocab_size = vocab_size
+
+  def forward(input):
+      return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Where do these come from?</h2>
+<ul class="simple">
+<li class="fragment"><p>Trained from a different model</p></li>
+<li class="fragment"><p>Extracted and posted to use</p></li>
+<li class="fragment"><p>(Many more details in NLP class)</p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Embeddings</p>
+<pre data-id="examples"><code data-trim data-noescape class="python">embedding.weights.value.update(pretrained_weights)</code></pre>
+<ul class="simple">
+<li><p><a class="reference external" href="https://projector.tensorflow.org/">https://projector.tensorflow.org/</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Query 1</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
+<p>Query 2</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
+</section>
+<section >
+<h1>Challenge 2 : Sentence Length</h1>
+</section>
+<section >
+<h2>Sentence Length</h2>
+<ul class="simple">
+<li class="fragment"><p>Examples may be of different length</p></li>
+<li class="fragment"><p>Need to all be converted to vectors and utilized</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge: Length Dimension</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Value Transformation</h2>
+<ul class="simple">
+<li class="fragment"><p>batch x length x vocab</p></li>
+<li class="fragment"><p>batch x length x feature</p></li>
+<li class="fragment"><p>batch x feature</p></li>
+<li class="fragment"><p>batch x hidden</p></li>
+<li class="fragment"><p>batch</p></li>
+</ul>
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Benefits</h2>
+<ul class="simple">
+<li><p>Extremely simple</p></li>
+<li><p>Embeddings encode key information</p></li>
+<li><p>Have all the tools we need</p></li>
+</ul>
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Completely ignores relative order</p></li>
+<li><p>Completley ignores absolute order</p></li>
+<li><p>Embeddings for all words, even rare ones</p></li>
+</ul>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 27</h2>
+<blockquote>
+<div><p>What's Next</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Course</p></li>
+<li class="fragment"><p>What's to Come</p></li>
+</ul>
+</section>
+<section >
+<h1>Review</h1>
+</section>
+<section >
+<h2>Class Focus</h2>
+<ul class="simple">
+<li class="fragment"><p><strong>Machine Learning</strong> Engineering</p></li>
+<li class="fragment"><p>Machine Learning <strong>Engineering</strong></p></li>
+<li class="fragment"><p>Focus: software engineering behind machine learning</p></li>
+</ul>
+</section>
+<section >
+<h2>MLE</h2>
+<ul class="simple">
+<li><p>Systems course disguised as ML</p></li>
+<li><p>Algorithms implemented Fast</p></li>
+<li><p>Testing / Debugging / Scaling</p></li>
+</ul>
+</section>
+<section >
+<h2>Module 0 - Foundations</h2>
+<img alt="_images/module.png" class="align-center" src="_images/module.png" />
+</section>
+<section >
+<h2>Module 0 - Foundations</h2>
+<ul class="simple">
+<li><p>Testing</p></li>
+<li><p>Higher-Order Functions</p></li>
+<li><p>Data Structures</p></li>
+</ul>
+</section>
+<section >
+<h2>Module 1 - Auto-Diff</h2>
+<img alt="_images/backprop4.png" class="align-center" src="_images/backprop4.png" />
+</section>
+<section >
+<h2>Module 1 - Auto-Diff</h2>
+<ul class="simple">
+<li><p>Variables</p></li>
+<li><p>Autodifferentiation</p></li>
+<li><p>ML Basics</p></li>
+</ul>
+</section>
+<section >
+<h2>Module 2 - Tensors</h2>
+<img alt="_images/stride4.png" class="align-center" src="_images/stride4.png" />
+</section>
+<section >
+<h2>Module 2 - Tensors</h2>
+<ul class="simple">
+<li><p>Multidimensional Arrays</p></li>
+<li><p>Map / Zip / Reduce</p></li>
+<li><p>Broadcasting</p></li>
+</ul>
+</section>
+<section >
+<h2>Module 3 - Effiency</h2>
+<img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" />
+</section>
+<section >
+<h2>Module 3 - Effiency</h2>
+<ul class="simple">
+<li><p>JIT / Types</p></li>
+<li><p>Parallel</p></li>
+<li><p>CUDA / Shared Memory</p></li>
+</ul>
+</section>
+<section >
+<h2>Module 4 - Networks</h2>
+<img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" />
+</section>
+<section >
+<h2>Module 4 - Networks</h2>
+<ul class="simple">
+<li><p>Convolutions</p></li>
+<li><p>Tiling</p></li>
+<li><p>Softmax</p></li>
+</ul>
+</section>
+<section >
+<h2>What do you know?</h2>
+<ul class="simple">
+<li><p>How neural networks works...</p></li>
+<li><p>How autodifferentiation works...</p></li>
+<li><p>How it all scales ...</p></li>
+</ul>
+</section>
+<section >
+<h2>What did you learn?</h2>
+<ul class="simple">
+<li><p>Systems are made by humans</p></li>
+<li><p>Debugging, testing, organization</p></li>
+<li><p>Filing bugs and asking questions</p></li>
+</ul>
+</section>
+<section >
+<h2>Piazza</h2>
+<img alt="piazza.png" src="piazza.png" />
+<ul class="simple">
+<li><p>Ge Gao - 505 contributions!</p></li>
+</ul>
+</section>
+<section >
+<h2>Course Reviews</h2>
+<p><a class="reference external" href="https://apps.engineering.cornell.edu/CourseEval/">https://apps.engineering.cornell.edu/CourseEval/</a></p>
+</section>
+<section >
+<h1>What's Next</h1>
+</section>
+<section >
+<h2>Many Forks</h2>
+<ul class="simple">
+<li><p>ML Engineering</p></li>
+<li><p>ML Systems</p></li>
+<li><p>ML Models</p></li>
+</ul>
+</section>
+<section >
+<h2>ML Engineering</h2>
+<ul class="simple">
+<li><p>Many questions beyond training</p></li>
+<li><p>Data sets and data availability</p></li>
+<li><p>Data collection / preprocessing / robustness</p></li>
+</ul>
+</section>
+<section >
+<h2>Tools of the Trade : Arrow</h2>
+<img alt="arrow.png" src="arrow.png" />
+</section>
+<section >
+<h2>Tools of the Trade : ONNX</h2>
+<img alt="onxx.png" src="onxx.png" />
+</section>
+<section >
+<h2>ML Systems</h2>
+<ul class="simple">
+<li><p>Many languages beyond torch</p></li>
+<li><p>Different Tensor access forms</p></li>
+</ul>
+</section>
+<section >
+<h2>Tools of the Trade: Jax</h2>
+<ul class="simple">
+<li><p>Introduces <cite>vector map</cite> in addition to broadcasting</p></li>
+<li><p>Can apply a function to a tensor across an entire dimension.</p></li>
+</ul>
+<p>Code</p>
+<pre data-id="tools-of-the-trade-jax"><code data-trim data-noescape class="python">vmap(model.forward, x)</code></pre>
+</section>
+<section >
+<h2>Tools of the Trade: Julia</h2>
+<ul class="simple">
+<li><p>Programming language for mathematical code</p></li>
+<li><p>Pluto -&gt; <a class="reference external" href="https://mybinder.org/v2/gh/fonsp/pluto-on-binder/master?urlpath=pluto">https://mybinder.org/v2/gh/fonsp/pluto-on-binder/master?urlpath=pluto</a></p></li>
+</ul>
+</section>
+<section >
+<h2>ML Models</h2>
+<ul class="simple">
+<li><p>Modern models are complicated, but made up of the parts we have seen</p></li>
+<li><p>Many are open source and available to play with.</p></li>
+</ul>
+</section>
+<section >
+<h2>My Bet</h2>
+<ul class="simple">
+<li><p>You can read models!</p></li>
+</ul>
+</section>
+<section >
+<h2>Future Context: Self-Driving</h2>
+<video width="640" height="480" controls>
+      <source src="   https://www.tesla.com/sites/default/files/images/careers/autopilot/network.mp4" type="video/mp4">
+</video></section>
+<section >
+<h2>Vision Models</h2>
+<ul>
+<li><p>ResNet</p>
+<p><a class="reference external" href="https://github.com/facebookresearch/detectron2/blob/master/detectron2/modeling/backbone/resnet.py">https://github.com/facebookresearch/detectron2/blob/master/detectron2/modeling/backbone/resnet.py</a></p>
+</li>
+</ul>
+</section>
+<section >
+<h2>Future Context: Code Gen</h2>
+<blockquote>
+<div> <blockquote style="align:center" class="twitter-tweet"> <a href="https://twitter.com/sharifshameem/status/1282676454690451457?ref_src=twsrc%5Etfw"></a></blockquote>
+
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></div></blockquote>
+</section>
+<section >
+<h2>NLP Models</h2>
+<ul>
+<li><p>Transformer</p>
+<p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/models/bert/modeling_bert.py">https://github.com/huggingface/transformers/blob/master/src/transformers/models/bert/modeling_bert.py</a></p>
+</li>
+</ul>
+</section>
+<section >
+<h2>Protein Folding</h2>
+<a class="reference internal image-reference" href="protein.gif"><img alt="protein.gif" src="protein.gif" style="width: 600px;" /></a>
+<p>'/home/srush/Downloads/carbon (18).png' '/home/srush/Downloads/carbon (18).png 'githu</p>
+</section>
+<section >
+<h2>Protein Folding</h2>
+<ul>
+<li><p>Distance Prediction</p>
+<p><a class="reference external" href="https://github.com/Urinx/alphafold_pytorch/blob/master/network.py">https://github.com/Urinx/alphafold_pytorch/blob/master/network.py</a></p>
+</li>
+</ul>
+</section>
+<section >
+<h2>Tips of the Trade</h2>
+<ul class="simple">
+<li><p>Fancy models are not always necessary</p></li>
+<li><p>Build something robust and fast on your hardware.</p></li>
+<li><p>Develop multiple expertise to be flexible to users</p></li>
+</ul>
+</section>
+<section >
+<h2>Future Steps</h2>
+</section>
+<section >
+<h2>QA</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

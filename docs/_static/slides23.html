@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 22</h2>
+<blockquote>
+<div><p>Convolution + Pooling</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Module 4</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://classroom.github.com/classrooms/68973473-mle/assignments/minitorch-4">GitHub</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Convolution</p></li>
+<li class="fragment"><p>2D+ Convolution</p></li>
+<li class="fragment"><p>Pooling</p></li>
+</ul>
+</section>
+<section >
+<h2>Intuition</h2>
+<ul class="simple">
+<li class="fragment"><p>Same neural network as before</p></li>
+<li class="fragment"><p>Brute force, try running it everywhere</p></li>
+<li class="fragment"><p>Hope it finds useful features at some locations</p></li>
+</ul>
+</section>
+<section >
+<h2>Convolution Forward</h2>
+<img alt="_images/conv1d.png" class="align-center" src="_images/conv1d.png" />
+</section>
+<section >
+<h2>Computation</h2>
+<p>Output Values</p>
+<pre data-id="computation"><code data-trim data-noescape class="python">output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]</code></pre>
+</section>
+<section >
+<h2>Alternative View</h2>
+<img alt="_images/convvec.png" class="align-center" src="_images/convvec.png" />
+</section>
+<section >
+<h2>Alternative View</h2>
+<p>Unroll and Zip</p>
+<pre data-id="id1"><code data-trim data-noescape class="python">input = minitorch.tensor([1, 2, 3, 4, 5, 6])
+input = unroll(input, K)
+print(input)
+
+[[1, 2, 3],
+ [2, 3, 4],
+ [3, 4, 5],
+ [4, 5, 6],
+ [5, 6, 0],
+ [6, 0, 0],
+ ]</code></pre>
+</section>
+<section >
+<h2>Our Convention</h2>
+<ul class="simple">
+<li><p>Input and Output same width</p></li>
+<li><p>A bit non-standard, but easier to code</p></li>
+</ul>
+</section>
+<section >
+<h2>Conv Back - Input</h2>
+<p>Reverse the convolutional anchor</p>
+<img alt="_images/conv1dback.png" class="align-center" src="_images/conv1dback.png" />
+</section>
+<section >
+<h2>Channels</h2>
+<ul class="simple">
+<li><p>Each position may have multiple values</p></li>
+<li><p>These may be meaningful - i.e. color channels</p></li>
+<li><p>These may be learned - i.e. hidden states</p></li>
+</ul>
+</section>
+<section >
+<h2>Key Points</h2>
+<ul class="simple">
+<li><p>Convolution is a Linear applied to all channels in position</p></li>
+<li><p>If weight is length K and there are 10 channels, the input to the linear
+is 10 * K.</p></li>
+<li><p>Output channels are just like the output of the Linear.</p></li>
+</ul>
+</section>
+<section >
+<h2>Graphical Representation</h2>
+<a class="reference internal image-reference" href="_images/channels.png"><img alt="_images/channels.png" class="align-center" src="_images/channels.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/177168">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Two Dimensional Convolution</h2>
+<ul class="simple">
+<li><p>Instead of line, now use box</p></li>
+<li><p>Box is anchored at the top-left</p></li>
+<li><p>Zip-reduce is over full box!</p></li>
+</ul>
+</section>
+<section >
+<h2>Convolution</h2>
+<img alt="_images/conv.png" class="align-center" src="_images/conv.png" />
+</section>
+<section >
+<h2>Conventions</h2>
+<p>Sizes</p>
+<pre data-id="conventions"><code data-trim data-noescape class="python"># Input image - batch x in_channel x height x width
+# Weight - out_channel x in_channel x kernel_height x kernel_width
+# Output image - batch x out_channel x height x width</code></pre>
+</section>
+<section >
+<h2>Alternative View</h2>
+<p>One step -&gt; mat mul</p>
+<p>Code</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">output[b, oc, h, w] = sum([weight[oc, ic, kh, kw] * input[b, ic, h + kh, w + kw]
+                           for ic, kh, kw in ...])
+# Input image - batch x (in_channel * height * width)
+# Weight - (in_channel * kernel_height * kernel_width) x out_channel</code></pre>
+</section>
+<section >
+<h2>Backward</h2>
+<img alt="_images/backward.png" class="align-center" src="_images/backward.png" />
+</section>
+<section >
+<h2>Backward</h2>
+<p>Same idea as 1D</p>
+<ul class="simple">
+<li><p>Reverse weight (bottom-top, left-right)</p></li>
+<li><p>Anchor bottom-right</p></li>
+<li><p>Compute convolution</p></li>
+</ul>
+</section>
+<section >
+<h2>Channels</h2>
+<p>Nothing different from 1D version</p>
+<a class="reference internal image-reference" href="_images/conv2.png"><img alt="_images/conv2.png" class="align-center" src="_images/conv2.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li class="fragment"><p>All about understanding sizes.</p></li>
+<li class="fragment"><p>Should be similar to matmul, start with output</p></li>
+<li class="fragment"><p>If outside boundaries, use 0</p></li>
+</ul>
+</section>
+<section >
+<h2>Advice</h2>
+<ul class="simple">
+<li><p>Implement 1D first it is easier</p></li>
+<li><p>Compute a couple manually yourself.</p></li>
+<li><p>All about indexing</p></li>
+</ul>
+</section>
+<section >
+<h2>Where are we?</h2>
+<p><a class="reference external" href="https://poloclub.github.io/cnn-explainer/">https://poloclub.github.io/cnn-explainer/</a></p>
+</section>
+<section >
+<h2>3D Convolution?</h2>
+<ul class="simple">
+<li><p>Yeah!</p></li>
+<li><p>Several neat versions</p></li>
+</ul>
+</section>
+<section >
+<h2>3D Convolution Voxels</h2>
+<a class="reference internal image-reference" href="3dconv.png"><img alt="3dconv.png" src="3dconv.png" style="width: 700px;" /></a>
+</section>
+<section >
+<h2>3D Convolution Chemistry</h2>
+<a class="reference internal image-reference" href="chem.gif"><img alt="chem.gif" src="chem.gif" style="width: 700px;" /></a>
+</section>
+<section >
+<h2>3D Convolution Video</h2>
+<a class="reference internal image-reference" href="video.jpeg"><img alt="video.jpeg" src="video.jpeg" style="width: 700px;" /></a>
+</section>
+<section >
+<h2>Graph Convolution</h2>
+<a class="reference internal image-reference" href="graph.png"><img alt="graph.png" src="graph.png" style="width: 700px;" /></a>
+</section>
+<section >
+<h1>Pooling</h1>
+</section>
+<section >
+<h2>Challenge</h2>
+<ul class="simple">
+<li><p>How do we look at bigger areas with convolutions?</p></li>
+</ul>
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Number of parameters scale with weight size</p></li>
+<li><p>&quot;Bigger&quot; patterns require more ways to split data.</p></li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li><p>Early layers: Capture basic shapes</p></li>
+<li><p>Middle layers: How these connect</p></li>
+<li><p>Later layers: Full objects</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<img alt="vis.png" src="vis.png" />
+</section>
+<section >
+<h2>Pooling</h2>
+<ul class="simple">
+<li><p>Adjusts the scale at each layer</p></li>
+<li><p>Conv stays the same size, image &quot;zooms&quot; out</p></li>
+</ul>
+</section>
+<section >
+<h2>Pooling</h2>
+<ul class="simple">
+<li><p>Adjusts the scale at each layer</p></li>
+<li><p>Conv stays the same size, image &quot;zooms&quot; out</p></li>
+</ul>
+</section>
+<section >
+<h2>Standard Reduction</h2>
+<a class="reference internal image-reference" href="_images/pool1.png"><img alt="_images/pool1.png" class="align-center" src="_images/pool1.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>&quot;Pooling&quot;</h2>
+<p>Reduction applied to each region:</p>
+<a class="reference internal image-reference" href="_images/pool2.png"><img alt="_images/pool2.png" class="align-center" src="_images/pool2.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Simple Implementation</h2>
+<ul class="simple">
+<li><p>Ensure that it is contiguous</p></li>
+<li><p>Use View to &quot;fold&quot; the tensor</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool3.png"><img alt="_images/pool3.png" class="align-center" src="_images/pool3.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Simple Implementation</h2>
+<ul class="simple">
+<li><p>Reduce along created fold</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool4.png"><img alt="_images/pool4.png" class="align-center" src="_images/pool4.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>2D Pooling</h2>
+<a class="reference internal image-reference" href="_images/pool2d.png"><img alt="_images/pool2d.png" class="align-center" src="_images/pool2d.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Fast Implementations?</h2>
+<ul class="simple">
+<li><p>If your reduce is on CUDA, can exploit small groups</p></li>
+<li><p>I.e. Prefix sum for each group on one block.</p></li>
+</ul>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

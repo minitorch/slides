@@ -1,0 +1,315 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 25
+------------
+
+   Softmax
+
+Intro
+======
+
+Protein Folding
+----------------
+
+.. image:: protein.gif
+   :width: 600px
+
+
+ML Breakthrough
+---------------
+
+.. image:: download.jpeg
+   :width: 700px
+
+ML Breakthrough
+---------------
+
+.. image:: AlphaFold.svg
+   :width: 700px
+
+HW
+======
+
+
+HW Q&A
+-------
+
+.. revealjs_fragments::
+
+   * Deadline Friday
+   * (very small subtraction if late)
+
+Tips for Debugging ML
+-----------------------
+
+* Extremely different than debugging code.
+* Cannot check if something easy went wrong.
+
+Tips for Debugging ML
+----------------------
+
+* Issue: It's so slow!
+
+* Methods: Start with small models
+
+
+Tips for Debugging ML
+----------------------
+
+* Issue: Waiting for model
+
+* Methods: Never watch! Debug as you train.
+
+
+Tips for Debugging ML
+----------------------
+
+* Issue: It fails at the end.
+
+* Method: Overfitting to validation data.
+
+
+Real-World Models
+------------------
+
+* Extremely large, days to train
+* Many small variants
+
+
+HW Q&A
+-------
+
+.. revealjs_fragments::
+
+   * Conv?
+   * Batching?
+   * Tiling?
+
+Lecture
+=========
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Max and Argmax
+   * Softmax in Depth
+   * Gating in practice
+
+
+Review: Max, Argmax, Softmax
+=============================
+
+Challenge
+---------
+
+How do we generalize sigmoid to multiple outputs?
+
+.. image:: figs/Conv/value.png
+
+
+Max reduction
+--------------
+
+* Max is a binary associative operator
+* :math:`\max(a, b)` returns max value
+* Generalized :math:`\text{ReLU}(a) = \max(a, b)`
+
+
+Argmax
+------
+
+* Function that returns `argmax`, one-hot
+* Generalizes step
+
+.. image:: figs/Conv/argmax.png
+
+
+
+Soft argmax?
+-------------
+
+* Need a soft version of argmax.
+* Generalizes sigmoid for our new loss function
+* Standard name -> softmax
+
+Softmax
+-------
+
+.. math::
+
+   \text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}
+
+Sigmoid is Softmax
+-------------------
+
+.. math::
+
+   \text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)
+
+
+Softmax
+---------
+
+.. image:: figs/Conv/softmax.png
+
+
+Review
+-------
+
+======= ============
+Binary  Multiclass
+======= ============
+ReLU     Max
+Step     Argmax
+Sigmoid  Softmax
+======= ============
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/178936>`_
+
+
+
+Softmax
+=========
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 500px
+
+
+Softmax Layer
+-------------
+
+* Produces a probability distribution over outputs (Sum to 1)
+* Derivative similar to sigmoid
+* Lots of interesting practical properties
+
+Softmax Brainteaser
+-------------------
+
+Contrast ::
+
+  a = minitorch.rand((10))
+  b1 = softmax(a)
+  b2 = sigmoid(a)
+  b1[2].backward()
+  b2[2].backward()
+
+Softmax in Context
+-------------------
+
+* Not a map!
+* Gradient spreads out from one point to all.
+
+
+Softmax
+-------
+
+* `Colab <https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu>`_
+
+
+Soft Gates
+============
+
+New Methods
+----------------
+
+* Sigmoid and softmax produce distributions
+* Can be used to "control" information flow
+
+Example
+-------
+
+Returns a combination of x and y
+
+.. math::
+
+   f(x, y, r) = x * \sigma(r) + y * (1 - \sigma(r))
+
+
+Gradient is controlled
+-----------------------
+
+.. math::
+
+   f'_x(x, y, r) &= \sigma(r) \\
+   f'_y(x, y, r) &= (1 - \sigma( r))\\
+   f'_r(x, y, r) &= (x -  y) \sigma'(r)
+
+
+Neural Network Gates
+-----------------------
+
+Learn which one of the previous layers is most useful.
+
+.. math::
+
+   r &= NN_1 \\
+   x &= NN_2 \\
+   y &= NN_3
+
+
+Gradient Flow
+--------------
+
+* Layers that are used get more updates
+* Gradient signals which aspect was important
+* Can have extra layers
+
+
+Selecting Choices
+-------------------
+
+.. revealjs_fragments::
+
+   * Gating gives us a binary choice
+   * What if we want to select between many elements?
+   * Softmax!
+
+Softmax Gating
+---------------
+
+Combines many elements of X based on R
+
+.. math::
+
+   f(X, R) = X \times softmax(R)
+
+
+Softmax Gating
+---------------
+
+* Brand name: Attention
+*
+
+Example: Translation
+--------------------
+
+* Show example
+
+
+Example: GPT-3
+--------------------
+
+* Show example
+
+
+
+Q&A
+----

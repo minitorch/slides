@@ -1,0 +1,335 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 21
+------------
+
+   Synthesis
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Efficiency
+   * Overview
+   * Image Classification
+
+
+Efficiency
+============
+
+Constraints
+------------
+
+* Memory must be typed
+* Memory must be *constant* size
+* Memory must be relatively small
+
+
+GPU
+-----
+
+* Lots of parallelism for computation
+
+* Challenge: reduce memory reads
+
+* Local > Shared > Global
+
+
+
+Counts
+-------
+
+* Significantly reduced global reads and writes
+* Needed block shared memory to do this
+
+Sliding Average
+-----------------
+
+Compute sliding average over a list ::
+
+   sub_size = 2
+   a = [4, 2, 5, 6, 2, 4]
+   out = [3, 3.5, 5.5, 4, 3]
+
+Example: Local Sum
+--------------------
+
+Compute sliding average over a list ::
+
+    def slide_py(out, a):
+       for i in range(out.size):
+           out[i] = 0
+           for j in range(sub_size):
+               out[i] += a[i + j]
+           out[i] = out[i] / sub_size
+
+CUDA
+-----
+
+* Each thread handles 1 output position
+* Copy data from array to shared memory (be sure to handle edges)
+* Threads loop in parallel doing averaging
+* Write out at the end
+
+
+Better CUDA
+-----------
+
+Two global reads per thread ::
+
+    def slide_cuda(out, a):
+       shared = numba.cuda.shared.array(THREADS + sub_size)
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       local_idx = numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           shared[local_idx] = a[i]
+           if local_idx < sub_size and i + THREADS < a.size:
+               shared[local_idx  + THREADS] = a[i + THREADS]
+           numba.cuda.syncthreads()
+           temp = 0
+           for j in range(sub_size):
+                temp += shared[local_idx + j]
+           out[i] = temp / sub_size
+
+Quiz
+-----
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/174714>`_
+
+
+Suggestions: Map
+-----------------
+
+.. revealjs_fragments::
+
+   * When do you need to index?
+   * When do you need to broadcast?
+   * Can you directly utilize storage?
+
+
+Suggestions: Zip
+-----------------
+
+.. revealjs_fragments::
+
+   * When can you avoid indexing?
+   * When can you avoid broadcasting?
+   * When does zip become a (fast) map?
+
+
+Suggestions: Reduce
+-------------------
+
+.. revealjs_fragments::
+
+   * Special cases: dimension reduce + full reduce, how do they differ?
+   * Do we need to call index everytime?
+   * Do we need to write to global memory every time?
+
+
+Suggestions: Matmul
+---------------------
+
+.. revealjs_fragments::
+
+   * Inner loop is key: can we optimize it?
+   * Key special case: Batch Matrix-Vector.
+   * GPU?
+
+
+
+Overview
+==========
+
+Where we are at
+------------------
+
+.. revealjs_fragments::
+
+   * Testing, Visualization, Math
+   * Scalars, Autodifferentiation
+   * Tensors, Gradients
+   * Parallel, Hardware
+
+
+Next Goal
+-----------
+
+.. revealjs_fragments::
+
+   * Build a real model
+
+
+What more?
+-----------
+
+.. revealjs_fragments::
+
+   * General framework to build tools
+   * Can learn through all sorts of functional transformations
+   * Can target different predictions and loss functions
+
+
+Architecture
+=============
+
+Goal: Image Recognition
+-------------------------
+
+
+Data Set
+-------------
+
+
+.. image:: figs/Conv/mnist.png
+           :align: center
+           :width: 200px
+
+
+Data Labels
+------------
+
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Conv/im2.png
+           :align: center
+           :width: 200px
+
+Data Points
+------------
+
+
+
+.. image:: figs/Graphs/data1.png
+           :align: center
+           :width: 250px
+
+
+.. image:: figs/Graphs/data2.png
+           :align: center
+           :width: 250px
+
+
+Strategy
+---------
+
+Build a neural network to classify these
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 400px
+
+
+Three Challenges
+------------------
+
+.. revealjs_fragments::
+
+   1) How do we handle input features?
+   2) How do we look at variable-size areas?
+   3) How do we predict multiple labels?
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 500px
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+  https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+
+.. image:: mnist.png
+           :align: center
+           :width: 400px
+
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv@3x.png
+           :align: center
+           :width: 400px
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv2@3x.png
+           :align: center
+           :width: 400px
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+.. image:: mnistregion.png
+           :align: center
+           :width: 400px
+
+
+Challenge 2: Variable Size Area
+---------------------------------
+
+.. image:: figs/Conv/pool2d@3x.png
+           :align: center
+           :width: 400px
+
+
+Challenge 2: Variable Size Area
+---------------------------------
+
+.. image:: figs/Conv/pool2d@3x.png
+           :align: center
+           :width: 400px
+
+Challenge 2: MNist Zoom
+---------------------------------
+
+.. image:: mnistzoom.png
+           :align: center
+           :width: 400px
+
+
+Challenge 3: Multiple Output
+---------------------------------
+
+.. image:: figs/Conv/value.png
+           :align: center
+           :width: 400px
+
+.. image:: figs/Conv/softmax.png
+           :align: center
+           :width: 400px
+
+Challenge 3: Multiple Output
+---------------------------------
+
+.. image:: hist.png
+           :align: center
+           :width: 500px
+
+
+Q&A
+----

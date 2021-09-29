@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 2.1 - Tensors</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 2.1 - Tensors</h1>
+</section>
+<section >
+<h2>Module 2.1</h2>
+<blockquote>
+<div><p>Tensor Data</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Starting Point</h2>
+<a class="reference internal image-reference" href="_images/splitfail.png"><img alt="_images/splitfail.png" class="align-center" src="_images/splitfail.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Math View (Alt)</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Quiz</h2>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Tensors</p></li>
+<li class="fragment"><p>Views</p></li>
+<li class="fragment"><p>Strides</p></li>
+</ul>
+</section>
+<section >
+<h1>Tensors</h1>
+</section>
+<section >
+<h2>Tensors?</h2>
+<p>What is it?</p>
+<ul class="simple">
+<li class="fragment"><p>Fancy multi-dimensional arrays</p></li>
+<li class="fragment"><p>Embedded mathmatical programming language</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensors!</h2>
+<p>Key Building Block</p>
+<ul class="simple">
+<li><p>Matlab</p></li>
+<li><p>Numpy</p></li>
+<li><p>Tensorflow, etc.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>0-Dimensional Scalar</p></li>
+<li><p>Our standby for Module-0</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>1-Dimensional -  Vector</p></li>
+</ul>
+<img alt="_images/vector1.png" class="align-center" src="_images/vector1.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>2-Dimensional - Matrix</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>Arbitrary dimensions - Tensor (Array in numpy)</p></li>
+</ul>
+<img alt="_images/tensor.png" class="align-center" src="_images/tensor.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Dims - # dimensions (<cite>tensor.dims</cite>)</p></li>
+<li class="fragment"><p>Shape -  # cells per dimension (<cite>tensor.shape</cite>)</p></li>
+<li class="fragment"><p>Size - # cells (<cite>tensor.size</cite>)</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<ul class="simple">
+<li><p>dims: 2</p></li>
+<li><p>shape: (2, 5)</p></li>
+<li><p>size : 10</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Example</h2>
+<ul class="simple">
+<li><p>dims: ?</p></li>
+<li><p>shape: ?</p></li>
+<li><p>size : ?</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Indexing</h2>
+<ul class="simple">
+<li><p>Indexing syntax: <cite>tensor[0, 1, 2]</cite></p></li>
+</ul>
+<img alt="_images/tensor2.png" class="align-center" src="_images/tensor2.png" />
+</section>
+<section >
+<h2>Convention!</h2>
+<p>In this class</p>
+<ul class="simple">
+<li><p>depth</p></li>
+<li><p>row</p></li>
+<li><p>columns</p></li>
+</ul>
+</section>
+<section >
+<h2>Why not just use lists?</h2>
+<ul class="simple">
+<li class="fragment"><p>Functions to manipulate shape</p></li>
+<li class="fragment"><p>Mathematical notation</p></li>
+<li class="fragment"><p>Can act as Variables / Parameters</p></li>
+<li class="fragment"><p>Efficient control of memory (Module-3)</p></li>
+</ul>
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul class="simple">
+<li><p>Permutation</p></li>
+</ul>
+<img alt="_images/matrix1.png" src="_images/matrix1.png" />
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul class="simple">
+<li><p>Views</p></li>
+</ul>
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+<img alt="_images/broad.png" src="_images/broad.png" />
+</section>
+<section >
+<h2>What's Bad?</h2>
+<ul class="simple">
+<li><p>Hard to grow or shrink</p></li>
+<li><p>Only numerical values</p></li>
+<li><p>Lose comprehensions / python built-ins</p></li>
+<li><p>Shapes are easy to mess up</p></li>
+</ul>
+</section>
+<section >
+<h2>Request</h2>
+<ul class="simple">
+<li class="fragment"><p>No autodifferentiation for now</p></li>
+<li class="fragment"><p>Only consider standard tensor operations</p></li>
+<li class="fragment"><p>Add autodiff afterwards</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>2-Dimensional - Matrix</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>Arbitrary dimensions - Tensor</p></li>
+</ul>
+<img alt="_images/tensor.png" class="align-center" src="_images/tensor.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Dims - # dimensions (<cite>tensor.dims</cite>)</p></li>
+<li class="fragment"><p>Shape -  # cells per dimension (<cite>tensor.shape</cite>)</p></li>
+<li class="fragment"><p>Size - # cells (<cite>tensor.size</cite>)</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<ul class="simple">
+<li><p>dims: 2 / shape: (2, 5) /  size : 10</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul>
+<li><p>Permutation</p>
+<pre><code data-trim data-noescape class="python">tensor.permute(1, 0)</code></pre>
+</li>
+</ul>
+<img alt="_images/matrix1.png" src="_images/matrix1.png" />
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul>
+<li><p>Views</p>
+<pre><code data-trim data-noescape class="python">tensor.view(1, 5, 2)</code></pre>
+</li>
+</ul>
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+<img alt="_images/broad.png" src="_images/broad.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/162299">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Views</h1>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li><p>Support user api</p></li>
+<li><p>Keep track of tensor properties</p></li>
+<li><p>Setup fast / simple Functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Usage</h2>
+<p>Unary</p>
+<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
+<p>Binary (for now, only same shape)</p>
+<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
+<p>Reductions</p>
+<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
+</section>
+<section >
+<h2>Why not lists?</h2>
+<p>Matrix (5, 2):</p>
+<pre data-id="why-not-lists"><code data-trim data-noescape class="python">matrix = [[1, 2], [3, 4], [5, 7], [2, 3], [2, 4]]</code></pre>
+<p>View (1, 5, 2)</p>
+<pre data-id="why-not-lists"><code data-trim data-noescape class="python">tensor = [[[matrix[j][i] for i in range(2)]
+            for j in range(5)]]</code></pre>
+<p>Transpose (2, 5)</p>
+<pre data-id="why-not-lists"><code data-trim data-noescape class="python">matrix_trans = [[matrix[i][j] for i in range(5)]
+                 for j in range(2)]</code></pre>
+</section>
+<section >
+<h2>Issues</h2>
+<ul>
+<li><p>Operators requires copying</p>
+<pre><code data-trim data-noescape class="python">matrix_trans = [[matrix[i][j] for i in range(5)]
+                 for j in range(2)]</code></pre>
+</li>
+<li><p>Storage shaped based on usage</p>
+<pre><code data-trim data-noescape class="python">tensor = [[[matrix[i][j] for i in range(2)]
+            for j in range(5)]]</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Idea 1: Views</h2>
+<ul class="simple">
+<li class="fragment"><p>Seperate storing information from user view</p></li>
+<li class="fragment"><p>Keep a mapping from users version to storage</p></li>
+</ul>
+</section>
+<section >
+<h2>Idea 2: Immutable Operations</h2>
+<ul class="simple">
+<li class="fragment"><p>Minitorch doesn't let you update tensors</p></li>
+<li class="fragment"><p>All operations return a &quot;new&quot; tensor</p></li>
+<li class="fragment"><p>Since there are no updates, maybe point to the same storage.</p></li>
+</ul>
+</section>
+<section >
+<h1>Tensor Internals</h1>
+</section>
+<section >
+<h2>How does this work</h2>
+<ul class="simple">
+<li><p><strong>Storage</strong> :  1-D array of numbers of length <cite>size</cite></p></li>
+<li><p><strong>Strides</strong> : tuple that provides the mapping from user <cite>indexing</cite>
+to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
+</ul>
+</section>
+<section >
+<h2>Strides</h2>
+<a class="reference internal image-reference" href="_images/stride2.png"><img alt="_images/stride2.png" class="align-center" src="_images/stride2.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Strides</h2>
+<a class="reference internal image-reference" href="_images/stride1.png"><img alt="_images/stride1.png" class="align-center" src="_images/stride1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Strides</h2>
+<a class="reference internal image-reference" href="_images/stride3.png"><img alt="_images/stride3.png" class="align-center" src="_images/stride3.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Which is best?</h2>
+<ul class="simple">
+<li><p>Can be useful when it is contiguous</p></li>
+<li><p>Bigger strides left</p></li>
+</ul>
+</section>
+<section >
+<h2>Strides</h2>
+<img alt="_images/stride4.png" class="align-center" src="_images/stride4.png" />
+</section>
+<section >
+<h2>Silly Stride Intuition</h2>
+<ul>
+<li><p>Numerical bases, binary number</p>
+<p>1101011</p>
+</li>
+</ul>
+<p>Implied strides: (64, 32, 16, 8, 4, 2, 1)</p>
+</section>
+<section >
+<h2>Stride Math</h2>
+<p>Calculating from strides</p>
+<pre data-id="stride-math"><code data-trim data-noescape class="python">s1 * index1 + s2 * index2 + s3 * index3 ...</code></pre>
+</section>
+<section >
+<h2>Key Operations</h2>
+<ul class="simple">
+<li><p>Map from index to position (binary -&gt; decimal)</p></li>
+<li><p>Map from position to index (decimal -&gt; binary)</p></li>
+</ul>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li><p>TensorData : Manager of strides and storage</p></li>
+</ul>
+</section>
+<section >
+<h1>Module-2</h1>
+</section>
+<section >
+<h2>Overview</h2>
+<ul class="simple">
+<li class="fragment"><p><cite>tensor.py</cite> - Tensor Variable</p></li>
+<li class="fragment"><p><cite>tensor_functions.py</cite> - Tensor Functions</p></li>
+<li class="fragment"><p><cite>tensor_data.py</cite> - Storage and Indexing</p></li>
+<li class="fragment"><p><cite>tensor_ops.py</cite> - Low-level tensor operations</p></li>
+</ul>
+</section>
+<section >
+<h2>Tasks 2.1: Indexing</h2>
+<img alt="_images/tensor2.png" src="_images/tensor2.png" />
+</section>
+<section >
+<h2>Tasks 2.2: Operations</h2>
+<img alt="_images/zip.png" class="align-center" src="_images/zip.png" />
+</section>
+<section >
+<h2>Tasks 2.3:  Autograd</h2>
+<img alt="_images/zip back.png" class="align-center" src="_images/zip back.png" />
+</section>
+<section >
+<h2>Tasks 2.4: Broadcasting</h2>
+<img alt="_images/zip broad back.png" src="_images/zip broad back.png" />
+</section>
+<section >
+<h2>Task 2.5: Training</h2>
+<img alt="complete.png" src="complete.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

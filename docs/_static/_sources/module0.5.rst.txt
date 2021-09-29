@@ -1,0 +1,376 @@
+Machine Learning Engineering
+=============================================
+
+
+Lecture 7
+------------
+
+  Derivatives
+
+
+Lab Session
+============
+
+
+Topics
+-------
+
+* Python internals
+* ML Review
+* Preview
+
+
+Lecture
+=========
+
+Derivative Types
+===================
+
+Loss
+------
+
+.. image:: figs/Graphs/move.png
+           :align: center
+           :width: 400px
+
+
+
+Symbolic Derivative
+---------------------
+
+.. math ::
+
+   f(x) = \sin(2 x)
+
+
+.. math ::
+
+    f'(x) = 2 \times \cos(2 x)
+
+* `Differentiation Rules <https://en.wikipedia.org/wiki/Differentiation_rules>`_
+
+Issues
+--------
+
+
+How do we handle higher-order functions? ::
+
+   def derivative(fn):
+       def inner(x):
+           ...
+       return inner
+
+   d_f = derivative(f)
+
+
+Definition of Derivative
+------------------------
+
+
+.. image:: figs/Grad/tangent.png
+           :align: center
+
+
+.. math ::
+
+    f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}
+
+Difference
+--------------------
+
+* Approximate limit with small value
+
+.. math ::
+
+    f'(x) \approx  \frac{f(x + \epsilon) - f(x)}{\epsilon}
+
+
+Central Difference
+--------------------
+
+.. math ::
+
+    f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+Multipleargs Difference
+------------------------
+
+.. math ::
+
+    f_y'(x, y) \approx  \frac{f(x, y  + \epsilon) - f(x, y-\epsilon)}{2\epsilon}
+
+.. image:: figs/Grad/approx.png
+           :align: center
+
+
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/156345>`_
+
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Numerical Derivatives
+   * Variables
+   * Functions
+
+
+
+Autodifferentiation
+==========================
+
+
+Goal
+-------
+
+.. revealjs_fragments::
+
+   * Write down arbitrary (python) functions
+   * Automatically compute any derivative
+   * Use this to fit models
+
+Are these symbolic derivatives?
+-------------------------------
+
+No
+
+.. revealjs_fragments::
+
+   * Don't get out mathematical function
+
+Are these numerical derivatives?
+-------------------------------
+
+No
+
+.. revealjs_fragments::
+
+   * Don't need to run samples nearby
+
+Downsides
+----------
+
+.. revealjs_fragments::
+
+   * Needs more information than numerical derivatives
+   * Needs to execute function unlike symbolic derivatives
+   * Requires overriding number system
+
+Derivative Checks
+--------------------
+
+*  Property: All three of these should roughly match
+
+
+Strategy
+-----------
+
+.. revealjs_fragments::
+
+  1. Replace numbers with  `Variables`.
+  2. Replace mathematical function with `Functions`.
+  3. `Variables` track which `Functions` were applied
+
+
+Autodifferentiation
+-------------------
+
+* Apply chain rule to the constructed graph
+* Code derivatives in to the graph
+
+
+Variables and Functions
+==========================
+
+"Wrapping"
+----------
+
+* Class wraps around numbers ::
+
+      class Scalar(Variable):
+          def __init__(self, value):
+               self.value = value
+          ...
+
+Goal
+-----
+
+.. revealjs_fragments::
+
+   * Act like a numerical value to user
+   * Record operations applied
+   * Hide access to internal storage
+
+How to make a Variable
+------------------------
+
+* Just wrap a standard value  ::
+
+    x_1 = minitorch.Scalar(x_1)
+    x_1.name = "x_1" # Optional for debugging
+
+
+How to update a Variable
+------------------------
+
+* Have to use a Function  ::
+
+    x_1 = minitorch.Scalar(x_1)
+    x_1.name = "x_1"
+
+    z = f.apply(x_1)
+
+Box Diagrams
+-------------
+
+.. image:: figs/Autograd/autograd1.png
+           :align: center
+
+Box Diagrams
+-------------
+
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+Code Demo
+-------------
+
+
+How does this Work
+-------------------
+
+* Arrows are Variables
+* Boxes  are Functions
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+Functions
+==========
+
+
+Functions
+-----------
+
+.. revealjs_fragments::
+
+   * Functions are implemented as static classes
+   * User implements `forward` and `backward` methods
+   * Forward is :math:`f` and backward is :math:`f'`
+
+Functions
+-----------
+
+* Function :math:`f(x) = x \times 5`
+
+* Implementation ::
+
+      class TimesFive(ScalarFunction):
+
+          @staticmethod
+          def forward(ctx, x):
+              return x * 5
+
+
+* :math:`x` is unwrapped (python number)
+
+Multi-arg Functions
+----------------------
+
+Code ::
+
+      class Mul(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x * y
+
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+Python Details
+------------------
+
+* Use `apply` for the above Functions ::
+
+   x = minitorch.Scalar(10., name="x")
+   y = minitorch.Scalar(5., name="y")
+   z = TimesFive.apply(x)
+   out = TimesFive.apply(z)
+
+* Apply unwraps, calls, and wraps again
+
+Tricks
+------------------
+
+* Use operator overloading to ensure that functions are called ::
+
+    out2 = x * y
+
+
+Backwards
+==========
+
+Coding Derivatives
+--------------------
+
+* For each :math:`f` we need to also provide :math:`f'`
+* This part can be done through local symbolic or numeric differentiation
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+
+
+Code
+------
+
+* Backward use :math:`f'`
+* Returns :math:`f'(x) \times d_{out}`
+
+ ::
+
+      class TimesFive(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x):
+              return x * 5
+
+          @staticmethod
+          def backward(ctx, d_out):
+              f_prime = 5
+              return f_prime * d_out
+
+Picture
+----------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+Code
+----------
+
+* What about :math:`f(x, y)`
+* Returns :math:`f'_x(x,y) \times d_{out}` and  :math:`f'_y(x,y) \times d_{out}`::
+
+
+      class AddTimes2(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x + 2 * y
+
+          @staticmethod
+          def backward(ctx, d_out):
+              return d_out, 2 * d_out
+
+
+
+Q&A
+=====

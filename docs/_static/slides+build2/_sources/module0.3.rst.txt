@@ -1,0 +1,426 @@
+
+Machine Learning Engineering
+=============================================
+
+
+Module 1.0
+------------
+
+  Mini-ML
+
+
+Lecture
+=========
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <>`_
+
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+
+   * Model
+     
+   * Parameters
+     
+   * Loss
+
+Datasets
+===============
+
+
+Data Points
+------------
+
+
+* Convention :math:`x`
+
+.. image:: figs/Graphs/data1.png
+           :align: center
+           :width: 250px
+
+Data Points
+------------
+
+* Convention :math:`x`
+
+.. image:: figs/Graphs/data2.png
+           :align: center
+           :width: 250px
+
+Data Points
+------------
+
+* Convention :math:`x`
+
+.. image:: figs/Graphs/data3.png
+           :align: center
+           :width: 250px
+
+Data Labels
+------------
+* Convention :math:`y=0` and :math:`y=1`
+
+
+.. image:: figs/Graphs/data2.png
+           :align: center
+           :width: 250px
+
+
+.. image:: figs/Graphs/data3.png
+           :align: center
+           :width: 250px
+
+
+
+Training Data
+--------------
+
+* Set of datapoints, each :math:`(x,y)`
+
+.. image:: figs/Graphs/data@3x.png
+           :align: center
+           :width: 250px
+
+
+
+Data Points
+-------------
+
+* Convention :math:`x`
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 200px
+
+Data Points
+-------------
+
+* Convention :math:`x`
+
+.. image:: figs/Conv/im2.png
+           :align: center
+
+Data Set
+-------------
+
+
+.. image:: figs/Conv/mnist.png
+           :align: center
+
+
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+  
+
+
+
+Data Labels
+------------
+
+* Convention :math:`y`
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Conv/im2.png
+           :align: center
+           :width: 200px
+
+Model
+===============
+
+Models
+---------------------
+
+* Functions from data points to labels
+* Functions :math:`m(x)`
+* Any shaped function is a model
+
+Example Model
+--------------
+
+* Example of a simple model ::
+
+   x = (0.5, 0.2)
+
+   def model(x):
+       return 0 if x[0] < 0.5 else 1
+
+   model(x)
+
+
+Model 1
+---------------------
+
+.. image:: figs/Graphs/model1.png
+           :align: center
+           :width: 350px
+
+* Linear Model
+
+Model 2
+---------------------
+
+.. image:: figs/Graphs/model2.png
+           :align: center
+           :width: 350px
+
+Model 3
+---------------------
+
+.. image:: figs/Graphs/model3.png
+           :align: center
+           :width: 350px
+
+
+
+Parameters
+===============
+
+Parameters
+-----------
+
+.. revealjs_fragments::
+
+   * Knobs that control the model
+   * Any information that controls the model shape
+
+Parameters
+-----------
+
+* Example with higher-order functions ::
+
+   def make_model(parameter):
+       def model(x):
+           return 0 if x[0] < parameter else 1
+       return model
+
+   model = make_model(0.4)
+   x = (0.5, 0.2)
+   model(x)
+
+
+Linear Parameters
+------------------
+
+
+a. rotating the linear separator ("slope")
+
+
+.. image:: figs/Graphs/weight.png
+           :align: center
+           :width: 500px
+
+Linear Parameters
+------------------
+
+b. changing the separator cutoff ("intercept")
+
+.. image:: figs/Graphs/bias.png
+           :align: center
+           :width: 500px
+
+Math
+------------------
+
+* Linear Model
+
+.. math::
+   m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b
+
+
+.. code::
+
+   def make_linear_model(w, b):
+       def model(x):
+           return 1 if (x[0] * w[0] + x[1] * w[1] + b > 0.0) else 0
+       return model
+   linear_model = make_linear_model([0.1, -0.2], 0.0)
+   linear_model(x)
+
+
+
+Coding with Parameters
+=======================
+
+Managing Parameters
+--------------------
+
+.. revealjs_fragments::
+
+   * Last lecture: Real-world models have many modules
+   * Management challenge, group parameters with code
+
+Module Style
+--------------------
+
+.. code::
+
+   def make_linear_model(w, b):
+       def model(x):
+           return 1 if (x[0] * w[0] + x[1] * w[1] + b > 0.0) else 0
+       return model
+
+vs ::
+
+   class MyLinearModel(Module):
+       def __init__(self):
+           self.w = [self.add_parameter("w1"),
+                     self.add_parameter("w2")]
+           self.b = self.add_parameter("b")
+
+       def forward(self, x):
+           return 1 if (x[0] * self.w[0] + x[1] * self.w[1] + self.b > 0.0) else 0
+
+Module Style
+--------------------
+
+.. code::
+
+   linear_model = make_linear_model([0.1, -0.2], 0.0)
+   linear_model(x)
+
+vs ::
+
+   linear_model = MyLinearModel()
+   parameters = linear_model.named_parameters()
+   parameters["w1"].update(0.1)
+   parameters["w2"].update(-0.2)
+   parameters["b"].update(0.0)
+   linear_model(x)
+
+Trade-offs
+--------------------
+
+.. revealjs_fragments::
+
+   * Modules are more verbose, but self-documenting
+   * Avoid currying and inner functions
+   * Functional style simpler, closer to math
+
+
+Loss
+=====
+
+
+
+Model on Data
+--------------
+
+.. image:: figs/Graphs/sector2.png
+           :align: center
+           :width: 350px
+
+
+Model on Data
+--------------
+
+.. image:: figs/Graphs/incorrect.png
+           :align: center
+           :width: 350px
+
+Distance
+--------------
+
+
+.. image:: figs/Graphs/distance.png
+           :align: center
+           :width: 350px
+
+* :math:`|m(x)|` correct or incorrect
+
+
+Point 1
+--------
+
+.. image:: figs/Graphs/pt3.png
+           :align: center
+           :width: 450px
+
+Point 2
+--------
+
+
+.. image:: figs/Graphs/pt1.png
+           :align: center
+           :width: 450px
+
+Point 3
+--------
+
+.. image:: figs/Graphs/pt2.png
+           :align: center
+           :width: 450px
+
+Loss
+--------
+
+.. revealjs_fragments::
+
+   * Loss weights our incorrect points
+   * Function of distance from boundary
+
+     :math:`L(w_1, w_2, b)` is loss, function of parameters.
+
+
+Sigmoid Loss
+--------------
+
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 600px
+
+.. revealjs_fragments::
+
+   * Weight distance by sigmoid
+   * Combines loss of all points
+
+Loss as function of Parameters
+--------
+
+.. image:: figs/Graphs/pt3.png
+           :align: center
+           :width: 200px
+.. image:: figs/Graphs/pt1.png
+           :align: center
+           :width: 200px
+.. image:: figs/Graphs/pt2.png
+           :align: center
+           :width: 200px
+
+
+Loss as function of Parameters
+--------
+
+
+.. image:: figs/Graphs/sigmoid2.png
+           :align: center
+           :width: 600px
+
+
+     
+
+Playground
+---------------
+
+   `Playground <https://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=gauss&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape=4,2&seed=0.91939&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false&learningRate_hide=true&regularizationRate_hide=true&batchSize_hide=true&noise_hide=true&discretize_hide=true&regularization_hide=true&activation_hide=true>`_
+
+
+
+
+
+
+Q&A
+-------

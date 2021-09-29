@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 5</h2>
+<blockquote>
+<div><p>Mini-ML 1</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/154098">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Datasets</p></li>
+<li class="fragment"><p>Model</p></li>
+<li class="fragment"><p>Parameters</p></li>
+</ul>
+</section>
+<section >
+<h1>Datasets</h1>
+</section>
+<section >
+<h2>Data Points</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(x\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/data1.png"><img alt="_images/data1.png" class="align-center" src="_images/data1.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(x\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/data2.png"><img alt="_images/data2.png" class="align-center" src="_images/data2.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(x\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/data3.png"><img alt="_images/data3.png" class="align-center" src="_images/data3.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Data Labels</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(y=0\)</span> and <span class="math notranslate nohighlight">\(y=1\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/data2.png"><img alt="_images/data2.png" class="align-center" src="_images/data2.png" style="width: 250px;" /></a>
+<a class="reference internal image-reference" href="_images/data3.png"><img alt="_images/data3.png" class="align-center" src="_images/data3.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Training Data</h2>
+<ul class="simple">
+<li><p>Set of datapoints, each <span class="math notranslate nohighlight">\((x,y)\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/data&#64;3x.png"><img alt="_images/data&#64;3x.png" class="align-center" src="_images/data&#64;3x.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(x\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(x\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/im2.png"><img alt="_images/im2.png" class="align-center" src="_images/im2.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Set</h2>
+<a class="reference internal image-reference" href="_images/mnist.png"><img alt="_images/mnist.png" class="align-center" src="_images/mnist.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Network</h2>
+<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Labels</h2>
+<ul class="simple">
+<li><p>Convention <span class="math notranslate nohighlight">\(y\)</span></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/im2.png"><img alt="_images/im2.png" class="align-center" src="_images/im2.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h1>Model</h1>
+</section>
+<section >
+<h2>Models</h2>
+<ul class="simple">
+<li><p>Functions from data points to labels</p></li>
+<li><p>Functions <span class="math notranslate nohighlight">\(m(x)\)</span></p></li>
+<li><p>Any shaped function is a model</p></li>
+</ul>
+</section>
+<section >
+<h2>Example Model</h2>
+<ul>
+<li><p>Example of a simple model</p>
+<pre><code data-trim data-noescape class="python">x = (0.5, 0.2)
+
+def model(x):
+    return 0 if x[0] &lt; 0.5 else 1
+
+model(x)</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Model 1</h2>
+<a class="reference internal image-reference" href="_images/model1.png"><img alt="_images/model1.png" class="align-center" src="_images/model1.png" style="width: 350px;" /></a>
+<ul class="simple">
+<li><p>Linear Model</p></li>
+</ul>
+</section>
+<section >
+<h2>Model 2</h2>
+<a class="reference internal image-reference" href="_images/model2.png"><img alt="_images/model2.png" class="align-center" src="_images/model2.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Model 3</h2>
+<a class="reference internal image-reference" href="_images/model3.png"><img alt="_images/model3.png" class="align-center" src="_images/model3.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h1>Parameters</h1>
+</section>
+<section >
+<h2>Parameters</h2>
+<ul class="simple">
+<li class="fragment"><p>Knobs that control the model</p></li>
+<li class="fragment"><p>Any information that controls the model shape</p></li>
+</ul>
+</section>
+<section >
+<h2>Parameters</h2>
+<ul>
+<li><p>Example with higher-order functions</p>
+<pre><code data-trim data-noescape class="python">def make_model(parameter):
+    def model(x):
+        return 0 if x[0] &lt; parameter else 1
+    return model
+
+model = make_model(0.4)
+x = (0.5, 0.2)
+model(x)</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Linear Parameters</h2>
+<ol class="loweralpha simple">
+<li><p>rotating the linear separator (&quot;slope&quot;)</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Linear Parameters</h2>
+<ol class="loweralpha simple" start="2">
+<li><p>changing the separator cutoff (&quot;intercept&quot;)</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Math</h2>
+<ul class="simple">
+<li><p>Linear Model</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b\]</div>
+<pre data-id="math"><code data-trim data-noescape class="python">def make_linear_model(w, b):
+    def model(x):
+        return 1 if (x[0] * w[0] + x[1] * w[1] + b &gt; 0.0) else 0
+    return model
+linear_model = make_linear_model([0.1, -0.2], 0.0)
+linear_model(x)</code></pre>
+</section>
+<section >
+<h1>Coding with Parameters</h1>
+</section>
+<section >
+<h2>Managing Parameters</h2>
+<ul class="simple">
+<li class="fragment"><p>Last lecture: Real-world models have many modules</p></li>
+<li class="fragment"><p>Management challenge, group parameters with code</p></li>
+</ul>
+</section>
+<section >
+<h2>Module Style</h2>
+<pre data-id="module-style"><code data-trim data-noescape class="python">def make_linear_model(w, b):
+    def model(x):
+        return 1 if (x[0] * w[0] + x[1] * w[1] + b &gt; 0.0) else 0
+    return model</code></pre>
+<p>vs</p>
+<pre data-id="module-style"><code data-trim data-noescape class="python">class MyLinearModel(Module):
+    def __init__(self):
+        self.w = [self.add_parameter(&quot;w1&quot;),
+                  self.add_parameter(&quot;w2&quot;)]
+        self.b = self.add_parameter(&quot;b&quot;)
+
+    def forward(self, x):
+        return 1 if (x[0] * self.w[0] + x[1] * self.w[1] + self.b &gt; 0.0) else 0</code></pre>
+</section>
+<section >
+<h2>Module Style</h2>
+<pre data-id="id9"><code data-trim data-noescape class="python">linear_model = make_linear_model([0.1, -0.2], 0.0)
+linear_model(x)</code></pre>
+<p>vs</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">linear_model = MyLinearModel()
+parameters = linear_model.named_parameters()
+parameters[&quot;w1&quot;].update(0.1)
+parameters[&quot;w2&quot;].update(-0.2)
+parameters[&quot;b&quot;].update(0.0)
+linear_model(x)</code></pre>
+</section>
+<section >
+<h2>Trade-offs</h2>
+<ul class="simple">
+<li class="fragment"><p>Modules are more verbose, but self-documenting</p></li>
+<li class="fragment"><p>Avoid currying and inner functions</p></li>
+<li class="fragment"><p>Functional style simpler, closer to math</p></li>
+</ul>
+</section>
+<section >
+<h2>Playground</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=gauss&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.91939&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false&amp;learningRate_hide=true&amp;regularizationRate_hide=true&amp;batchSize_hide=true&amp;noise_hide=true&amp;discretize_hide=true&amp;regularization_hide=true&amp;activation_hide=true">Playground</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Module-1</h1>
+</section>
+<section >
+<h2>Module-1 Learning Objectives</h2>
+<ul class="simple">
+<li class="fragment"><p>Practical understanding of derivatives</p></li>
+<li class="fragment"><p>Dive into autodifferentiation</p></li>
+<li class="fragment"><p>Parameters and their usage</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: What is it?</h2>
+<ul class="simple">
+<li class="fragment"><p>Numerical and symbolic derivatives</p></li>
+<li class="fragment"><p>Implement our numerical class</p></li>
+<li class="fragment"><p>Implement autodifferentiation</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: Review</h2>
+<ul class="simple">
+<li class="fragment"><p>Review <a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">differentiation rules</a></p></li>
+<li class="fragment"><p>Everything is scalars for now (no &quot;gradients&quot;)</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1 Overview</h2>
+<ul class="simple">
+<li class="fragment"><p>5 Tasks</p></li>
+<li class="fragment"><p>Due Sept 29th.</p></li>
+</ul>
+</section>
+<section >
+<h2>Task 1.1: Numerical Derivatives</h2>
+<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h2>Task 1.2: Scalars</h2>
+<img alt="expgraph.png" class="align-center" src="expgraph.png" />
+</section>
+<section >
+<h2>Task 1.3: Chain Rule</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Task 1.4: Backpropagation</h2>
+<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
+</section>
+<section >
+<h2>Task 1.5: Classifier Training</h2>
+<img alt="complete.png" src="complete.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

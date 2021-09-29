@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 10</h2>
+<blockquote>
+<div><p>Tensors</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Upcoming</h2>
+<ul class="simple">
+<li class="fragment"><p>Module-1 Due Tonight</p></li>
+<li class="fragment"><p>Module-2 Released on Thursday (Mon. Oct 19)</p></li>
+</ul>
+</section>
+<section >
+<h1>Lecture</h1>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Neural Networks</p></li>
+<li class="fragment"><p>Tensors!</p></li>
+<li class="fragment"><p>Module-2</p></li>
+</ul>
+</section>
+<section >
+<h1>Neural Networks</h1>
+</section>
+<section >
+<h2>Intuition: Neural Networks</h2>
+<ol class="arabic simple">
+<li><p>Apply many linear seperators</p></li>
+<li><p>Reshape the data space based on results</p></li>
+<li><p>Apply a linear model on new space</p></li>
+</ol>
+</section>
+<section >
+<h2>Neural Networks</h2>
+<ul class="simple">
+<li class="fragment"><p>New <em>model</em></p></li>
+<li class="fragment"><p>Uses repeated linears to split data</p></li>
+<li class="fragment"><p>Produces non-linear separators</p></li>
+<li class="fragment"><p>Loss will not change</p></li>
+</ul>
+</section>
+<section >
+<h2>Final Layer</h2>
+<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/mlpmid.png"><img alt="_images/mlpmid.png" class="align-center" src="_images/mlpmid.png" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>Math View (Alt)</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/160977">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h1>Tensors!</h1>
+</section>
+<section >
+<h2>Tensors?</h2>
+<p>What is it?</p>
+<ul class="simple">
+<li class="fragment"><p>Fancy multi-dimensional arrays</p></li>
+<li class="fragment"><p>Embedded mathmatical programming language</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensors!</h2>
+<p>Key Building Block</p>
+<ul class="simple">
+<li><p>Matlab</p></li>
+<li><p>Numpy</p></li>
+<li><p>Tensorflow, etc.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>0-Dimensional Scalar</p></li>
+<li><p>Our standby for Module-0</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>1-Dimensional -  Vector</p></li>
+</ul>
+<img alt="_images/vector1.png" class="align-center" src="_images/vector1.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>2-Dimensional - Matrix</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li><p>Arbitrary dimensions - Tensor (Array in numpy)</p></li>
+</ul>
+<img alt="_images/tensor.png" class="align-center" src="_images/tensor.png" />
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Dims - # dimensions (<cite>tensor.dims</cite>)</p></li>
+<li class="fragment"><p>Shape -  # cells per dimension (<cite>tensor.shape</cite>)</p></li>
+<li class="fragment"><p>Size - # cells (<cite>tensor.size</cite>)</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<ul class="simple">
+<li><p>dims: 2</p></li>
+<li><p>shape: (2, 5)</p></li>
+<li><p>size : 10</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Example</h2>
+<ul class="simple">
+<li><p>dims: ?</p></li>
+<li><p>shape: ?</p></li>
+<li><p>size : ?</p></li>
+</ul>
+<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
+</section>
+<section >
+<h2>Indexing</h2>
+<ul class="simple">
+<li><p>Indexing syntax: <cite>tensor[1, 2, 0]</cite></p></li>
+</ul>
+<img alt="_images/tensor2.png" class="align-center" src="_images/tensor2.png" />
+</section>
+<section >
+<h2>Why not just use lists?</h2>
+<ul class="simple">
+<li class="fragment"><p>Functions to manipulate shape</p></li>
+<li class="fragment"><p>Mathematical notation</p></li>
+<li class="fragment"><p>Can act as Variables / Parameters</p></li>
+<li class="fragment"><p>Efficient control of memory (Module-3)</p></li>
+</ul>
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul class="simple">
+<li><p>Permutation</p></li>
+</ul>
+<img alt="_images/matrix1.png" src="_images/matrix1.png" />
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul class="simple">
+<li><p>Views</p></li>
+</ul>
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+<img alt="_images/broad.png" src="_images/broad.png" />
+</section>
+<section >
+<h2>What's Bad?</h2>
+<ul class="simple">
+<li><p>Hard to grow or shrink</p></li>
+<li><p>Only numerical values</p></li>
+<li><p>Lose comprehensions / python built-ins</p></li>
+<li><p>Shapes are easy to mess up</p></li>
+</ul>
+</section>
+<section >
+<h1>Module-2</h1>
+</section>
+<section >
+<h2>Overview</h2>
+<ul class="simple">
+<li class="fragment"><p><cite>tensor.py</cite> - Tensor Variable</p></li>
+<li class="fragment"><p><cite>tensor_functions.py</cite> - Tensor Functions</p></li>
+<li class="fragment"><p><cite>tensor_data.py</cite> - Storage and Indexing</p></li>
+<li class="fragment"><p><cite>tensor_ops.py</cite> - Low-level tensor operations</p></li>
+</ul>
+</section>
+<section >
+<h2>Tasks 2.1: Indexing</h2>
+<img alt="_images/tensor2.png" src="_images/tensor2.png" />
+</section>
+<section >
+<h2>Tasks 2.2: Operations</h2>
+<img alt="_images/zip.png" class="align-center" src="_images/zip.png" />
+</section>
+<section >
+<h2>Tasks 2.3:  Autograd</h2>
+<img alt="_images/zip back.png" class="align-center" src="_images/zip back.png" />
+</section>
+<section >
+<h2>Tasks 2.4: Broadcasting</h2>
+<img alt="_images/zip broad back.png" src="_images/zip broad back.png" />
+</section>
+<section >
+<h2>Task 2.5: Training</h2>
+<img alt="complete.png" src="complete.png" />
+</section>
+<section >
+<h1>Q&amp;A</h1>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

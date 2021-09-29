@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 1.1 - Learning With Derivatives</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 1.1 - Learning With Derivatives</h1>
+</section>
+<section >
+<h2>Module 1.1</h2>
+<blockquote>
+<div><p>Learning With Derivatives</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Review: Model</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://minitorch.github.io/mlprimer.html">https://minitorch.github.io/mlprimer.html</a></p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/model1.png"><img alt="_images/model1.png" class="align-center" src="_images/model1.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Review: Parameters</h2>
+<ol class="loweralpha simple">
+<li><p>rotating the linear separator (&quot;slope&quot;)</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Review: Parameters</h2>
+<ol class="loweralpha simple" start="2">
+<li><p>changing the separator cutoff (&quot;intercept&quot;)</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Math</h2>
+<ul class="simple">
+<li><p>Linear Model</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b\]</div>
+<pre data-id="math"><code data-trim data-noescape class="python">def make_linear_model(w, b):
+    def model(x):
+        return 1 if (x[0] * w[0] + x[1] * w[1] + b &gt; 0.0) else 0
+    return model
+linear_model = make_linear_model([0.1, -0.2], 0.0)
+linear_model(x)</code></pre>
+</section>
+<section >
+<h2>Loss</h2>
+<ul>
+<li class="fragment"><p>Loss weights our incorrect points</p></li>
+<li class="fragment"><p>Function of distance from boundary</p>
+<p><span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span> is loss, function of parameters.</p>
+</li>
+</ul>
+</section>
+<section >
+<h2>Sigmoid</h2>
+<a class="reference internal image-reference" href="_images/sigmoid.png"><img alt="_images/sigmoid.png" class="align-center" src="_images/sigmoid.png" style="width: 600px;" /></a>
+<ul class="simple">
+<li class="fragment"><p>Weight distance by sigmoid</p></li>
+<li class="fragment"><p>Combines loss of all points</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><cite>Quiz</cite></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Model Fit</p></li>
+<li class="fragment"><p>Derivatives</p></li>
+<li class="fragment"><p>Module 1</p></li>
+</ul>
+</section>
+<section >
+<h1>Model Fitting</h1>
+</section>
+<section >
+<h2>Start</h2>
+<a class="reference internal image-reference" href="_images/incorrect.png"><img alt="_images/incorrect.png" class="align-center" src="_images/incorrect.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Find parameters that minimize loss</p></li>
+<li class="fragment"><p>Finalize a fixed model</p></li>
+</ul>
+</section>
+<section >
+<h2>Fitting</h2>
+<ul class="simple">
+<li class="fragment"><p>Field of optimization</p></li>
+<li class="fragment"><p>Many, many different approaches</p></li>
+<li class="fragment"><p>Our focus: <cite>gradient descent</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Parameter Fitting</h2>
+<ol class="arabic simple">
+<li><p>Compute the loss function, <span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span></p></li>
+<li><p>See how small changes would change the loss</p></li>
+<li><p>Update to parameters to locally reduce the loss</p></li>
+</ol>
+</section>
+<section >
+<h2>Step 1: Compute Loss</h2>
+<a class="reference internal image-reference" href="_images/pt2.png"><img alt="_images/pt2.png" class="align-center" src="_images/pt2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/sigmoid.png"><img alt="_images/sigmoid.png" class="align-center" src="_images/sigmoid.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Step 2: Find Direction</h2>
+<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Step 3: Update Parameters</h2>
+<a class="reference internal image-reference" href="_images/move.png"><img alt="_images/move.png" class="align-center" src="_images/move.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Hard Issues</h2>
+<ul class="simple">
+<li class="fragment"><p>Local update, may get stuck for some models</p></li>
+<li class="fragment"><p>How much do we move?</p></li>
+<li class="fragment"><p>Can we do better?</p></li>
+</ul>
+</section>
+<section >
+<h2>Easier Issue</h2>
+<ul class="simple">
+<li class="fragment"><p>How do we find good directions?</p></li>
+</ul>
+</section>
+<section >
+<h1>Derivatives</h1>
+</section>
+<section >
+<h2>Function Notation</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = \sin(2 x)\]</div>
+<div class="math notranslate nohighlight">
+\[g(x) = x + 10\]</div>
+</section>
+<section >
+<h2>Derivative Notation</h2>
+<div class="math notranslate nohighlight">
+\[f'(x) = 2 \times \cos(2 x)\]</div>
+<div class="math notranslate nohighlight">
+\[g'(x) = 1\]</div>
+</section>
+<section >
+<h2>Multiple Arguments</h2>
+<div class="math notranslate nohighlight">
+\[f(x, y) = x + 2 y\]</div>
+<p>Subscript indicates variable</p>
+<div class="math notranslate nohighlight">
+\[f_x'(x, y) = 1\]</div>
+<div class="math notranslate nohighlight">
+\[f_y'(x, y) = 2\]</div>
+</section>
+<section >
+<h2>Intuition: Derivative</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = x^2\]</div>
+<img alt="_images/function.png" class="align-center" src="_images/function.png" />
+</section>
+<section >
+<h2>Intuition: Derivative</h2>
+<ul class="simple">
+<li><p>Slope of tangeant line</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[f'(x) = 2x\]</div>
+<img alt="_images/tangent.png" class="align-center" src="_images/tangent.png" />
+</section>
+<section >
+<h1>Derivative Types</h1>
+</section>
+<section >
+<h2>Symbolic Derivative</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = \sin(2 x)\]</div>
+<div class="math notranslate nohighlight">
+\[f'(x) = 2 \times \cos(2 x)\]</div>
+<ul class="simple">
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">Differentiation Rules</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Issues</h2>
+<p>How do we handle higher-order functions?</p>
+<pre data-id="issues"><code data-trim data-noescape class="python">def derivative(fn):
+    def inner(x):
+        ...
+    return inner
+
+d_f = derivative(f)</code></pre>
+</section>
+<section >
+<h2>Definition of Derivative: Geometry</h2>
+<img alt="_images/tangent.png" class="align-center" src="_images/tangent.png" />
+<div class="math notranslate nohighlight">
+\[f'(x) = \lim_{\epsilon \rightarrow 0} \frac{f(x + \epsilon) - f(x)}{\epsilon}\]</div>
+</section>
+<section >
+<h2>Central Difference</h2>
+<div class="math notranslate nohighlight">
+\[f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}\]</div>
+</section>
+<section >
+<h2>Approximating Derivative</h2>
+<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h1>Autodifferentiation</h1>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Write down arbitrary (python) functions</p></li>
+<li class="fragment"><p>Automatically compute any derivative</p></li>
+<li class="fragment"><p>Use this to fit models</p></li>
+</ul>
+</section>
+<section >
+<h2>Are these symbolic derivatives?</h2>
+<p>No</p>
+<ul class="simple">
+<li class="fragment"><p>Don't get out mathematical function</p></li>
+</ul>
+</section>
+<section >
+<h2>Are these numerical derivatives?</h2>
+<p>No</p>
+<ul class="simple">
+<li class="fragment"><p>Don't need to run samples nearby</p></li>
+</ul>
+</section>
+<section >
+<h2>Downsides</h2>
+<ul class="simple">
+<li class="fragment"><p>Needs more information than numerical derivatives</p></li>
+<li class="fragment"><p>Needs to execute function unlike symbolic derivatives</p></li>
+<li class="fragment"><p>Requires overriding number system</p></li>
+</ul>
+</section>
+<section >
+<h2>Derivative Checks</h2>
+<ul class="simple">
+<li><p>Property: All three of these should roughly match</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>Replace numbers with  <cite>Variables</cite>.</p></li>
+<li class="fragment"><p>Replace mathematical function with <cite>Functions</cite>.</p></li>
+<li class="fragment"><p><cite>Variables</cite> track which <cite>Functions</cite> were applied</p></li>
+</ol>
+</section>
+<section >
+<h2>Autodifferentiation</h2>
+<ul class="simple">
+<li><p>Apply chain rule to the constructed graph</p></li>
+<li><p>Code derivatives in to the graph</p></li>
+</ul>
+</section>
+<section >
+<h1>Variables and Functions</h1>
+</section>
+<section >
+<h2>&quot;Wrapping&quot;</h2>
+<ul>
+<li><p>Class wraps around numbers</p>
+<pre><code data-trim data-noescape class="python">class Scalar(Variable):
+    def __init__(self, value):
+         self.value = value
+    ...</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Act like a numerical value to user</p></li>
+<li class="fragment"><p>Record operations applied</p></li>
+<li class="fragment"><p>Hide access to internal storage</p></li>
+</ul>
+</section>
+<section >
+<h2>How to make a Variable</h2>
+<ul>
+<li><p>Just wrap a standard value</p>
+<pre><code data-trim data-noescape class="python">x_1 = minitorch.Scalar(x_1)
+x_1.name = &quot;x_1&quot; # Optional for debugging</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>How to update a Variable</h2>
+<ul>
+<li><p>Have to use a Function</p>
+<pre><code data-trim data-noescape class="python">x_1 = minitorch.Scalar(x_1)
+x_1.name = &quot;x_1&quot;
+
+z = f.apply(x_1)</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Box Diagrams</h2>
+<img alt="_images/autograd1.png" class="align-center" src="_images/autograd1.png" />
+</section>
+<section >
+<h2>Box Diagrams</h2>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+</section>
+<section >
+<h2>Code Demo</h2>
+</section>
+<section >
+<h2>How does this Work</h2>
+<ul class="simple">
+<li><p>Arrows are Variables</p></li>
+<li><p>Boxes  are Functions</p></li>
+</ul>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+</section>
+<section >
+<h1>Module-1</h1>
+</section>
+<section >
+<h2>Module-1 Learning Objectives</h2>
+<ul class="simple">
+<li class="fragment"><p>Practical understanding of derivatives</p></li>
+<li class="fragment"><p>Dive into autodifferentiation</p></li>
+<li class="fragment"><p>Parameters and their usage</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: What is it?</h2>
+<ul class="simple">
+<li class="fragment"><p>Numerical and symbolic derivatives</p></li>
+<li class="fragment"><p>Implement our numerical class</p></li>
+<li class="fragment"><p>Implement autodifferentiation</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1: Review</h2>
+<ul class="simple">
+<li class="fragment"><p>Review <a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">differentiation rules</a></p></li>
+<li class="fragment"><p>Everything is scalars for now (no &quot;gradients&quot;)</p></li>
+</ul>
+</section>
+<section >
+<h2>Module-1 Overview</h2>
+<ul class="simple">
+<li class="fragment"><p>5 Tasks</p></li>
+</ul>
+</section>
+<section >
+<h2>Task 1.1: Numerical Derivatives</h2>
+<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h2>Task 1.2: Scalars</h2>
+<img alt="_images/expgraph.png" class="align-center" src="_images/expgraph.png" />
+</section>
+<section >
+<h2>Task 1.3: Chain Rule</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Task 1.4: Backpropagation</h2>
+<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
+</section>
+<section >
+<h2>Task 1.5: Classifier Training</h2>
+<img alt="_images/complete.png" src="_images/complete.png" />
+</section>
+<section >
+<h1>Q&amp;A</h1>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

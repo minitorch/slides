@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning Engineering</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+<link rel="stylesheet" href="_static/default.css"><section >
+<h1>Machine Learning Engineering</h1>
+</section>
+<section >
+<h2>Lecture 18</h2>
+<blockquote>
+<div><p>Parallel</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Review: Matmul</p></li>
+<li class="fragment"><p>GPUs</p></li>
+<li class="fragment"><p>CUDA on Numba</p></li>
+</ul>
+</section>
+<section >
+<h1>MatMul</h1>
+</section>
+<section >
+<h2>Fusion</h2>
+<ul class="simple">
+<li><p>Optimization across operator boundary</p></li>
+<li><p>Save speed or memory in by avoiding extra forward/backward</p></li>
+<li><p>Can open even greater optimization gains</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
+</section>
+<section >
+<h2>Matmul Simple</h2>
+<img alt="_images/matmulsimple.png" class="align-center" src="_images/matmulsimple.png" />
+</section>
+<section >
+<h2>Computations</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Starter Code</h2>
+<ul class="simple">
+<li><p>Walk through output.</p></li>
+<li><p>Find row and column of input</p></li>
+<li><p>Simultaneous zip / reduce.</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul back.png" class="align-center" src="_images/matmul back.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/171894">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Simple Matmul</h2>
+<p>Code</p>
+<pre data-id="simple-matmul"><code data-trim data-noescape class="python">A.shape == (I, J)
+B.shape == (J, K)
+out.shape == (I, K)</code></pre>
+</section>
+<section >
+<h2>Simple Matmul Pseudocode</h2>
+<p>Code</p>
+<pre data-id="simple-matmul-pseudocode"><code data-trim data-noescape class="python">for outer_index in out.indices():
+    for inner_val in range(J):
+        out[outer_index] += A[outer_index[0], inner_val] * \
+                            B[inner_val, outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Complexities</h2>
+<ul class="simple">
+<li><p>Indices to strides</p></li>
+<li><p>Minimizing index operations</p></li>
+<li><p>Broadcasting</p></li>
+</ul>
+</section>
+<section >
+<h2>Matmul Speedups</h2>
+<p>What can be parallelized?</p>
+<pre data-id="matmul-speedups"><code data-trim data-noescape class="python">for outer_index in out.indices():
+    for inner_val in range(J):
+        out[outer_index] += A[outer_index[0], inner_val] * \
+                            B[inner_val, outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Compare to zip / reduce</h2>
+<p>Code</p>
+<pre data-id="compare-to-zip-reduce"><code data-trim data-noescape class="python">ZIP STEP
+C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+for C_outer in C.indices():
+    C[C_out] = A[outer_index[0], inner_val] * \
+               B[inner_val, outer_index[1]]
+REDUCE STEP
+for outer_index in out.indices():
+   for inner_val in range(J):
+      out[outer_index] = C[outer_index[0], inner_val,
+                           outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+f(M, N) &amp;=&amp;  M N \\
+g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} N^\top \\
+g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h1>GPUs</h1>
+</section>
+<section >
+<h2>Popularizing GPUs</h2>
+<a class="reference internal image-reference" href="nvidia.jpg"><img alt="nvidia.jpg" class="align-center" src="nvidia.jpg" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>NVidia - 25 Years</h2>
+<img alt="nvidiastock.png" class="align-center" src="nvidiastock.png" />
+</section>
+<section >
+<h2>Main Driver</h2>
+<img alt="videogame.png" class="align-center" src="videogame.png" />
+</section>
+<section >
+<h2>Programming Video Games</h2>
+<ul class="simple">
+<li><p>Custom shader languages</p></li>
+<li><p>Graphics targeted operations</p></li>
+</ul>
+</section>
+<section >
+<h2>General Purpose GPUs</h2>
+<ul class="simple">
+<li class="fragment"><p>NVidia: can we make these programmable</p></li>
+<li class="fragment"><p>~2008: CUDA langauge</p></li>
+<li class="fragment"><p>Maybe something world changing...</p></li>
+</ul>
+</section>
+<section >
+<h2>Maybe?</h2>
+<img alt="bitcoin-img.svg" class="align-center" src="bitcoin-img.svg" /></section>
+<section >
+<h2>(Not totally kidding)</h2>
+<a class="reference internal image-reference" href="bitcoin.png"><img alt="bitcoin.png" class="align-center" src="bitcoin.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Machine Learning</h2>
+<ul class="simple">
+<li class="fragment"><p>Growth in ML parallels GPU development</p></li>
+<li class="fragment"><p>Major deep learning results require GPU</p></li>
+<li class="fragment"><p>All modern training is on GPU (or more)</p></li>
+</ul>
+</section>
+<section >
+<h2>ML</h2>
+<img alt="translate.gif" class="align-center" src="translate.gif" />
+</section>
+<section >
+<h2>Is this enough?</h2>
+<img alt="gpus.png" class="align-center" src="gpus.png" />
+</section>
+<section >
+<h2>GPUs</h2>
+<img alt="3090.png" class="align-center" src="3090.png" />
+</section>
+<section >
+<h2>Eeks</h2>
+<ul class="simple">
+<li class="fragment"><p>GPUs: macho-sounding nonsense</p></li>
+<li class="fragment"><p>Us: simple explanations</p></li>
+</ul>
+</section>
+<section >
+<h1>CUDA</h1>
+</section>
+<section >
+<h2>CUDA</h2>
+<ul class="simple">
+<li class="fragment"><p>NVidia's programming language for GPU</p></li>
+<li class="fragment"><p>Compute Unified Device Architecture</p></li>
+<li class="fragment"><p>Like standard programming but in parallel</p></li>
+</ul>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<img alt="_images/thread&#64;3x.png" class="align-center" src="_images/thread&#64;3x.png" />
+</section>
+<section >
+<h2>Thread code</h2>
+<p>Code</p>
+<pre data-id="thread-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, 1](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<img alt="_images/block1d&#64;3x.png" class="align-center" src="_images/block1d&#64;3x.png" />
+</section>
+<section >
+<h2>Threads code</h2>
+<p>Code</p>
+<pre data-id="threads-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, 10](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<a class="reference internal image-reference" href="_images/blockdim&#64;3x.png"><img alt="_images/blockdim&#64;3x.png" class="align-center" src="_images/blockdim&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Threads code</h2>
+<p>Code</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, (10, 10)](a, b)</code></pre>
+</section>
+<section >
+<h2>Who is CUDA?</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Block code</h2>
+<p>Code</p>
+<pre data-id="block-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[(10, 10), (10, 10)](a, b)</code></pre>
+</section>
+<section >
+<h2>Key Idea</h2>
+<ul class="simple">
+<li><p><cite>add</cite> is run by all threads (inside prange)</p></li>
+<li><p>Can call functions, if they are jitted</p></li>
+<li><p>Communicate through shared memory</p></li>
+</ul>
+</section>
+<section >
+<h2>Next time...</h2>
+<ul class="simple">
+<li><p>Why is this useful?</p></li>
+<li><p>How can we talk to others?</p></li>
+</ul>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

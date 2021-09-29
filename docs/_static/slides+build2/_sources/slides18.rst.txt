@@ -1,0 +1,344 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+
+
+Lecture 18
+------------
+
+   Parallel
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Matmul
+   * GPUs
+   * CUDA on Numba
+
+MatMul
+=======
+
+
+Fusion
+-------
+
+* Optimization across operator boundary
+* Save speed or memory in by avoiding extra forward/backward
+* Can open even greater optimization gains
+
+
+Example: Matmul
+-------------------
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmulsimple.png
+           :align: center
+
+
+Computations
+-----------------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+Starter Code
+-------------
+
+* Walk through output.
+* Find row and column of input
+* Simultaneous zip / reduce.
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul\ back.png
+           :align: center
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/171894>`_
+
+
+
+Simple Matmul
+-------------------
+
+Code ::
+
+  A.shape == (I, J)
+  B.shape == (J, K)
+  out.shape == (I, K)
+
+
+Simple Matmul Pseudocode
+-------------------------
+
+Code ::
+
+  for outer_index in out.indices():
+      for inner_val in range(J):
+          out[outer_index] += A[outer_index[0], inner_val] * \
+                              B[inner_val, outer_index[1]]
+
+
+Complexities
+-------------
+
+* Indices to strides
+* Minimizing index operations
+* Broadcasting
+
+
+Matmul Speedups
+-------------------------
+
+What can be parallelized? ::
+
+  for outer_index in out.indices():
+      for inner_val in range(J):
+          out[outer_index] += A[outer_index[0], inner_val] * \
+                              B[inner_val, outer_index[1]]
+
+Compare to zip / reduce
+-----------------------
+
+Code ::
+
+  ZIP STEP
+  C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+  for C_outer in C.indices():
+      C[C_out] = A[outer_index[0], inner_val] * \
+                 B[inner_val, outer_index[1]]
+  REDUCE STEP
+  for outer_index in out.indices():
+     for inner_val in range(J):
+        out[outer_index] = C[outer_index[0], inner_val,
+                             outer_index[1]]
+
+Matrix Multiply
+---------------
+.. math::
+
+   \begin{eqnarray*}
+   f(M, N) &=&  M N \\
+   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} N^\top \\
+   g'_N(f(M, N)) &=&  M^\top \text{grad}_{\text{out}}
+   \end{eqnarray*}
+
+
+GPUs
+=====
+
+Popularizing GPUs
+------------------
+
+.. image:: nvidia.jpg
+           :width: 300px
+           :align: center
+
+NVidia - 25 Years
+-----------------
+
+.. image:: nvidiastock.png
+           :align: center
+
+
+Main Driver
+-----------------
+
+.. image:: videogame.png
+           :align: center
+
+Programming Video Games
+------------------------
+
+* Custom shader languages
+* Graphics targeted operations
+
+General Purpose GPUs
+---------------------
+
+.. revealjs_fragments::
+
+   * NVidia: can we make these programmable
+   * ~2008: CUDA langauge
+   * Maybe something world changing...
+
+Maybe?
+--------
+
+.. image:: bitcoin-img.svg
+           :align: center
+
+(Not totally kidding)
+---------------------
+
+.. image:: bitcoin.png
+           :width: 500px
+           :align: center
+
+Machine Learning
+-----------------
+
+.. revealjs_fragments::
+
+   * Growth in ML parallels GPU development
+   * Major deep learning results require GPU
+   * All modern training is on GPU (or more)
+
+ML
+---
+
+.. image:: translate.gif
+           :align: center
+
+
+Is this enough?
+----------------
+
+.. image:: gpus.png
+           :align: center
+
+
+GPUs
+------
+
+.. image:: 3090.png
+           :align: center
+
+
+Eeks
+----
+
+.. revealjs_fragments::
+
+   * GPUs: macho-sounding nonsense
+   * Us: simple explanations
+
+
+
+CUDA
+=======
+
+
+CUDA
+-----
+
+.. revealjs_fragments::
+
+   * NVidia's programming language for GPU
+   * Compute Unified Device Architecture
+   * Like standard programming but in parallel
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/thread@3x.png
+           :align: center
+
+
+Thread code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 1](a, b)
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/block1d@3x.png
+           :align: center
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 10](a, b)
+
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/blockdim@3x.png
+           :align: center
+           :width: 500px
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, (10, 10)](a, b)
+
+
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+Block code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[(10, 10), (10, 10)](a, b)
+
+
+Key Idea
+--------
+
+* `add` is run by all threads (inside prange)
+* Can call functions, if they are jitted
+* Communicate through shared memory
+
+Next time...
+-------------
+
+* Why is this useful?
+* How can we talk to others?
+
+Q&A
+----

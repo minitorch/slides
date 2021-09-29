@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 1.2 - Autodifferentiation</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 1.2 - Autodifferentiation</h1>
+</section>
+<section >
+<h2>Module 1.2</h2>
+<blockquote>
+<div><p>Autodifferentiation</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Symbolic Derivative</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = \sin(2 x)\]</div>
+<div class="math notranslate nohighlight">
+\[f'(x) = 2 \times \cos(2 x)\]</div>
+<ul class="simple">
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Differentiation_rules">Differentiation Rules</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Numerical Derivative</h2>
+<div class="math notranslate nohighlight">
+\[f'(x) \approx  \frac{f(x + \epsilon) - f(x-\epsilon)}{2\epsilon}\]</div>
+<img alt="_images/approx.png" class="align-center" src="_images/approx.png" />
+</section>
+<section >
+<h2>Autodifferentiation Goals</h2>
+<ul class="simple">
+<li class="fragment"><p>Write down arbitrary (python) functions</p></li>
+<li class="fragment"><p>Programmatically compute the derivative</p></li>
+<li class="fragment"><p>Two passes: run function, compute derivative</p></li>
+</ul>
+</section>
+<section >
+<h2>Box Diagrams</h2>
+<img alt="_images/autograd1.png" class="align-center" src="_images/autograd1.png" />
+</section>
+<section >
+<h2>Box Diagrams</h2>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><cite>Quiz</cite></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Variables and Functions</p></li>
+<li class="fragment"><p>Backward</p></li>
+<li class="fragment"><p>Chain Rule</p></li>
+<li class="fragment"><p>Backpropagation</p></li>
+</ul>
+</section>
+<section >
+<h2>Autodifferentiation</h2>
+<ul class="simple">
+<li><p>Two pass strategy</p></li>
+<li><p>Forward Pass - Compute arbitrary function</p></li>
+<li><p>Backward Pass - Compute derivatives of function</p></li>
+</ul>
+</section>
+<section >
+<h2>Forward Pass</h2>
+<ul class="simple">
+<li><p>Run mathematical code</p></li>
+<li><p>Collects result and computation graph</p></li>
+</ul>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Backward Pass</h2>
+<ul class="simple">
+<li><p>Uses computation graph to compute derivatives</p></li>
+<li><p>Happens internally in our system.</p></li>
+</ul>
+<img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
+</section>
+<section >
+<h2>Example : Linear Model</h2>
+<ul class="simple">
+<li><p>Our forward computes</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[{\cal L}(w, b) = - \log \sigma(x;w, b)\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[m(x; w, b) = x_1 \times w_1 + x_2 \times w_2 + b\]</div>
+<ul class="simple">
+<li><p>Our backward computes</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[{\cal L}'_w(w, b) \ \   {\cal L}'_b(w, b)\]</div>
+</section>
+<section >
+<h1>Functions and Variables</h1>
+</section>
+<section >
+<h2>Strategy</h2>
+<p>Need to collect all the computation</p>
+<ol class="arabic simple">
+<li class="fragment"><p>Replace numbers with  <cite>Variables</cite>.</p></li>
+<li class="fragment"><p>Replace mathematical function with <cite>Functions</cite>.</p></li>
+<li class="fragment"><p><cite>Variables</cite> track which <cite>Functions</cite> were applied</p></li>
+</ol>
+</section>
+<section >
+<h2>&quot;Wrapping&quot;</h2>
+<ul>
+<li><p>Class wraps around numbers</p>
+<pre><code data-trim data-noescape class="python">class Scalar(Variable):
+    def __init__(self, value):
+         self.value = value
+    ...</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li class="fragment"><p>Act like a numerical value to user</p></li>
+<li class="fragment"><p>Record operations applied</p></li>
+<li class="fragment"><p>Hide access to internal storage</p></li>
+</ul>
+</section>
+<section >
+<h2>Functions</h2>
+<ul class="simple">
+<li class="fragment"><p>Functions are implemented as static classes</p></li>
+<li class="fragment"><p>We implement hidden <cite>forward</cite> and <cite>backward</cite> methods</p></li>
+<li class="fragment"><p>User calls <cite>apply</cite> which handles wrapping / unwrapping</p></li>
+</ul>
+</section>
+<section >
+<h2>Functions</h2>
+<ul>
+<li><p>Function <span class="math notranslate nohighlight">\(f(x) = x \times 5\)</span></p></li>
+<li><p>Implementation</p>
+<pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
+
+    &#64;staticmethod
+    def forward(ctx, x):
+        return x * 5</code></pre>
+</li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number) and return is a number</p></li>
+</ul>
+</section>
+<section >
+<h2>Multi-arg Functions</h2>
+<p>Code</p>
+<pre data-id="multi-arg-functions"><code data-trim data-noescape class="python">class Mul(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x, y):
+        return x * y</code></pre>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+</section>
+<section >
+<h2>Python Details</h2>
+<ul>
+<li><p>Use <cite>apply</cite> for the above Functions</p>
+<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
+y = minitorch.Scalar(5., name=&quot;y&quot;)
+z = TimesFive.apply(x)
+out = TimesFive.apply(z)</code></pre>
+</li>
+<li><p>Apply unwraps, calls, and wraps again</p></li>
+</ul>
+</section>
+<section >
+<h2>Tricks</h2>
+<ul>
+<li><p>Use operator overloading to ensure that functions are called</p>
+<pre><code data-trim data-noescape class="python">out2 = x * y</code></pre>
+</li>
+<li><p>Many functions e.g. <cite>sub</cite> can be implemented with other calls.</p></li>
+</ul>
+</section>
+<section >
+<h2>Notes</h2>
+<ul class="simple">
+<li><p>Since each operation creates a new variable, there are no loops.</p></li>
+<li><p>Cannot modify a variable! Graph only gets larger.</p></li>
+</ul>
+</section>
+<section >
+<h1>Backwards</h1>
+</section>
+<section >
+<h2>How do we get derivatives?</h2>
+<ul class="simple">
+<li><p>Base case: compute derivatives for single functions</p></li>
+<li><p>Inductive case: define how to propagate a derivative</p></li>
+</ul>
+</section>
+<section >
+<h2>Base Case: Coding Derivatives</h2>
+<ul class="simple">
+<li><p>For each <span class="math notranslate nohighlight">\(f\)</span> we need to also provide <span class="math notranslate nohighlight">\(f'\)</span></p></li>
+<li><p>This part can be done through local symbolic or even numeric differentiation</p></li>
+</ul>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Code</h2>
+<ul class="simple">
+<li><p>Backward use <span class="math notranslate nohighlight">\(f'\)</span></p></li>
+<li><p>Returns <span class="math notranslate nohighlight">\(f'(x) \times d_{out}\)</span></p></li>
+</ul>
+<blockquote>
+<div><pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x):
+        return x * 5
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        f_prime = 5
+        return f_prime * d_out</code></pre>
+</div></blockquote>
+</section>
+<section >
+<h2>Picture</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Code</h2>
+<ul>
+<li><p>What about <span class="math notranslate nohighlight">\(f(x, y)\)</span></p></li>
+<li><p>Returns <span class="math notranslate nohighlight">\(f'_x(x,y) \times d_{out}\)</span> and  <span class="math notranslate nohighlight">\(f'_y(x,y) \times d_{out}\)</span>:</p>
+<pre><code data-trim data-noescape class="python">class AddTimes2(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x, y):
+        return x + 2 * y
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        return d_out, 2 * d_out</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>What is Context?</h2>
+<ul class="simple">
+<li><p>Promise -&gt; context on <cite>forward</cite> is given to <cite>backward</cite></p></li>
+<li><p>May be called at different times.</p></li>
+</ul>
+</section>
+<section >
+<h2>Handling Variables</h2>
+<p>Consider a function <cite>Square</cite></p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(g(x) = x^2\)</span> that squares x</p></li>
+<li><p>Derivative function uses variable <span class="math notranslate nohighlight">\(g'(x) = 2 \times x\)</span></p></li>
+<li><p>However backward doesn't take args</p>
+<pre><code data-trim data-noescape class="python">def backward(ctx, d_out):</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Context</h2>
+<p>Arguments to backward must be saved in context.</p>
+<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x):
+        ctx.save_for_backward(x)
+        return x * x
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        x = ctx.saved_values
+        f_prime = 2 * x
+        return f_prime * d_out</code></pre>
+</section>
+<section >
+<h2>Context Internals</h2>
+<p>Run <cite>Square</cite></p>
+<pre data-id="context-internals"><code data-trim data-noescape class="python">x = minitorch.Scalar(10)
+x_2  = Square.apply(x)
+x_2.history.context</code></pre>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

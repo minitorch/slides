@@ -1,0 +1,384 @@
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 20
+------------
+
+      All About GPU 2
+
+
+Admin
+------
+
+.. revealjs_fragments::
+
+   * HW 2 grades
+   * Quiz Grades
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Memory
+   * CUDA Efficiency
+   * Efficiency Tricks
+
+Memory
+========
+
+Stack
+-------
+
+.. revealjs_fragments::
+
+   * Threads: Run the code
+   * Block: Groups "close" threads
+   * Grid: All the thread blocks
+   * Total Threads: `threads_per_block` x `total_blocks`
+
+Thread Names
+-------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+           :width: 500px
+
+Block Names
+-------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+
+Memory
+-------
+
+
+* CUDA also has a memory stack
+* Local > Shared > Global
+* Fast code does minimal global reads
+
+
+Local Memory
+-------------
+
+.. image:: figs/gpu/local\ mem@3x.png
+           :align: center
+           :width: 500px
+
+Example
+--------
+
+Code ::
+
+  def local_fn(out, a):
+    local = numba.cuda.local.array(10, numba.int32)
+    local[0] = 10
+    local[5] = 20
+  local_fn = numba.cuda.jit()(local_fn)
+  local_fn[BLOCKS, THREADS](out, a)
+
+Block Shared Memory
+-------------------
+
+.. image:: figs/gpu/sharedmem@3x.png
+           :align: center
+           :width: 500px
+
+Example
+---------
+
+Code ::
+
+  def block_fn(out, a):
+    shared = numba.cuda.shared.array(10, numba.int32)
+    shared[0] = 10
+    numba.cuda.syncthreads()
+    shared[5] = 20
+  block_fn = numba.cuda.jit()(block_fn)
+  block_fn[BLOCKS, THREADS](out, a)
+
+
+Quiz
+-----
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/173803>`_
+
+
+Constraints
+------------
+
+* Memory must be typed
+* Memory must be *constant* size
+* Memory must be relatively small
+
+
+Thinking about Speed
+---------------------
+
+* Algorithms: Reduce computation complexity
+
+* Typical: Remove loops, code operations
+
+
+
+GPU
+---------------------
+
+* Lots of parallelism for computation
+
+* Challenge: reduce memory reads
+
+* Local > Shared > Global
+
+
+Sliding Average
+-----------------
+
+Compute sliding average over a list ::
+
+   sub_size = 2
+   a = [4, 2, 5, 6, 2, 4]
+   out = [3, 3.5, 5.5, 4, 3]
+
+Example: Local Sum
+--------------------
+
+Compute sliding average over a list ::
+
+    def slide_py(out, a):
+       for i in range(out.size):
+           out[i] = 0
+           for j in range(sub_size):
+               out[i] += a[i + j]
+           out[i] = out[i] / sub_size
+
+Example: Parallel Local Sum
+------------------------------
+
+Compute sliding average over a list ::
+
+    def slide_numba(out, a):
+       for i in numba.prange(out.size):
+           out[i] = 0
+           for j in range(sub_size):
+               out[i] += a[i + j]
+           out[i] = out[i] / sub_size
+
+Planning for CUDA
+------------------
+
+* Count up the memory accesses
+
+* How many global / shared / local reads?
+
+* Can we make move things to be more local?
+
+
+Basic CUDA
+-----------
+
+Compute CUDA ::
+
+    def slide_cuda(out, a):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           out[i] = 0
+           for j in range(sub_size):
+                out[i] += a[i + j]
+           out[i] = out[i] / sub_size
+
+Planning for CUDA
+------------------
+
+* `sub_size` global reads per thread
+* `sub_size` global writes per thread
+
+* Each is being read too many times.
+
+
+Strategy
+---------
+
+* Use blocks to move from global to shared
+* Use thread to move from shared to local
+
+
+Better CUDA
+-----------
+
+One global write per thread ::
+
+    def slide_cuda(out, a):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           temp = 0
+           for j in range(sub_size):
+                temp += a[i + j]
+           out[i] = temp / sub_size
+
+Pattern
+--------
+
+Copy from global to shared ::
+
+     local_idx = numba.cuda.threadIdx.x
+     shared[local_idx] = a[i]
+     numba.cuda.syncthreads()
+
+
+Better CUDA
+-----------
+
+Two global reads per thread ::
+
+    def slide_cuda(out, a):
+       shared = numba.cuda.shared.array(THREADS + sub_size)
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       local_idx = numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           shared[local_idx] = a[i]
+           if local_idx < sub_size and i + THREADS < a.size::
+               shared[local_idx  + THREADS] = a[i + THREADS]
+           numba.cuda.syncthreads()
+           temp = 0
+           for j in range(sub_size):
+                temp += shared[local_idx + j]
+           out[i] = temp / sub_size
+
+Counts
+-------
+
+* Significantly reduced global reads and writes
+* Needed block shared memory to do this
+
+Example 2: Broadcasted Zip
+----------------------------
+
+.. image:: figs/Ops/zip\ broad.png
+
+
+Example 2: Broadcasted Zip
+----------------------------
+
+Zip ::
+
+    I, J = out.shape
+    def zip_py(out, a, b):
+       for i in range(I):
+           for j in range(J):
+               out[i, j] = a[i] * b[j]
+
+
+
+Simple CUDA
+----------------------------
+
+Compute CUDA ::
+
+    def zip_cuda(out, a, b):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       j = numba.cuda.blockIdx.y * THREADS \
+           + numba.cuda.threadIdx.y
+
+       out[i, j] = a[i] * b[j]
+
+Example 2: Broadcasted Zip
+----------------------------
+
+Assume we know that I is very large, J is very small.
+
+.. image:: figs/Ops/zip\ broad.png
+
+
+Alternative CUDA
+-----------------
+
+Compute CUDA (small J, large I) ::
+
+    def zip_cuda(out, a, b):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       shared = numba.cuda.shared.array(J)
+
+       if i < J:
+           shared[local_idx] = b[j]
+
+       numba.cuda.syncthreads()
+       for j in range(J):
+           out[i, j] = a[i] * shared[j]
+
+Matrix Multiplication
+----------------------
+
+
+* Major operation to implement on CUDA
+* Every cell needs to be used multiple times
+* Lots of tricks to make it efficient...
+
+
+General Efficiency
+==================
+
+Pedagogy
+---------
+
+.. revealjs_fragments::
+
+   * Module-3 will require some optimizations
+   * These are up to you to implement.
+   * Try first on CPU
+
+
+
+Suggestions: Map
+-----------------
+
+.. revealjs_fragments::
+
+   * When do you need to index?
+   * When do you need to broadcast?
+   * Can you directly utilize storage?
+
+
+Suggestions: Zip
+-----------------
+
+.. revealjs_fragments::
+
+   * When can you avoid indexing?
+   * When can you avoid broadcasting?
+   * When does zip become a (fast) map?
+
+
+Suggestions: Reduce
+-------------------
+
+.. revealjs_fragments::
+
+   * Special cases: dimension reduce + full reduce, how do they differ?
+   * Do we need to call index everytime?
+   * Do we need to write to global memory every time?
+
+
+Suggestions: Matmul
+---------------------
+
+.. revealjs_fragments::
+
+   * Inner loop is key: can we optimize it?
+   * Key special case: Batch Matrix-Vector.
+   * GPU?

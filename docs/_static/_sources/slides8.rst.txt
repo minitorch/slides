@@ -1,0 +1,347 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+Lecture 8
+------------
+
+  Autodifferentiation
+
+Homework Reminder
+------------------
+
+.. revealjs_fragments::
+
+   * Due next Tuesday (Material done)
+   * Next Lecture Sunday (NY PM)
+   * Live Session
+   * Warnings / Updates
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/158322>`_
+
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Functions
+   * Chain Rule
+   * Backward
+   * Backpropagation
+
+Functions
+===========
+
+Review: Functions
+-----------
+
+* Function :math:`f(x) = x \times 5`
+
+* Implementation ::
+
+      class TimesFive(ScalarFunction):
+
+          @staticmethod
+          def forward(ctx, x):
+              return x * 5
+
+
+* :math:`x` is unwrapped (python number)
+
+Multi-arg Functions
+----------------------
+
+Code ::
+
+      class Mul(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x * y
+
+.. image:: figs/Autograd/autograd2.png
+           :align: center
+
+
+Chain Rule
+===========
+
+
+Python Details
+------------------
+
+* Use `apply` for the above Functions ::
+
+   x = minitorch.Scalar(10., name="x")
+   y = minitorch.Scalar(5., name="y")
+   z = TimesFive.apply(x)
+   out = TimesFive.apply(z)
+
+* Apply unwraps, calls, and wraps again
+
+Chaining Boxes
+---------------
+
+Chaining ::
+
+   x = minitorch.Scalar(10., name="x")
+   g_x = G.apply(x)
+   f_g_x = F.apply(g_x)
+
+
+.. image:: figs/Autograd/chain1.png
+           :align: center
+
+
+
+
+Chain Rule
+-----------
+
+* Compute derivative from chain
+
+.. math ::
+
+    f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+
+Chain Rule
+-----------
+
+.. math::
+
+   \begin{eqnarray*}
+   y &=& g(x) \\
+   d_{out} &=& f'(y) \\
+   f'_x(g(x)) &=&  g'(x) \times d_{out} \\
+   \end{eqnarray*}
+
+
+
+.. image:: figs/Autograd/chain2.png
+           :align: center
+
+Two Arguments: Chain
+--------------------
+.. math::
+
+   \begin{eqnarray*}
+  f'_x(g(x, y)) &=& g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
+  f'_y(g(x, y)) &=& g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
+  \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+
+Two Arguments: Chain
+---------------------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& g(x, y) \\
+   d_{out} &=& f'(z) \\
+   f'_x(g(x, y)) &=& g_x'(x, y) \times d_{out} \\
+   f'_y(g(x, y)) &=& g_y'(x, y) \times d_{out}
+   \end{eqnarray*}
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+Coding Derivatives
+--------------------
+
+* For each :math:`f` or :math:`g`  we need to also provide :math:`f'` and :math:`g'`
+* This part can be done through local symbolic or numeric differentiation
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+
+Picture
+----------
+
+.. image:: figs/Autograd/autograd3.png
+           :align: center
+
+Code
+------
+
+* Backward use :math:`g'`
+* Returns :math:`g'(x) \times d_{out}` ::
+
+    class TimesFive(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+         return x * 5
+
+      @staticmethod
+       def backward(ctx, d_out):
+         g_prime = 5
+         return g_prime * d_out
+
+
+Code
+----------
+
+* What about :math:`g(x, y)`
+* Returns :math:`g'_x(x,y) \times d_{out}` ::
+
+
+      class AddTimes2(ScalarFunction):
+          @staticmethod
+          def forward(ctx, x, y):
+              return x + 2 * y
+
+          @staticmethod
+          def backward(ctx, d_out):
+              g_prime_x = 1
+              g_prime_y = 2
+              return g_prime_x * d_out, g_prime_y * d_out
+
+Code
+----------
+
+.. image:: figs/Autograd/chain3.png
+           :align: center
+
+
+Handling Variables
+--------------------
+
+Consider a function `Square`
+
+* :math:`g(x) = x^2` that squares x
+* Derivative function uses variable :math:`g'(x) = 2 \times x`
+* However backward doesn't take args ::
+
+    def backward(ctx, d_out):
+
+Context
+----------
+
+Arguments to backward must be saved in context. ::
+
+  class Square(ScalarFunction):
+      @staticmethod
+      def forward(ctx, x):
+          ctx.save_for_backward(x)
+          return x * x
+
+      @staticmethod
+      def backward(ctx, d_out):
+          x = ctx.saved_values
+          f_prime = 2 * x
+          return f_prime * d_out
+
+Context Internals
+-----------------
+
+Run `Square` ::
+
+   x = minitorch.Scalar(10)
+   x_2  = Square.apply(x)
+   x_2.history.context
+
+Backpropagation
+=================
+
+Full Graph
+-----------
+
+.. math::
+
+   \begin{eqnarray*}
+   z &=& x \times y \\
+   h(x, y) &=& \log(z) + \exp(z)
+   \end{eqnarray*}
+
+
+.. image:: figs/Autograd/backprop1.png
+           :align: center
+
+Method
+------
+
+.. revealjs_fragments::
+
+   * Graph propagation
+   * `breadth-first search <https://en.wikipedia.org/wiki/Breadth-first_search>`_
+   * Ensure flow to original Variables.
+
+Terminology
+------------
+
+.. revealjs_fragments::
+
+   * Leaf: Variable created from scratch
+   * Non-Leaf: Variable created with a Function
+   * Constant: Term passed in that is not a variable
+
+Algorithm
+----------
+
+a. if the Variable is a leaf, add its final derivative
+b. if the Variable is not a leaf,
+
+   1) Apply chainrule as derivative as :math:`d_{out}`
+   2) Loop through all the previous Variables
+   3) Add to the queue.
+
+
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop2.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop3.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop4.png
+           :align: center
+
+Example
+-----------
+
+.. image:: figs/Autograd/backprop5.png
+           :align: center
+Example
+-----------
+
+.. image:: figs/Autograd/backprop6.png
+           :align: center
+Example
+-----------
+
+.. image:: figs/Autograd/backprop7.png
+           :align: center
+
+
+Q&A
+=====

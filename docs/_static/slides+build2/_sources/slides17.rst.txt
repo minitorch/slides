@@ -1,0 +1,284 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 17
+------------
+
+   Network Efficiency
+
+
+Module 3
+==========
+
+Task 3.1
+---------
+  Parallel
+
+Task 3.2
+---------
+  Matrix Mult
+
+
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Numba
+   * Operator Fusion
+   * MatMul
+
+
+Numba
+======
+
+Alternative 3: Compile Python
+-----------------------------
+
+Pros:
+
+* "Same" language
+* Integrate code
+
+Cons: A bit hacky :)
+
+Example: Numba
+
+Function Calls
+---------------
+
+* Function calls are not free and don't get `inlined`
+* Checks for args, special keywords and variable lists
+* Methods check for overrides and class inheritance
+
+
+Types
+------
+
+Critical code  ::
+
+  out[o] = in_storage[j] + 3
+
+* Doesn't know type of `in_storage[j]`
+* May need to coerce 3 to float or raise error
+* May even call `__add__` or `__ladd__`!
+
+Numba
+------
+
+* Python library for speeding up numerical python
+* API: Higher-order functions to produce fast mathmatical code
+* `Numba <https://numba.pydata.org/numba-doc/latest/user/5minguide.html>`_
+
+How does it work?
+-----------------
+
+Numba ::
+
+  def my_code(x, y):
+     for i in range(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit()(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+What do we lose?
+----------------
+
+* `njit` will fail for many python operations
+* No lists, classes, python functions allowed
+* Any different types will cause recompilation
+
+Notebook
+---------
+
+`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
+
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/170828>`_
+
+
+Parallel
+========
+
+Parallel
+---------
+
+.. revealjs_fragments::
+
+   * Run code on multiple threads
+   * Particularly suited for map / zip
+   * Baby steps towards GPU
+
+
+Parallel Range
+---------------
+
+.. revealjs_fragments::
+
+   * Replace `for` loops with parallel version
+   * Tells compiler it can run in any order
+   * Be careful! Ideally these loops don't change anything
+
+Code Transformation
+----------------------
+
+Transform ::
+
+  def my_code(x, y):
+     for i in prange(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit(parallel=True)(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+
+
+Nondeterminism
+----------------
+
+.. revealjs_fragments::
+
+   * No guarantee on ordering
+   * Need to be careful with reductions
+   * Speedups will depend on system
+
+Notebook
+---------
+
+`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
+
+
+Parallel Bugs
+-------------
+
+.. revealjs_fragments::
+
+   * Warning! Nasty bugs
+   * Tests failing randomly
+   * Crashes due to out-of-bounds
+
+
+Parallel Diagnostics
+---------------------
+
+* Diagnostics give parallel compilation
+* Useful to see if you are getting benefits
+
+Operator Fusion
+================
+
+User API
+---------
+
+* Basic mathematical operations
+* Chained together as boxes with broadcasting
+* Optimize within each individually
+
+
+Fusion
+-------
+
+* Optimization across operator boundary
+* Save speed or memory in by avoiding extra forward/backward
+* Can open even great optimization gains
+
+Automatic Fusion
+----------------
+
+* Compiled language can automatically fuse operators
+* Major area of research
+* Example: TVM, XLA, ONXX
+
+Automatic Fusion
+----------------
+
+.. image:: expgraph2.png
+           :align: center
+
+
+Manual Fusion
+--------------
+
+* Utilize a pre-fused operator when needed
+* Standard libraries for implementations
+
+
+
+Example: Matmul
+-------------------
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmulsimple.png
+           :align: center
+
+Advantages
+-----------
+
+* No three dimensional intermediate
+* No `save_for_backwards`
+* Can use core matmul libraries (in the future)
+
+
+Computations
+-----------------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+
+Starter Code
+-------------
+
+* Walk through output.
+* Find row and column of input
+* Simultaneous zip / reduce.
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul\ back.png
+           :align: center
+
+
+Matrix Multiply
+---------------
+.. math::
+
+   \begin{eqnarray*}
+   f(M, N) &=&  M N \\
+   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} N^\top \\
+   g'_N(f(M, N)) &=&  M^\top \text{grad}_{\text{out}}
+   \end{eqnarray*}
+
+
+Q&A
+----

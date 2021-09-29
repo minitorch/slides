@@ -1,0 +1,34 @@
+
+Minitorch Slides
+=================
+
+
+  (Scroll Right)
+
+Module 0 |logo|
+----------------
+
+* :doc:`module0.0` - `(pdf) <module0.0.html?print-pdf>`_
+* :doc:`module0.1` - `(pdf) <module0.1.html?print-pdf>`_
+* :doc:`module0.2` - `(pdf) <module0.2.html?print-pdf>`_
+
+.. |logo| image:: images/match.png
+           :width: 40pt
+
+  
+ 
+Module 1 |logo|
+-----------------
+
+* :doc:`module1.0` - `(pdf) <module1.0.html?print-pdf>`_
+* :doc:`module1.1` - `(pdf) <module1.1.html?print-pdf>`_
+* :doc:`module1.2` - `(pdf) <module1.2.html?print-pdf>`_
+* :doc:`module1.3` - `(pdf) <module1.3.html?print-pdf>`_
+
+Module 2 |logo|
+-----------------
+
+* :doc:`module2.0` - `(pdf) <module2.0.html?print-pdf>`_
+* :doc:`module2.1` - `(pdf) <module2.1.html?print-pdf>`_
+* :doc:`module2.2` - `(pdf) <module2.2.html?print-pdf>`_
+* :doc:`module2.3` - `(pdf) <module2.3.html?print-pdf>`_
