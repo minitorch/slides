@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 1.2 - Backprop</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 1.2 - Backprop</h1>
+</section>
+<section >
+<h2>Module 1.2</h2>
+<blockquote>
+<div><p>Backprop</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Functions</h2>
+<ul>
+<li><p>Function <span class="math notranslate nohighlight">\(f(x) = x \times 5\)</span></p></li>
+<li><p>Implementation</p>
+<pre><code data-trim data-noescape class="python">class TimesFive(ScalarFunction):
+
+    &#64;staticmethod
+    def forward(ctx, x):
+        return x * 5</code></pre>
+</li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> is unwrapped (python number) and return is a number</p></li>
+</ul>
+</section>
+<section >
+<h2>Multi-arg Functions</h2>
+<p>Code</p>
+<pre data-id="multi-arg-functions"><code data-trim data-noescape class="python">class Mul(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x, y):
+        return x * y</code></pre>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+</section>
+<section >
+<h2>Context</h2>
+<p>Arguments to backward must be saved in context.</p>
+<pre data-id="context"><code data-trim data-noescape class="python">class Square(ScalarFunction):
+    &#64;staticmethod
+    def forward(ctx, x):
+        ctx.save_for_backward(x)
+        return x * x
+
+    &#64;staticmethod
+    def backward(ctx, d_out):
+        x = ctx.saved_values
+        f_prime = 2 * x
+        return f_prime * d_out</code></pre>
+</section>
+<section >
+<h2>Picture</h2>
+<img alt="_images/autograd2.png" class="align-center" src="_images/autograd2.png" />
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><cite>Quiz</cite></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Variables and Functions</p></li>
+<li class="fragment"><p>Backward</p></li>
+<li class="fragment"><p>Chain Rule</p></li>
+</ul>
+</section>
+<section >
+<h2>How do we get derivatives?</h2>
+<ul class="simple">
+<li><p>Base case: compute derivatives for single functions</p></li>
+<li><p>Inductive case: define how to propagate a derivative</p></li>
+</ul>
+</section>
+<section >
+<h1>Chain Rule</h1>
+</section>
+<section >
+<h2>Python Details</h2>
+<ul>
+<li><p>Use <cite>apply</cite> for the above Functions</p>
+<pre><code data-trim data-noescape class="python">x = minitorch.Scalar(10.)
+z = TimesFive.apply(x)
+out = TimesFive.apply(z)</code></pre>
+</li>
+<li><p>Apply unwraps, calls, and wraps again</p></li>
+</ul>
+</section>
+<section >
+<h2>Chaining Boxes</h2>
+<p>Chaining</p>
+<pre data-id="chaining-boxes"><code data-trim data-noescape class="python">x = minitorch.Scalar(10., name=&quot;x&quot;)
+g_x = G.apply(x)
+f_g_x = F.apply(g_x)</code></pre>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+</section>
+<section >
+<h2>Chain Rule</h2>
+<ul class="simple">
+<li><p>Compute derivative from chain</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[f'_x(g(x)) = g'(x) \times f'_{g(x)}(g(x))\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+</section>
+<section >
+<h2>Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; g(x) \\
+d_{out} &amp;=&amp; f'(z) \\
+f'_x(g(x)) &amp;=&amp; g'(x) \times d_{out} \\
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[log(x)^2\]</div>
+<img alt="_images/chain1.png" class="align-center" src="_images/chain1.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x) = log(x)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1 \\
+g'(x) =  1 / x\end{split}\]</div>
+<img alt="_images/chain2.png" class="align-center" src="_images/chain2.png" />
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[f'_x(g(x))\]</div>
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
+\[f(g(x, y))\]</div>
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split} \begin{eqnarray*}
+f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times f'_{g(x, y)}(g(x, y)) \\
+f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times f'_{g(x, y)}(g(x, y))
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+</section>
+<section >
+<h2>Two Arguments: Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; g(x, y) \\
+d_{out} &amp;=&amp; f'(z) \\
+f'_x(g(x, y)) &amp;=&amp; g_x'(x, y) \times d_{out} \\
+f'_y(g(x, y)) &amp;=&amp; g_y'(x, y) \times d_{out}
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<p>Chaining</p>
+<div class="math notranslate nohighlight">
+\[(x * y)^2\]</div>
+<img alt="_images/chain3.png" class="align-center" src="_images/chain3.png" />
+<div class="math notranslate nohighlight">
+\[\begin{split}f(z) = z^2\\
+g(x, y) = (x * y)\\\end{split}\]</div>
+</section>
+<section >
+<h2>Example: Chain Rule</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'(z) = 2z \times 1\\
+g'_x(x, y) = y \\
+g'_y(x, y) = x \\\end{split}\]</div>
+<p>What is the combination?</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'_x(g(x, y)) = 2 z y\\
+f'_y(g(x, y)) = 2 z x \\\end{split}\]</div>
+</section>
+<section >
+<h2>Multivariable Chain</h2>
+<div class="math notranslate nohighlight">
+\[f(g(x), h(x))\]</div>
+</section>
+<section >
+<h2>Multivariable Chain</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z_1 &amp;=&amp; g(x) \\
+z_2 &amp;=&amp; h(x) \\
+f'_x(g(x), h(y)) &amp;=&amp; g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h2>Coding Derivatives</h2>
+<ul class="simple">
+<li><p>For each <span class="math notranslate nohighlight">\(f\)</span> or <span class="math notranslate nohighlight">\(g\)</span>  we need to also provide <span class="math notranslate nohighlight">\(f'\)</span> and <span class="math notranslate nohighlight">\(g'\)</span></p></li>
+<li><p>This part can be done through local symbolic or numeric differentiation</p></li>
+</ul>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h2>Picture</h2>
+<img alt="_images/autograd3.png" class="align-center" src="_images/autograd3.png" />
+</section>
+<section >
+<h1>Backpropagation</h1>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li><p>Efficient implementation of chain-rule</p></li>
+<li><p>Assume access to the graph.</p></li>
+<li><p>Goal: Call backward once per variable / d_out</p></li>
+</ul>
+</section>
+<section >
+<h2>Full Graph</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z &amp;=&amp; x \times y \\
+h(x, y) &amp;=&amp; \log(z) + \exp(z)
+\end{eqnarray*}\end{split}\]</div>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Tool</h2>
+<p>If we have:</p>
+<ul class="simple">
+<li><p>the derivative with respect to a Variable</p></li>
+<li><p>the Function that created the Variable</p></li>
+</ul>
+<p>We can apply the chain rule through that function.</p>
+</section>
+<section >
+<h2>Step</h2>
+<img alt="_images/backprop3.png" class="align-center" src="_images/backprop3.png" />
+<img alt="_images/backprop4.png" class="align-center" src="_images/backprop4.png" />
+</section>
+<section >
+<h2>Issue</h2>
+<p>Order matters!</p>
+<ul class="simple">
+<li><p>If we proceed without finishing a variable,
+we may need to apply chain rule multiple times</p></li>
+</ul>
+<p>Desired property: all derivatives for a variable before backward.</p>
+</section>
+<section >
+<h2>Ordering Step</h2>
+<ul class="simple">
+<li><p>Do not process any Variable until all downstream Variables are done.</p></li>
+<li><p>Collect a list of the Variables first.</p></li>
+</ul>
+</section>
+<section >
+<h2>Topological Sorting</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://wikipedia.org/wiki/Topological_sorting">Topological Sorting</a></p></li>
+<li><p>High-level -&gt; Run depth first search and mark nodes.</p></li>
+</ul>
+</section>
+<section >
+<h2>Topological Sorting</h2>
+<p>Pseudocode</p>
+<pre data-id="id11"><code data-trim data-noescape class="python">visit(last)
+
+function visit(node n)
+  if n has a mark then return
+
+  for each node m with an edge from n to m do
+      visit(m)
+
+  mark n with a permanent mark
+  add n to list</code></pre>
+</section>
+<section >
+<h2>Backpropagation</h2>
+<ul class="simple">
+<li class="fragment"><p>Graph propagation</p></li>
+<li class="fragment"><p>Ensure flow to original Variables.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology</h2>
+<ul class="simple">
+<li class="fragment"><p>Leaf: Variable created from scratch</p></li>
+<li class="fragment"><p>Non-Leaf: Variable created with a Function</p></li>
+<li class="fragment"><p>Constant: Term passed in that is not a variable</p></li>
+</ul>
+</section>
+<section >
+<h2>Algorithm: Outer Loop</h2>
+<ol class="arabic simple" start="0">
+<li class="fragment"><p>Call topological sort</p></li>
+<li class="fragment"><p>Create dict of Variables and derivatives</p></li>
+<li class="fragment"><p>For each node in backward order:</p></li>
+</ol>
+</section>
+<section >
+<h2>Algorithm: Inner Loop</h2>
+<ol class="loweralpha">
+<li><p>if Variable is leaf, add its final derivative</p></li>
+<li><p>if the Variable is not a leaf,</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>call backward with <span class="math notranslate nohighlight">\(d_{out}\)</span></p></li>
+<li><p>loop through all the Variables+derivative</p></li>
+<li><p>accumulate derivatives for the Variable</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop1.png" class="align-center" src="_images/backprop1.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop2.png" class="align-center" src="_images/backprop2.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop3.png" class="align-center" src="_images/backprop3.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop4.png" class="align-center" src="_images/backprop4.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop5.png" class="align-center" src="_images/backprop5.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop6.png" class="align-center" src="_images/backprop6.png" />
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/backprop7.png" class="align-center" src="_images/backprop7.png" />
+</section>
+<section >
+<h1>Neural Networks</h1>
+</section>
+<section >
+<h2>Neural Networks</h2>
+<ul class="simple">
+<li class="fragment"><p>New <em>model</em></p></li>
+<li class="fragment"><p>Uses repeated linear splits of data</p></li>
+<li class="fragment"><p>Produces non-linear separators</p></li>
+<li class="fragment"><p>Loss will not change</p></li>
+</ul>
+</section>
+<section >
+<h2>Training</h2>
+<pre data-id="training"><code data-trim data-noescape class="python">model = Network()
+...
+model.named_parameters()</code></pre>
+<ul class="simple">
+<li><p>All the parameters in model are leaf Variables</p></li>
+<li><p>Computing backward on loss fills their derivative</p></li>
+</ul>
+</section>
+<section >
+<h2>Math View</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+h_ 1 &amp;=&amp; \text{ReLU}(x_1 \times w^0_1 + x_2 \times w^0_2 + b^0) \\
+h_ 2 &amp;=&amp; \text{ReLU}(x_1 \times w^1_1 + x_2 \times w^1_2 + b^1)\\
+m(x_1, x_2) &amp;=&amp; h_1 \times w_1 + h_2 \times w_2 + b
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Math View (Alt)</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p><span class="math notranslate nohighlight">\(w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1\)</span></p>
+</dd>
+</dl>
+</section>
+<section >
+<h2>Code</h2>
+<ul class="simple">
+<li><p>Code in <cite>run_scalar.py</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Code</h2>
+<ul class="simple">
+<li><p>Optim to move the parameters.</p></li>
+</ul>
+</section>
+<section >
+<h1>Q&amp;A</h1>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,417 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+
+Morning Session
+-----------------
+
+Module-2
+-----------
+
+.. revealjs_fragments::
+
+   * Module-2 is hard
+   * Extension to Wednesday, Oct 21
+
+
+Autograder Issues
+--------------------
+
+
+.. revealjs_fragments::
+
+   * Issues on github's side
+   * Should all be resolved at this point.
+
+
+Requests
+---------
+
+.. revealjs_fragments::
+
+   * Please post your repo
+   * Please post stack trace
+   * If you edited other functions, please let us know
+
+Questions Task 2.1
+-------------------
+
+.. revealjs_fragments::
+
+   * count
+   * Indexing with strides
+   * Permute
+
+Questions Task 2.2
+-------------------
+
+.. revealjs_fragments::
+
+   * reduce
+   * Returning Tensors
+   * Strides in map
+
+
+Questions Task 2.3
+-------------------
+
+.. revealjs_fragments::
+
+
+   * Backward
+   * Allows broadcasting
+
+Questions Task 2.4
+-------------------
+
+.. revealjs_fragments::
+
+   * Backward
+   * Allows broadcasting
+
+Questions Task 2.5
+-------------------
+
+.. revealjs_fragments::
+
+   * Batching operations
+   * Check grad
+
+Lecture
+==========
+
+Lecture 14
+------------
+
+   Applying Tensors
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: Broadcasting
+   * Training
+   * Simple NLP
+
+
+Broadcasting
+=============
+
+
+Zip With Broadcasting
+---------------------
+
+.. image:: figs/Ops/zip\ broad\ back.png
+
+Zip With Broadcasting
+---------------------
+
+Code ::
+
+  out = zeros(3, 2)
+  for i in range(3):
+      for j in range(2):
+          out[i, j] = a[i] + b[j]
+
+Matrix Scalar Addition
+-----------------------
+
+Doesn't Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5])
+
+Does Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)
+
+
+Applying the Rules
+-------------------
+
+
+* (3, 4, 5) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 5) => X
+
+
+Tensor-Scalar operations
+------------------------
+
+.. image:: figs/Broadcast/scalar.png
+           :align: center
+
+Matrix-matrix operations
+---------------------------
+
+.. image:: figs/Broadcast/threed.png
+           :align: center
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/166912>`_
+
+
+Training
+=========
+
+
+Parameter Fitting
+------------------------------------
+
+1. Compute the loss function, :math:`L(w_1, w_2, b)`
+2. See how small changes would change the loss
+3. Update to parameters to locally reduce the loss
+
+
+Batching
+--------
+
+.. image:: figs/NLP/batch.png
+           :align: center
+
+
+Loss
+------
+
+1) Compute Loss ::
+
+    out = model.forward(X).view(data.N)
+    loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()
+
+Model: Math
+------------
+
+.. math::
+
+   \begin{eqnarray*}
+   \text{lin}(x; w, b) &=& x_1 \times w_1 + x_2 \times w_2 + b \\
+   h_ 1 &=& \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+   h_ 2 &=& \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+   m(x_1, x_2) &=& \text{lin}(h; w, b)
+   \end{eqnarray*}
+
+
+
+Model: Code
+------------
+
+1) Model ::
+
+    class Network(minitorch.Module):
+      def __init__(self):
+        ...
+        self.layer1 = Linear(2, HIDDEN)
+        self.layer2 = Linear(HIDDEN, HIDDEN)
+        self.layer3 = Linear(HIDDEN, 1)
+
+
+Layer 1: Weight
+----------------
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+
+Layer 1: Bias
+--------------
+
+.. image:: figs/NLP/bias.png
+           :align: center
+
+Key Task
+---------
+
+.. revealjs_fragments::
+
+   * Use broadcasting to implement the linear function
+   * Hint: Align `batch` x `features` x `hidden` to make it work
+
+
+Layer 2: Weights
+----------------
+
+.. image:: figs/NLP/weight2.png
+           :align: center
+
+
+Compute Derivatives
+--------------------
+
+Step 2 ::
+
+  (loss.sum().view(1)).backward()
+  print(model.layer1.w_1.value.grad)
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+
+Layer 1: Weight Grad
+--------------------
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+
+Update Parameters
+--------------------
+
+
+Step 3 ::
+
+    for p in model.parameters():
+        if p.value.grad is not None:
+            p.update(p.value - RATE * (p.value.grad / float(data.N)))
+
+Broadcasting
+-------------
+
+.. revealjs_fragments::
+
+   * Batches
+   * Loss Computation
+   * Linear computation
+   * Autodifferentiation
+   * Gradient updates
+
+
+Observations
+-------------
+
+.. revealjs_fragments::
+
+   * Exactly the same function as Module-1
+   * No loops within tensors
+
+
+
+Simple NLP
+===========
+
+Natural Language Processing
+----------------------------
+
+.. revealjs_fragments::
+
+   * Systems for human language
+   * Broad area of study with lots of challenges
+   * Heavily uses ML, more in recent years
+
+
+
+
+Sentiment Classification
+-------------------------
+
+.. revealjs_fragments::
+
+   * Canonical sentence classification problem
+
+   * Given sentence predict sentiment class
+
+   * Key aspects: word polarity
+
+
+Data
+------
+
+.. image:: figs/NLP/negative.png
+           :align: center
+
+Data
+--------------------
+
+.. image:: figs/NLP/positive.png
+           :align: center
+
+Loss
+-----
+
+.. revealjs_fragments::
+
+   * Exactly the same as simple problem!
+
+
+
+Training
+---------
+
+.. revealjs_fragments::
+
+   * Exactly the same as simple problem!
+
+
+Model
+---------
+
+.. revealjs_fragments::
+
+   * Mostly similar to the simple problem.
+
+
+Modeling Challenges
+--------------------
+
+.. revealjs_fragments::
+
+   * Converting words to vectors
+   * Sentences of arbitrary length
+   * Handling word combinations
+
+
+Challenge: Vector Form
+------------------------
+
+.. image:: figs/NLP/onehot.png
+           :align: center
+
+Challenge: Vector Form
+------------------------
+
+.. image:: figs/NLP/senthot.png
+           :align: center
+
+
+Embedding Table
+------------------------
+
+.. image:: figs/NLP/embweight.png
+           :align: center
+
+Embedding One
+------------------------
+
+
+.. image:: figs/NLP/embone.png
+           :align: center
+
+Reduction
+------------------------
+
+.. image:: figs/NLP/pooling.png
+           :align: center
+
+Network
+------------------------
+
+.. image:: figs/NLP/sentemb.png
+           :align: center
+
+Q&A
+----

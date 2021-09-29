@@ -1,0 +1,381 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+Update
+-------
+
+* HW deadline moved to Wednesday next week
+* One breaking errata (one line of code)
+
+Lecture 19
+------------
+
+   All About GPU
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Review: CUDA
+   * Threads
+   * Memory
+
+Threads
+========
+
+
+CUDA
+-----
+
+.. revealjs_fragments::
+
+   * NVidia's programming language for GPU
+   * Compute Unified Device Architecture
+   * Like standard programming but in parallel
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/thread@3x.png
+           :align: center
+
+
+Thread code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 1](a, b)
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/block1d@3x.png
+           :align: center
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 10](a, b)
+
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/blockdim@3x.png
+           :align: center
+           :width: 500px
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, (10, 10)](a, b)
+
+
+
+Who is CUDA?
+---------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+Block code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[(10, 10), (10, 10)](a, b)
+
+Check
+-------
+
+Code::
+
+  def printer(a):
+    print("hello!")
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, 10](a)
+
+Output
+--------
+
+Output ::
+
+  hello!
+  hello!
+  hello!
+  hello!
+  hello!
+  ...
+
+Stack
+-------
+
+.. revealjs_fragments::
+
+   * Threads: Run the code
+   * Block: Groups "close" threads
+   * Grid: All the thread blocks
+   * Total Threads: `threads_per_block` x `total_blocks`
+
+
+
+
+Thread Names
+==============
+
+CUDA Code
+---------
+
+.. revealjs_fragments::
+
+   * Every thread runs simultaneously
+   * (Roughly) in lockstep
+   * How can we get anything done?
+
+Thread Names
+-------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+           :width: 500px
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[1, (10, 10)](a)
+
+Output
+------
+
+Output ::
+
+ 6 3
+ 7 3
+ 8 3
+ 9 3
+ 0 4
+ 1 4
+ 2 4
+ 3 4
+ 4 4
+
+Block Names
+-------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.blockIdx.x,
+          numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, (10, 10)](a)
+
+Output
+-------
+
+Output ::
+
+  7 6 9
+  7 7 9
+  7 8 9
+  7 9 9
+  2 6 9
+  2 7 9
+
+What's my name?
+---------------
+
+Name ::
+
+  BLOCKS_X = 32
+  BLOCKS_Y = 32
+  THREADS_X = 10
+  THREADS_Y = 10
+  def fn(a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    y = numba.cuda.blockIdx.y * THREADS_Y + numba.cuda.threadIdx.y
+    ...
+  fn = numba.cuda.jit()(fn)
+  fn[(BLOCKS_X, BLOCKS_Y), (THREADS_X, THREAD_Y)](a)
+
+Simple Map
+-----------
+Map ::
+
+  BLOCKS_X = 32
+  THREADS_X = 32
+  def fn(out, a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    if x >=0 and x < a.size:
+      out[x] = a[x] + 10
+  fn = numba.cuda.jit()(fn)
+  fn[BLOCKS_X, THREADS_X](a)
+
+Guards
+------
+
+Guards ::
+
+  x = numba.cuda.blockIdx.x * BLOCKS_X + numba.cuda.threadIdx.x
+  if x >=0 and x < a.size:
+
+Map Guard
+----------
+
+.. image:: figs/gpu/map@3x.png
+           :align: center
+           :width: 500px
+
+
+Communication
+==============
+
+
+Memory
+-------
+
+
+* CUDA also has a memory stack
+* Local > Shared > Global
+* Fast code does minimal global reads
+
+Local Memory
+-------------
+
+.. image:: figs/gpu/local\ mem@3x.png
+           :align: center
+           :width: 500px
+
+
+Example
+--------
+
+Code ::
+
+  def local_fn(out, a):
+    local = numba.cuda.local.array(10, numba.int32)
+    local[0] = 10
+    local[5] = 20
+  local_fn = numba.cuda.jit()(local_fn)
+  local_fn[BLOCKS, THREADS](out, a)
+
+Constraints
+------------
+
+* Memory must be typed
+* Memory must be *constant* size
+* Memory must be relatively small
+
+
+BAD Example
+------------
+
+Code ::
+
+  def local_fn(out, a):
+    local = numba.cuda.local.array(a.size, numba.int32)
+    local[0] = 10
+    local[5] = 20
+  local_fn = numba.cuda.jit()(local_fn)
+  local_fn[BLOCKS, THREADS](out, a)
+
+
+Block Shared Memory
+-------------------
+
+.. image:: figs/gpu/sharedmem@3x.png
+           :align: center
+           :width: 500px
+
+Example
+---------
+
+Code ::
+
+  def block_fn(out, a):
+    shared = numba.cuda.shared.array(10, numba.int32)
+    shared[0] = 10
+    numba.cuda.syncthreads()
+    shared[5] = 20
+  block_fn = numba.cuda.jit()(block_fn)
+  block_fn[BLOCKS, THREADS](out, a)
+
+
+Colab
+------
+
+* https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV
+
+Real Example
+-------------
+code ::
+
+  def sum(out, a):
+    shared = numba.cuda.shared.array(32, numba.float32)
+    i = 32 * numba.cuda.blockIdx.x + numba.cuda.threadIdx.x
+    if i < a.size:
+        shared[i] = a[i]
+        cur = 1
+        for i in range(5):
+            numba.cuda.syncthreads()
+            if i % 2 == 0:
+                shared[i // (cur*2)] = shared[i // cur] + \
+                                       shared[(i // cur) + 1]
+            cur *= 2
+    numba.cuda.syncthreads()
+    if i == 0:
+        out[0] = shared[0]
+
+
+Q&A
+----

@@ -1,0 +1,278 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 27
+------------
+
+   What's Next
+
+
+Lecture
+=========
+
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Course
+   * What's to Come
+
+
+Review
+=======
+
+Class Focus
+-------------------------------
+
+.. revealjs_fragments::
+
+     * **Machine Learning** Engineering
+     * Machine Learning **Engineering**
+     * Focus: software engineering behind machine learning
+
+MLE
+----
+
+* Systems course disguised as ML
+* Algorithms implemented Fast
+* Testing / Debugging / Scaling
+
+Module 0 - Foundations
+-----------------------
+
+.. image:: figs/Module/module.png
+           :align: center
+
+Module 0 - Foundations
+-----------------------
+
+* Testing
+* Higher-Order Functions
+* Data Structures
+
+Module 1 - Auto-Diff
+------------------------
+
+.. image:: figs/Autograd/backprop4.png
+           :align: center
+
+Module 1 - Auto-Diff
+------------------------
+
+* Variables
+* Autodifferentiation
+* ML Basics
+
+Module 2 - Tensors
+------------------------
+
+.. image:: figs/Tensors/stride4.png
+           :align: center
+
+Module 2 - Tensors
+------------------------
+
+* Multidimensional Arrays
+* Map / Zip / Reduce
+* Broadcasting
+
+
+Module 3 - Effiency
+------------------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+
+Module 3 - Effiency
+------------------------
+
+* JIT / Types
+* Parallel
+* CUDA / Shared Memory
+
+Module 4 - Networks
+------------------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+
+Module 4 - Networks
+------------------------
+
+* Convolutions
+* Tiling
+* Softmax
+
+What do you know?
+------------------
+
+* How neural networks works...
+* How autodifferentiation works...
+* How it all scales ...
+
+What did you learn?
+--------------------
+
+* Systems are made by humans
+* Debugging, testing, organization
+* Filing bugs and asking questions
+
+
+
+Piazza
+-------
+
+.. image:: piazza.png
+
+* Ge Gao - 505 contributions!
+
+
+
+Course Reviews
+---------------
+
+https://apps.engineering.cornell.edu/CourseEval/
+
+
+What's Next
+=============
+
+Many Forks
+-----------
+
+* ML Engineering
+* ML Systems
+* ML Models
+
+ML Engineering
+---------------
+
+* Many questions beyond training
+* Data sets and data availability
+* Data collection / preprocessing / robustness
+
+
+Tools of the Trade : Arrow
+---------------------------
+
+.. image:: arrow.png
+
+Tools of the Trade : ONNX
+---------------------------
+
+.. image:: onxx.png
+
+
+ML Systems
+-------------------
+
+* Many languages beyond torch
+* Different Tensor access forms
+
+
+Tools of the Trade: Jax
+------------------------
+
+* Introduces `vector map` in addition to broadcasting
+
+
+* Can apply a function to a tensor across an entire dimension.
+
+Code ::
+
+  vmap(model.forward, x)
+
+
+Tools of the Trade: Julia
+--------------------------
+
+* Programming language for mathematical code
+
+* Pluto -> https://mybinder.org/v2/gh/fonsp/pluto-on-binder/master?urlpath=pluto
+
+
+ML Models
+----------
+
+* Modern models are complicated, but made up of the parts we have seen
+* Many are open source and available to play with.
+
+My Bet
+------
+
+* You can read models!
+
+
+Future Context: Self-Driving
+-----------------------------
+
+.. raw:: html
+
+   <video width="640" height="480" controls>
+         <source src="   https://www.tesla.com/sites/default/files/images/careers/autopilot/network.mp4" type="video/mp4">
+   </video>
+
+
+Vision Models
+--------------
+
+* ResNet
+
+  https://github.com/facebookresearch/detectron2/blob/master/detectron2/modeling/backbone/resnet.py
+
+Future Context: Code Gen
+----------------------------------
+
+  .. raw:: html
+
+    <blockquote style="align:center" class="twitter-tweet"> <a href="https://twitter.com/sharifshameem/status/1282676454690451457?ref_src=twsrc%5Etfw"></a></blockquote>
+
+   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+NLP Models
+--------------
+
+* Transformer
+
+  https://github.com/huggingface/transformers/blob/master/src/transformers/models/bert/modeling_bert.py
+
+
+Protein Folding
+----------------
+
+.. image:: protein.gif
+   :width: 600px
+'/home/srush/Downloads/carbon (18).png' '/home/srush/Downloads/carbon (18).png 'githu
+
+Protein Folding
+----------------
+
+* Distance Prediction
+
+  https://github.com/Urinx/alphafold_pytorch/blob/master/network.py
+
+
+
+Tips of the Trade
+-------------------
+
+* Fancy models are not always necessary
+* Build something robust and fast on your hardware.
+* Develop multiple expertise to be flexible to users
+
+
+Future Steps
+-------------
+
+QA
+--

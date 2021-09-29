@@ -1,0 +1,278 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+
+Lecture 10
+------------
+
+  Tensors
+
+
+Upcoming
+---------
+
+.. revealjs_fragments::
+
+   * Module-1 Due Tonight
+   * Module-2 Released on Thursday (Mon. Oct 19)
+
+
+Lecture
+=========
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Neural Networks
+   * Tensors!
+   * Module-2
+
+Neural Networks
+================
+
+Intuition: Neural Networks
+--------------------------
+
+1) Apply many linear seperators
+2) Reshape the data space based on results
+3) Apply a linear model on new space
+
+Neural Networks
+------------------
+
+.. revealjs_fragments::
+
+   * New *model*
+   * Uses repeated linears to split data
+   * Produces non-linear separators
+   * Loss will not change
+
+Final Layer
+--------------
+.. image:: figs/Graphs/split1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Graphs/split2.png
+           :align: center
+           :width: 200px
+
+
+.. image:: figs/Graphs/mlpmid.png
+           :align: center
+           :width: 300px
+
+
+Math View (Alt)
+---------------
+
+.. math::
+
+   \begin{eqnarray*}
+   \text{lin}(x; w, b) &=& x_1 \times w_1 + x_2 \times w_2 + b \\
+   h_ 1 &=& \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+   h_ 2 &=& \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+   m(x_1, x_2) &=& \text{lin}(h; w, b)
+   \end{eqnarray*}
+
+Parameters:
+ :math:`w_1, w_2, w^0_1, w^0_2, w^1_1, w^1_2, b, b^0, b^1`
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/160977>`_
+
+
+Tensors!
+================
+
+Tensors?
+--------
+
+What is it?
+
+.. revealjs_fragments::
+
+   * Fancy multi-dimensional arrays
+   * Embedded mathmatical programming language
+
+
+Tensors!
+----------
+
+Key Building Block
+
+* Matlab
+* Numpy
+* Tensorflow, etc.
+
+
+Terminology
+------------
+
+* 0-Dimensional Scalar
+
+* Our standby for Module-0
+
+Terminology
+------------
+
+* 1-Dimensional -  Vector
+
+.. image:: figs/Tensors/vector.png
+           :align: center
+
+
+Terminology
+------------
+
+* 2-Dimensional - Matrix
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+Terminology
+------------
+
+* Arbitrary dimensions - Tensor (Array in numpy)
+
+.. image:: figs/Tensors/tensor.png
+           :align: center
+
+Terminology
+------------
+
+.. revealjs_fragments::
+
+   * Dims - # dimensions (`tensor.dims`)
+   * Shape -  # cells per dimension (`tensor.shape`)
+   * Size - # cells (`tensor.size`)
+
+Example
+------------
+
+* dims: 2
+* shape: (2, 5)
+* size : 10
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+
+Example
+------------
+
+* dims: ?
+* shape: ?
+* size : ?
+
+.. image:: figs/Tensors/matrix.png
+           :align: center
+
+
+Indexing
+------------
+
+* Indexing syntax: `tensor[1, 2, 0]`
+
+.. image:: figs/Tensors/tensor2.png
+           :align: center
+
+Why not just use lists?
+------------------------
+
+.. revealjs_fragments::
+
+   * Functions to manipulate shape
+   * Mathematical notation
+   * Can act as Variables / Parameters
+   * Efficient control of memory (Module-3)
+
+Shape Maniputation
+------------------
+
+* Permutation
+
+.. image:: figs/Tensors/matrix1.png
+.. image:: figs/Tensors/matrix2.png
+
+
+Shape Maniputation
+---------------------
+
+* Views
+
+.. image:: figs/Tensors/matrix2.png
+.. image:: figs/Tensors/broad.png
+
+
+What's Bad?
+------------
+
+* Hard to grow or shrink
+* Only numerical values
+* Lose comprehensions / python built-ins
+* Shapes are easy to mess up
+
+
+
+Module-2
+==========
+
+Overview
+----------
+
+.. revealjs_fragments::
+
+   * `tensor.py` - Tensor Variable
+   * `tensor_functions.py` - Tensor Functions
+   * `tensor_data.py` - Storage and Indexing
+   * `tensor_ops.py` - Low-level tensor operations
+
+
+Tasks 2.1: Indexing
+-----------------------
+
+.. image:: figs/Tensors/tensor2.png
+
+
+
+Tasks 2.2: Operations
+-----------------------
+
+.. image:: figs/Ops/zip.png
+           :align: center
+
+
+
+Tasks 2.3:  Autograd
+----------------------
+
+.. image:: figs/Ops/zip\ back.png
+           :align: center
+
+
+Tasks 2.4: Broadcasting
+-------------------------
+
+.. image:: figs/Ops/zip\ broad\ back.png
+
+
+Task 2.5: Training
+-------------------
+
+.. image:: complete.png
+
+
+Q&A
+=====

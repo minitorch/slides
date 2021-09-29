@@ -1,0 +1,318 @@
+
+.. raw:: html
+
+   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
+   <link rel="stylesheet" href="_static/default.css">
+
+
+Machine Learning Engineering
+=============================================
+
+Lecture 24
+------------
+
+   Max, Argmax, Softmax
+
+
+Lecture
+=========
+
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Review: Pooling
+   * ReLU, Step, Sigmoid
+   * Max, Argmax, Softmax
+
+
+Pooling
+=======
+
+Challenge
+---------
+
+* How do we look at bigger areas with convolutions?
+
+
+Example
+--------
+
+.. image:: vis.png
+
+
+Pooling
+----------
+
+* Adjusts the scale at each layer
+* Conv stays the same size, image "zooms" out
+
+
+Pooling
+----------
+
+* Adjusts the scale at each layer
+* Conv stays the same size, image "zooms" out
+
+
+Standard Reduction
+-------------------
+
+.. image:: figs/Conv/pool1.png
+           :align: center
+           :width: 500px
+
+"Pooling"
+-----------
+
+Reduction applied to each region:
+
+.. image:: figs/Conv/pool2.png
+           :align: center
+           :width: 500px
+
+Simple Implementation
+----------------------
+
+* Ensure that it is contiguous
+* Use View to "fold" the tensor
+
+.. image:: figs/Conv/pool3.png
+           :align: center
+           :width: 500px
+
+
+Simple Implementation
+----------------------
+
+* Reduce along created fold
+
+
+.. image:: figs/Conv/pool4.png
+           :align: center
+           :width: 500px
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/177585>`_
+
+
+More Reductions
+----------------
+
+* Heading for a `max` reduction
+* Quick detour
+
+
+ReLU, Step, Sigmoid
+====================
+
+
+Basic Operations
+-----------------
+
+* Introduced in Module-0
+* Widely used in ML
+
+Review: ReLU
+------------
+
+Main activation function used between separators
+
+.. image:: figs/Graphs/relu2.png
+           :align: center
+           :width: 400px
+
+Review: Step
+------------
+
+Step function is used to determine correct answer
+
+.. image:: step.png
+           :align: center
+           :width: 400px
+
+
+
+
+Review: Sigmoid
+----------------
+
+Used to determine the loss function
+
+
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 400px
+
+
+ReLU
+-------------
+
+Mathematically,
+
+.. math::
+
+   \text{ReLU}(x) = \max\{0, x\}
+
+Simplest `max` function.
+
+
+Step
+------
+
+Mathematically,
+
+.. math::
+
+   \text{step}(x) = x > 0 = \arg\max\{0, x\}
+
+Simplest `argmax` function.
+
+
+Relationship
+-------------
+
+Step is derivative of ReLU
+
+.. math::
+   \begin{eqnarray*}
+   \text{ReLU'}(x) &=& \begin{cases} 0 & \text{if } x \leq 0 \\ 1 & \text{ow}  \end{cases} \\
+   \text{step}(x) &=& \text{ReLU}'(x)
+   \end{eqnarray*}
+
+Derivative of Step?
+--------------------
+
+Mathematically,
+
+.. math::
+   \text{step}'(x) &=& \begin{cases} 0 & \text{if } x \leq 0 \\ 0 & \text{ow}  \end{cases} \\
+
+
+Not a useful function to differentiate
+
+
+Soft argmax?
+--------------------
+
+Would be nice to have a version that with a useful derivative
+
+.. math::
+   \text{sigmoid}(x) &=& \text{softmax} \{0, x\} \\
+
+
+Useful soft version of argmax.
+
+
+
+Max, Argmax, Softmax
+====================
+
+Challenge
+---------
+
+How do we generalize sigmoid to multiple outputs?
+
+.. image:: figs/Conv/value.png
+
+
+Max reduction
+--------------
+
+* Max is a binary associative operator
+* :math:`\max(a, b)` returns max value
+* Generalized :math:`\text{ReLU}(a) = \max(a, b)`
+
+
+Max Pooling
+-----------
+
+* Common to apply pooling with max
+* Sets pooled value to "most active" in block
+* Forward code is easy to implement
+
+
+Max Backward
+-------------
+
+* Unlike sum, max throws away other values
+* Only top value gets used
+* Backward needs to know this.
+
+Argmax
+------
+
+* Function that returns `argmax`, one-hot
+* Generalizes step
+
+.. image:: figs/Conv/argmax.png
+
+
+
+Max Backward
+----------------
+
+* First compute `argmax`
+* Only send gradient to `argmax` gradinput
+* Everything else is 0
+
+
+Ties
+-----
+
+* What if there are two or more argmax's?
+* Max is non-differentiable, like `ReLU(0)`.
+* Short answer: Ignore, pick one
+
+HW
+----
+
+* When writing tests for max, ties will break finite-differences
+* Suggestion: perturb your input by adding a small amount of random noise.
+
+Soft argmax?
+-------------
+
+* Need a soft version of argmax.
+* Generalizes sigmoid for our new loss function
+* Standard name -> softmax
+
+Softmax
+-------
+
+.. math::
+
+   \text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}
+
+Sigmoid is Softmax
+-------------------
+
+.. math::
+
+   \text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)
+
+
+Softmax
+---------
+
+.. image:: figs/Conv/softmax.png
+
+
+Review
+-------
+
+======= ============
+Binary  Multiclass
+======= ============
+ReLU     Max
+Step     Argmax
+Sigmoid  Softmax
+======= ============
+
+
+QA
+---
