@@ -5,7 +5,7 @@ Module 2.1 - Tensors
 Module 2.1
 ------------
 
-    Tensor Data
+    Tensor
 
 
 Starting Point
@@ -59,7 +59,8 @@ Parameters:
 
 Quiz
 -------
-    
+
+  Quiz
 
 Outline
 --------
@@ -177,17 +178,6 @@ In this class
 
 
 
-                   
-Why not just use lists?
-------------------------
-
-.. revealjs_fragments::
-
-   * Functions to manipulate shape
-   * Mathematical notation
-   * Can act as Variables / Parameters
-   * Efficient control of memory (Module-3)
-
 Shape Maniputation
 ------------------
 
@@ -216,9 +206,6 @@ What's Bad?
 
 
 
-
-
-
 Request
 ---------
 
@@ -227,68 +214,6 @@ Request
    * No autodifferentiation for now
    * Only consider standard tensor operations
    * Add autodiff afterwards
-
-
-Terminology
-------------
-
-* 2-Dimensional - Matrix
-
-.. image:: figs/Tensors/matrix.png
-           :align: center
-
-Terminology
-------------
-
-* Arbitrary dimensions - Tensor
-
-.. image:: figs/Tensors/tensor.png
-           :align: center
-
-Terminology
-------------
-
-.. revealjs_fragments::
-
-   * Dims - # dimensions (`tensor.dims`)
-   * Shape -  # cells per dimension (`tensor.shape`)
-   * Size - # cells (`tensor.size`)
-
-Example
-------------
-
-* dims: 2 / shape: (2, 5) /  size : 10
-
-.. image:: figs/Tensors/matrix.png
-           :align: center
-
-
-Shape Maniputation
-------------------
-
-* Permutation ::
-
-    tensor.permute(1, 0)
-
-.. image:: figs/Tensors/matrix1.png
-.. image:: figs/Tensors/matrix2.png
-
-
-Shape Maniputation
----------------------
-
-* Views ::
-
-    tensor.view(1, 5, 2)
-
-.. image:: figs/Tensors/matrix2.png
-.. image:: figs/Tensors/broad.png
-
-
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/162299>`_
 
 
 Views
@@ -318,6 +243,18 @@ Reductions ::
     new_tensor = tensor.sum()
 
 
+                  
+Why not just use lists?
+------------------------
+
+.. revealjs_fragments::
+
+   * Functions to manipulate shape
+   * Mathematical notation
+   * Can act as Variables / Parameters
+   * Efficient control of memory (Module-3)
+
+    
 Why not lists?
 ---------------
 

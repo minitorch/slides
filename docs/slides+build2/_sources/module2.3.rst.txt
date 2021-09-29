@@ -1,19 +1,49 @@
 
 
-.. raw:: html
-
-   <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
-   <link rel="stylesheet" href="_static/default.css">
-
-
-Machine Learning Engineering
+Module 2.3 - Tensor Functions
 =============================================
 
 
-Lecture 12
+
+Lecture 13
 ------------
 
-   Tensor Functions
+   Broadcasting
+
+
+Morning Session
+=================
+
+Errata
+-------------------
+
+* Tasks
+* Bad Assert
+
+
+Reduction
+---------
+.. image:: figs/Reduce/sum0.png
+           :align: center
+
+Reduction
+---------
+
+.. image:: figs/Reduce/sum1.png
+           :align: center
+
+Reduction
+---------
+
+.. image:: figs/Reduce/implement.png
+           :align: center
+
+
+Reduction
+---------
+
+.. image:: figs/Reduce/sum2.png
+           :align: center
 
 
 Lecture
@@ -24,254 +54,12 @@ Outline
 
 .. revealjs_fragments::
 
-   * Review: Views / Strides
-   * Tensor Functions
-   * Operations
-   * Gradients
-
-
-Views / Strides
-================
-
-User API
-------------
-
-.. revealjs_fragments::
-
-   * Dims - # dimensions (`tensor.dims`)
-   * Shape -  # cells per dimension (`tensor.shape`)
-   * Size - # cells (`tensor.size`)
-
-User Counting
--------------
-
-Shape = (2, 3, 2)
-
-
-Index Counting
-
-.. revealjs_fragments::
-
-   * (0, 0, 0)
-   * (0, 0, 1)
-   * (0, 1, 0)
-
-Shape Maniputation
-------------------
-
-* Permutation ::
-
-    tensor.permute(1, 0)
-
-.. image:: figs/Tensors/matrix1.png
-.. image:: figs/Tensors/matrix2.png
-
-How does this work
---------------------
-
-* **Storage** :  1-D array of numbers of length `size`
-
-* **Strides** : tuple that provides the mapping from user `indexing`
-  to the `position` in the 1-D `storage`.
-
-
-Strides
---------------
-
-.. image:: figs/Tensors/stride1.png
-           :align: center
-           :width: 400px
-
-Stride Math
-------------
-
-Calculating from strides  ::
-
-  stride1 * index1 + stride2 * index2 + stride3 * index3 ...
-
-
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/163583>`_
-
-
-Tensor Functions
-================
-
-Functions
-----------
-
-* Moving from Scalar to Tensor Functions
-
-* Implementation? ::
-
-    def add2(a, b):
-       out_tensor = minitorch.zeros(*a.shape)
-       for i in range(a.shape[0]):
-           for j in range(a.shape[1]):
-              out_tensor[i , j] = a[i, j] + b[i, j]
-       return out_tensor
-
-Issues
-----------
-
-.. revealjs_fragments::
-
-   * Different code per different dims
-   * Big autodiff graph
-   * Slow, lots of Python loops
-   * Lots of code
-
-Tensor Functions
------------------
-
-.. revealjs_fragments::
-
-   * Tensors as Variables.
-   * Track graph at tensor level
-   * Functions wrap / unwrap Tensors ::
-
-       out = a + b
-
-Implementation
----------------
-
-.. revealjs_fragments::
-   * `Function` class (forward / backward)
-   * Similar API as scalars
-   * Take / return Tensor objects
-
-Operations
-================
-
-Implementing Tensor Functions
-------------------------------
-
-.. revealjs_fragments::
-
-   * Option: code `for` loop for each
-   * Lazy. We did this already...
-   * Optimization. how do we make it fast?
-
-Strategy
------------
-
-.. revealjs_fragments::
-
-   * Implement high-level functions
-   * `Lift` scalar operators to tensors
-   * Go back and optimize high-level functions
-   * Customize important Functions
-
-Tensor Functions
------------------
-
-Unary ::
-
-    new_tensor = tensor.log()
-
-Binary (for now, only same shape) ::
-
-    new_tensor = tensor1 + tensor2
-
-Reductions ::
-
-    new_tensor = tensor.sum()
-
-
-Tensor Ops
------------------
-
-.. revealjs_fragments::
-
-   1) **Map** - Apply to all elements
-
-   2) **Zip** (same as zipWith) - Apply to all pairs
-
-   3) **Reduce** - Reduce a subset
-
-
-Map
----------
-
-.. image:: figs/Ops/map.png
-           :align: center
-
-Examples: Map
--------------
-
-Binary operations ::
-
-    new_tensor = tensor1.log()
-    new_tensor = tensor1.exp()
-    new_tensor = -tensor1
-
-
-Zip
----------
-
-.. image:: figs/Ops/zip.png
-           :align: center
-
-Examples: Zip
--------------
-
-Binary operations ::
-
-    new_tensor = tensor1 + tensor2
-    new_tensor = tensor1 * tensor2
-    new_tensor = tensor1 < tensor2
-
-
-Reduce
----------
-
-.. image:: figs/Ops/reduce.png
-           :align: center
-
-Reduce Options
----------------
-
-.. revealjs_fragments::
-
-   * Can reduce full tensor
-
-   * Can also just reduce 1 dimension ::
-
-       out = minitorch.rand(3,4,5).mean(1)
-       print(out.shape )
-       # (3, 1, 5)
-
-Examples: Reduce
--------------------
-
-Binary operations ::
-
-    new_tensor = tensor1.mean()
-    new_tensor = tensor1.sum(1)
-
-
-Notes
-------
-
-.. revealjs_fragments::
-
-   * None of this relies on strides
-   * However, you will need strides to implement
-
-
-Gradients
-==========
-
-Derivatives
-------------
-
-.. revealjs_fragments::
-
-   * Each tensor arg is many args
-   * Returning tensor is like running several Functions
-   * Result `backward` needs to run chain-rule for each arg and output.
+   * Review: Gradients
+   * Challenges
+   * Broadcasting
+
+Review: Gradients
+===================
 
 
 Terminology
@@ -304,6 +92,208 @@ Reduce Gradient
 
 .. image:: figs/Ops/reduce\ back.png
            :align: center
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/164632>`_
+
+
+
+Broadcasting
+==============
+
+High Level
+---------------
+
+.. revealjs_fragments::
+
+   * Apply same operation multiple times
+   * Avoid loops and writes
+   * Save memory
+
+
+First Challenge
+---------------
+
+.. revealjs_fragments::
+
+   * Relaxing Zip constraints
+   * Apply zip without shapes being identical
+
+
+Motivation: Scalar Addition
+------------------------------
+
+.. math::
+
+   vector1 + 10
+
+Naive Scalar Addition 1
+-----------------------
+
+* Repeat vector-size
+
+.. math::
+
+   vector1 + [10, 10, 10]
+
+.. code::
+
+  vector1 + tensor([10, 10, 10])
+
+Naive Scalar Addition2
+----------------------
+
+* Write a `for` loop
+
+.. code::
+
+  temp_vector = zeros(vector1.shape)
+  for i in vector.shape[0]:
+      temp_vector[i] = vector1[i] + 10
+
+
+
+
+Broadcasting
+============
+
+Broadcasting
+------------
+
+.. revealjs_fragments::
+
+   * No intermediate terms
+   * Define rules to make different shapes work together
+   * Avoid for loops entirely
+
+
+Zip With Broadcasting
+---------------------
+
+
+.. image:: figs/Ops/zip\ broad\ back.png
+
+Zip With Broadcasting
+---------------------
+
+Code ::
+
+  out = zeros(3, 2)
+  for i in range(3):
+      for j in range(2):
+          out[i, j] = a[i] + b[j]
+
+Zip Back Broadcasting
+---------------------
+
+.. image:: figs/Ops/zip\ broad.png
+
+
+Rules
+-----
+
+*   **Rule 1**: Dimension of size 1 broadcasts with anything
+*   **Rule 2**: Extra dimensions of 1 can be added with `view`
+*   **Rule 3**: Zip automatically adds starting dims of size 1
+
+
+Matrix Scalar Addition
+-----------------------
+
+Matrix + Scalar ::
+
+    matrix1 + tensor([10])
+
+Matrix Scalar Addition
+-----------------------
+
+Matrix + Vector ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3])
+
+Matrix Scalar Addition
+-----------------------
+
+Doesn't Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5])
+
+Does Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)
+
+Applying the Rules
+-------------------
+
+
+* (3, 4, 5) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 5) => X
+
+Exercises
+-------------------
+
+* (1, 3, 4) | (1, 3, 1) => ?
+* (1, 4, 4) | (3, 1, 5) => ?
+* (3, 4, 1) | (1) => ?
+
+
+Examples
+=========
+
+Tensor-Scalar operations
+------------------------
+
+.. image:: figs/Broadcast/scalar.png
+           :align: center
+
+Matrix-vector operations
+-------------------------
+
+
+.. image:: figs/Broadcast/vector.png
+           :align: center
+
+Matrix-matrix operations
+---------------------------
+
+.. image:: figs/Broadcast/threed.png
+           :align: center
+
+(Transposed) Matrix multiplication
+----------------------
+
+
+.. image:: figs/Broadcast/matmul.png
+           :width: 600px
+           :align: center
+
+Autodiff
+--------
+
+* Backward automatically broadcast (if needed)
+
+
+Broadcasting
+=============
+
+Implementation
+---------------
+
+* Never create an intermediate value.
+* Implicit map between output space / input space
+
+
+Functions
+----------
+
+* `shape_broadcast` - create the broadcast dims
+
+* `broadcast_index` - map from broadcasted to original value
 
 
 
