@@ -5,7 +5,7 @@ Module 2.1 - Tensors
 Module 2.1
 ------------
 
-    Tensor Data
+    Tensor
 
 
 Starting Point
@@ -177,17 +177,6 @@ In this class
 
 
 
-                   
-Why not just use lists?
-------------------------
-
-.. revealjs_fragments::
-
-   * Functions to manipulate shape
-   * Mathematical notation
-   * Can act as Variables / Parameters
-   * Efficient control of memory (Module-3)
-
 Shape Maniputation
 ------------------
 
@@ -285,11 +274,6 @@ Shape Maniputation
 .. image:: figs/Tensors/broad.png
 
 
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/162299>`_
-
 
 Views
 ================
@@ -318,6 +302,18 @@ Reductions ::
     new_tensor = tensor.sum()
 
 
+                  
+Why not just use lists?
+------------------------
+
+.. revealjs_fragments::
+
+   * Functions to manipulate shape
+   * Mathematical notation
+   * Can act as Variables / Parameters
+   * Efficient control of memory (Module-3)
+
+    
 Why not lists?
 ---------------
 

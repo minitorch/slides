@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Machine Learning Engineering</title>
+  <title>Module 2.2 - Tensor Functions</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -32,71 +32,20 @@
   </head><body>
     <div class="reveal">
         <div class="slides">
-            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
-<link rel="stylesheet" href="_static/default.css"><section >
-<h1>Machine Learning Engineering</h1>
+            <section >
+<h1>Module 2.2 - Tensor Functions</h1>
 </section>
 <section >
-<h2>Lecture 11</h2>
+<h2>Lecture</h2>
 <blockquote>
-<div><p>Tensor Data</p>
+<div><p>Tensor Functions</p>
 </div></blockquote>
 </section>
 <section >
-<h2>Class Details</h2>
-<ul class="simple">
-<li class="fragment"><p>Module-1 Answers released</p></li>
-<li class="fragment"><p>Module-2 out</p></li>
-<li class="fragment"><p><a class="reference external" href="https://classroom.github.com/a/PLMV2D3V">https://classroom.github.com/a/PLMV2D3V</a></p></li>
-</ul>
+<h1>Views / Strides</h1>
 </section>
 <section >
-<h2>Roadmap</h2>
-<ul class="simple">
-<li class="fragment"><p>Module-2 - Tensors / Neural Nets</p></li>
-<li class="fragment"><p>Module-3 - Low-level (GPU / Opt)</p></li>
-<li class="fragment"><p>Module-4 - End-to-End Training</p></li>
-<li class="fragment"><p>...</p></li>
-</ul>
-</section>
-<section >
-<h1>Lecture</h1>
-</section>
-<section >
-<h2>Outline</h2>
-<ul class="simple">
-<li class="fragment"><p>Review: Tensors</p></li>
-<li class="fragment"><p>Views</p></li>
-<li class="fragment"><p>Strides</p></li>
-</ul>
-</section>
-<section >
-<h1>Tensors</h1>
-</section>
-<section >
-<h2>Request</h2>
-<ul class="simple">
-<li class="fragment"><p>No autodifferentiation for now</p></li>
-<li class="fragment"><p>Only consider standard tensor operations</p></li>
-<li class="fragment"><p>Add autodiff afterwards</p></li>
-</ul>
-</section>
-<section >
-<h2>Terminology</h2>
-<ul class="simple">
-<li><p>2-Dimensional - Matrix</p></li>
-</ul>
-<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
-</section>
-<section >
-<h2>Terminology</h2>
-<ul class="simple">
-<li><p>Arbitrary dimensions - Tensor</p></li>
-</ul>
-<img alt="_images/tensor.png" class="align-center" src="_images/tensor.png" />
-</section>
-<section >
-<h2>Terminology</h2>
+<h2>User API</h2>
 <ul class="simple">
 <li class="fragment"><p>Dims - # dimensions (<cite>tensor.dims</cite>)</p></li>
 <li class="fragment"><p>Shape -  # cells per dimension (<cite>tensor.shape</cite>)</p></li>
@@ -104,11 +53,14 @@
 </ul>
 </section>
 <section >
-<h2>Example</h2>
+<h2>User Counting</h2>
+<p>Shape = (2, 3, 2)</p>
+<p>Index Counting</p>
 <ul class="simple">
-<li><p>dims: 2 / shape: (2, 5) /  size : 10</p></li>
+<li class="fragment"><p>(0, 0, 0)</p></li>
+<li class="fragment"><p>(0, 0, 1)</p></li>
+<li class="fragment"><p>(0, 1, 0)</p></li>
 </ul>
-<img alt="_images/matrix.png" class="align-center" src="_images/matrix.png" />
 </section>
 <section >
 <h2>Shape Maniputation</h2>
@@ -123,80 +75,11 @@
 <section >
 <h2>Shape Maniputation</h2>
 <ul>
-<li><p>Views</p>
-<pre><code data-trim data-noescape class="python">tensor.view(1, 5, 2)</code></pre>
+<li><p>Permutation</p>
+<pre><code data-trim data-noescape class="python">tensor.permute(2, 1, 0, 3)</code></pre>
 </li>
 </ul>
-<img alt="_images/matrix2.png" src="_images/matrix2.png" />
-<img alt="_images/broad.png" src="_images/broad.png" />
-</section>
-<section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/162299">Quiz</a></p>
-</div></blockquote>
-</section>
-<section >
-<h1>Views</h1>
-</section>
-<section >
-<h2>Goal</h2>
-<ul class="simple">
-<li><p>Support user api</p></li>
-<li><p>Keep track of tensor properties</p></li>
-<li><p>Setup fast / simple Functions</p></li>
-</ul>
-</section>
-<section >
-<h2>Tensor Usage</h2>
-<p>Unary</p>
-<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
-<p>Binary (for now, only same shape)</p>
-<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
-<p>Reductions</p>
-<pre data-id="tensor-usage"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
-</section>
-<section >
-<h2>Why not lists?</h2>
-<p>Matrix (5, 2):</p>
-<pre data-id="why-not-lists"><code data-trim data-noescape class="python">matrix = [[1, 2], [3, 4], [5, 7], [2, 3], [2, 4]]</code></pre>
-<p>View (1, 5, 2)</p>
-<pre data-id="why-not-lists"><code data-trim data-noescape class="python">tensor = [[[matrix[j][i] for i in range(2)]
-            for j in range(5)]]</code></pre>
-<p>Transpose (2, 5)</p>
-<pre data-id="why-not-lists"><code data-trim data-noescape class="python">matrix_trans = [[matrix[i][j] for i in range(5)]
-                 for j in range(2)]</code></pre>
-</section>
-<section >
-<h2>Issues</h2>
-<ul>
-<li><p>Operators requires copying</p>
-<pre><code data-trim data-noescape class="python">matrix_trans = [[matrix[i][j] for i in range(5)]
-                 for j in range(2)]</code></pre>
-</li>
-<li><p>Storage shaped based on usage</p>
-<pre><code data-trim data-noescape class="python">tensor = [[[matrix[i][j] for i in range(2)]
-            for j in range(5)]]</code></pre>
-</li>
-</ul>
-</section>
-<section >
-<h2>Idea 1: Views</h2>
-<ul class="simple">
-<li class="fragment"><p>Seperate storing information from user view</p></li>
-<li class="fragment"><p>Keep a mapping from users version to storage</p></li>
-</ul>
-</section>
-<section >
-<h2>Idea 2: Immutable Operations</h2>
-<ul class="simple">
-<li class="fragment"><p>Minitorch doesn't let you update tensors</p></li>
-<li class="fragment"><p>All operations return a &quot;new&quot; tensor</p></li>
-<li class="fragment"><p>Since there are no updates, maybe point to the same storage.</p></li>
-</ul>
-</section>
-<section >
-<h1>Tensor Internals</h1>
+<p>Rearranges dims in order given.</p>
 </section>
 <section >
 <h2>How does this work</h2>
@@ -208,52 +91,325 @@ to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
 </section>
 <section >
 <h2>Strides</h2>
-<a class="reference internal image-reference" href="_images/stride2.png"><img alt="_images/stride2.png" class="align-center" src="_images/stride2.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/stride1.png"><img alt="_images/stride1.png" class="align-center" src="_images/stride1.png" style="width: 400px;" /></a>
 </section>
 <section >
 <h2>Strides</h2>
-<a class="reference internal image-reference" href="_images/stride1.png"><img alt="_images/stride1.png" class="align-center" src="_images/stride1.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/stride2.png"><img alt="_images/stride2.png" class="align-center" src="_images/stride2.png" style="width: 400px;" /></a>
 </section>
 <section >
 <h2>Strides</h2>
 <a class="reference internal image-reference" href="_images/stride3.png"><img alt="_images/stride3.png" class="align-center" src="_images/stride3.png" style="width: 400px;" /></a>
 </section>
 <section >
-<h2>Which is best?</h2>
-<ul class="simple">
-<li><p>Can be useful when it is contiguous</p></li>
-<li><p>Bigger strides left</p></li>
-</ul>
-</section>
-<section >
-<h2>Strides</h2>
-<img alt="_images/stride4.png" class="align-center" src="_images/stride4.png" />
-</section>
-<section >
-<h2>Silly Stride Intuition</h2>
-<ul>
-<li><p>Numerical bases, binary number</p>
-<p>1101011</p>
-</li>
-</ul>
-<p>Implied strides: (64, 32, 16, 8, 4, 2, 1)</p>
-</section>
-<section >
 <h2>Stride Math</h2>
 <p>Calculating from strides</p>
-<pre data-id="stride-math"><code data-trim data-noescape class="python">s1 * index1 + s2 * index2 + s3 * index3 ...</code></pre>
+<pre data-id="stride-math"><code data-trim data-noescape class="python">stride1 * index1 + stride2 * index2 + stride3 * index3 ...</code></pre>
 </section>
 <section >
-<h2>Key Operations</h2>
+<h2>Main Idea</h2>
 <ul class="simple">
-<li><p>Map from index to position (binary -&gt; decimal)</p></li>
-<li><p>Map from position to index (decimal -&gt; binary)</p></li>
+<li><p>Same storage</p></li>
+<li><p>Different views and permutations.</p></li>
+<li><p>Strides tells us the relationship.</p></li>
+</ul>
+</section>
+<section >
+<h2>Lecture Quiz</h2>
+<blockquote>
+<div><p><a href="#id13"><span class="problematic" id="id14">`Quiz`_</span></a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Tensor Functions</p></li>
+<li class="fragment"><p>Operations</p></li>
+<li class="fragment"><p>Broadcasting</p></li>
+</ul>
+</section>
+<section >
+<h1>Tensor Functions</h1>
+</section>
+<section >
+<h2>Goal</h2>
+<ul class="simple">
+<li><p>Support user api</p></li>
+<li><p>Keep track of tensor properties</p></li>
+<li><p>Setup fast / simple Functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Functions</h2>
+<ul>
+<li><p>Moving from Scalar to Tensor Functions</p></li>
+<li><p>Implementation?</p>
+<pre><code data-trim data-noescape class="python">def add2(a, b):
+   out_tensor = minitorch.zeros(*a.shape)
+   for i in range(a.shape[0]):
+       for j in range(a.shape[1]):
+          out_tensor[i , j] = a[i, j] + b[i, j]
+   return out_tensor</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li class="fragment"><p>Different code per different dims</p></li>
+<li class="fragment"><p>Big autodiff graph</p></li>
+<li class="fragment"><p>Slow, lots of Python loops</p></li>
+<li class="fragment"><p>Lots of code</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Functions</h2>
+<ul>
+<li class="fragment"><p>Tensors as Variables.</p></li>
+<li class="fragment"><p>Track graph at tensor level</p></li>
+<li class="fragment"><p>Functions wrap / unwrap Tensors</p>
+<pre><code data-trim data-noescape class="python">out = a + b</code></pre>
+</li>
 </ul>
 </section>
 <section >
 <h2>Implementation</h2>
 <ul class="simple">
-<li><p>TensorData : Manager of strides and storage</p></li>
+<li class="fragment"><p><cite>Function</cite> class (forward / backward)</p></li>
+<li class="fragment"><p>Similar API as scalars</p></li>
+<li class="fragment"><p>Take / return Tensor objects</p></li>
+</ul>
+</section>
+<section >
+<h1>Operations</h1>
+</section>
+<section >
+<h2>Implementing Tensor Functions</h2>
+<ul class="simple">
+<li class="fragment"><p>Option: code <cite>for</cite> loop for each</p></li>
+<li class="fragment"><p>Lazy. We did this already...</p></li>
+<li class="fragment"><p>Optimization. How do we make it fast?</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ul class="simple">
+<li class="fragment"><p>Implement high-level functions</p></li>
+<li class="fragment"><p><cite>Lift</cite> scalar operators to tensors</p></li>
+<li class="fragment"><p>Go back and optimize high-level functions</p></li>
+<li class="fragment"><p>Customize important Functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Functions</h2>
+<p>Unary</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
+<p>Binary (for now, only same shape)</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
+<p>Reductions</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
+</section>
+<section >
+<h2>Tensor Ops</h2>
+<ol class="arabic simple">
+<li class="fragment"><p><strong>Map</strong> - Apply to all elements</p></li>
+<li class="fragment"><p><strong>Zip</strong> (same as zipWith) - Apply to all pairs</p></li>
+<li class="fragment"><p><strong>Reduce</strong> - Reduce a subset</p></li>
+</ol>
+</section>
+<section >
+<h2>Map</h2>
+<img alt="_images/map.png" class="align-center" src="_images/map.png" />
+</section>
+<section >
+<h2>Examples: Map</h2>
+<p>Binary operations</p>
+<pre data-id="examples-map"><code data-trim data-noescape class="python">new_tensor = tensor1.log()
+new_tensor = tensor1.exp()
+new_tensor = -tensor1</code></pre>
+</section>
+<section >
+<h2>Zip</h2>
+<img alt="_images/zip.png" class="align-center" src="_images/zip.png" />
+</section>
+<section >
+<h2>Examples: Zip</h2>
+<p>Binary operations</p>
+<pre data-id="examples-zip"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2
+new_tensor = tensor1 * tensor2
+new_tensor = tensor1 &lt; tensor2</code></pre>
+</section>
+<section >
+<h2>Reduce</h2>
+<img alt="_images/reduce.png" class="align-center" src="_images/reduce.png" />
+</section>
+<section >
+<h2>Reduce Options</h2>
+<ul>
+<li class="fragment"><p>Can reduce full tensor</p></li>
+<li class="fragment"><p>Can also just reduce 1 dimension</p>
+<pre><code data-trim data-noescape class="python">out = minitorch.rand(3, 4, 5).mean(1)
+print(out.shape)
+# (3, 1, 5)</code></pre>
+</li>
+</ul>
+</section>
+<section >
+<h2>Examples: Reduce</h2>
+<p>Binary operations</p>
+<pre data-id="examples-reduce"><code data-trim data-noescape class="python">new_tensor = tensor1.mean()
+new_tensor = tensor1.sum(1)</code></pre>
+</section>
+<section >
+<h2>Reduce Example</h2>
+<p>Code</p>
+</section>
+<section >
+<h2>Implementation Notes</h2>
+<ul class="simple">
+<li class="fragment"><p>Needs to work on any strides.</p></li>
+<li class="fragment"><p>Start from output. Where does each final value come from?</p></li>
+<li class="fragment"><p>Make sure you really understand tensor data first.</p></li>
+</ul>
+</section>
+<section >
+<h1>Broadcasting</h1>
+</section>
+<section >
+<h2>High Level</h2>
+<ul class="simple">
+<li class="fragment"><p>Apply same operation multiple times</p></li>
+<li class="fragment"><p>Avoid loops and writes</p></li>
+<li class="fragment"><p>Save memory</p></li>
+</ul>
+</section>
+<section >
+<h2>First Challenge</h2>
+<ul class="simple">
+<li class="fragment"><p>Relaxing Zip constraints</p></li>
+<li class="fragment"><p>Apply zip without shapes being identical</p></li>
+</ul>
+</section>
+<section >
+<h2>Motivation: Scalar Addition</h2>
+<div class="math notranslate nohighlight">
+\[vector1 + 10\]</div>
+</section>
+<section >
+<h2>Naive Scalar Addition 1</h2>
+<ul class="simple">
+<li><p>Repeat vector-size</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[vector1 + [10, 10, 10]\]</div>
+<pre data-id="naive-scalar-addition-1"><code data-trim data-noescape class="python">vector1 + tensor([10, 10, 10])</code></pre>
+</section>
+<section >
+<h2>Naive Scalar Addition 2</h2>
+<ul class="simple">
+<li><p>Write a <cite>for</cite> loop</p></li>
+</ul>
+<pre data-id="naive-scalar-addition-2"><code data-trim data-noescape class="python">temp_vector = zeros(vector1.shape)
+for i in vector.shape[0]:
+    temp_vector[i] = vector1[i] + 10</code></pre>
+</section>
+<section >
+<h2>Broadcasting</h2>
+<ul class="simple">
+<li class="fragment"><p>No intermediate terms</p></li>
+<li class="fragment"><p>Define rules to make different shapes work together</p></li>
+<li class="fragment"><p>Avoid for loops entirely</p></li>
+</ul>
+</section>
+<section >
+<h2>Zip With Broadcasting</h2>
+<img alt="_images/zip broad back.png" src="_images/zip broad back.png" />
+</section>
+<section >
+<h2>Zip With Broadcasting</h2>
+<p>Code</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">out = zeros(3, 2)
+for i in range(3):
+    for j in range(2):
+        out[i, j] = a[i] + b[j]</code></pre>
+</section>
+<section >
+<h2>Zip Broadcasting</h2>
+<img alt="_images/zip broad.png" src="_images/zip broad.png" />
+</section>
+<section >
+<h2>Rules</h2>
+<ul class="simple">
+<li><p><strong>Rule 1</strong>: Dimension of size 1 broadcasts with anything</p></li>
+<li><p><strong>Rule 2</strong>: Extra dimensions of 1 can be added with <cite>view</cite></p></li>
+<li><p><strong>Rule 3</strong>: Zip automatically adds starting dims of size 1</p></li>
+</ul>
+</section>
+<section >
+<h2>Matrix Scalar Addition</h2>
+<p>Matrix + Scalar</p>
+<pre data-id="matrix-scalar-addition"><code data-trim data-noescape class="python">matrix1 + tensor([10])</code></pre>
+</section>
+<section >
+<h2>Matrix Scalar Addition</h2>
+<p>Matrix + Vector</p>
+<pre data-id="id8"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3])</code></pre>
+</section>
+<section >
+<h2>Matrix Scalar Addition</h2>
+<p>Doesn't Work!</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5])</code></pre>
+<p>Does Work!</p>
+<pre data-id="id9"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)</code></pre>
+</section>
+<section >
+<h2>Applying the Rules</h2>
+<ul class="simple">
+<li><p>(3, 4, 5) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (3, 5) =&gt; X</p></li>
+</ul>
+</section>
+<section >
+<h2>Exercises</h2>
+<ul class="simple">
+<li><p>(1, 3, 4) | (1, 3, 1) =&gt; ?</p></li>
+<li><p>(1, 4, 4) | (3, 1, 5) =&gt; ?</p></li>
+<li><p>(3, 4, 1) | (1) =&gt; ?</p></li>
+</ul>
+</section>
+<section >
+<h1>Examples</h1>
+</section>
+<section >
+<h2>Tensor-Scalar operations</h2>
+<img alt="_images/scalar.png" class="align-center" src="_images/scalar.png" />
+</section>
+<section >
+<h2>Matrix-vector operations</h2>
+<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
+</section>
+<section >
+<h2>Matrix-matrix operations</h2>
+<img alt="_images/threed.png" class="align-center" src="_images/threed.png" />
+</section>
+<section >
+<h2>Matrix-Matrix Operations</h2>
+<a class="reference internal image-reference" href="_images/matmul.png"><img alt="_images/matmul.png" class="align-center" src="_images/matmul.png" style="width: 600px;" /></a>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li><p>Never create an intermediate value.</p></li>
+<li><p>Implicit map between output space / input space</p></li>
+</ul>
+</section>
+<section >
+<h2>Functions</h2>
+<ul class="simple">
+<li><p><cite>shape_broadcast</cite> - create the broadcast dims</p></li>
+<li><p><cite>broadcast_index</cite> - map from broadcasted to original value</p></li>
 </ul>
 </section>
 <section >

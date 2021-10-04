@@ -37,228 +37,247 @@
 <h1>Machine Learning Engineering</h1>
 </section>
 <section >
-<h2>Lecture 13</h2>
+<h2>Lecture 15</h2>
 <blockquote>
-<div><p>Broadcasting</p>
+<div><p>Sentence Classification</p>
 </div></blockquote>
 </section>
 <section >
-<h1>Morning Session</h1>
-</section>
-<section >
-<h2>Errata</h2>
+<h2>Today's Class</h2>
 <ul class="simple">
-<li><p>Tasks</p></li>
-<li><p>Bad Assert</p></li>
+<li class="fragment"><p>Review: Training</p></li>
+<li class="fragment"><p>Simple NLP</p></li>
+<li class="fragment"><p>Train / Test</p></li>
 </ul>
 </section>
 <section >
-<h2>Reduction</h2>
-<img alt="_images/sum0.png" class="align-center" src="_images/sum0.png" />
+<h1>Training</h1>
 </section>
 <section >
-<h2>Reduction</h2>
-<img alt="_images/sum1.png" class="align-center" src="_images/sum1.png" />
+<h2>Parameter Fitting</h2>
+<ol class="arabic simple">
+<li><p>Compute the loss function, <span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span></p></li>
+<li><p>See how small changes would change the loss</p></li>
+<li><p>Update to parameters to locally reduce the loss</p></li>
+</ol>
 </section>
 <section >
-<h2>Reduction</h2>
-<img alt="_images/implement.png" class="align-center" src="_images/implement.png" />
+<h2>Batching</h2>
+<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
 </section>
 <section >
-<h2>Reduction</h2>
-<img alt="_images/sum2.png" class="align-center" src="_images/sum2.png" />
+<h2>Loss</h2>
+<p>Step 3 Compute Loss</p>
+<pre data-id="loss"><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
+loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
 </section>
 <section >
-<h1>Lecture</h1>
+<h2>Compute Derivatives</h2>
+<p>Step 2</p>
+<pre data-id="compute-derivatives"><code data-trim data-noescape class="python">loss.sum().backward()
+print(model.layer1.weight.value.grad)</code></pre>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 </section>
 <section >
-<h2>Outline</h2>
-<ul class="simple">
-<li class="fragment"><p>Review: Gradients</p></li>
-<li class="fragment"><p>Challenges</p></li>
-<li class="fragment"><p>Broadcasting</p></li>
-</ul>
-</section>
-<section >
-<h1>Review: Gradients</h1>
-</section>
-<section >
-<h2>Terminology</h2>
-<ul class="simple">
-<li class="fragment"><p>Scalar -&gt; Tensor</p></li>
-<li class="fragment"><p>Derivative -&gt; Gradient</p></li>
-<li class="fragment"><p><cite>d_out</cite> -&gt;  <cite>grad_out</cite></p></li>
-<li class="fragment"><p>Recommendation: Reason through gradients as many derivatives</p></li>
-</ul>
-</section>
-<section >
-<h2>Map Gradient</h2>
-<img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
-</section>
-<section >
-<h2>Zip Gradient</h2>
-<img alt="_images/zip back.png" class="align-center" src="_images/zip back.png" />
-</section>
-<section >
-<h2>Reduce Gradient</h2>
-<img alt="_images/reduce back.png" class="align-center" src="_images/reduce back.png" />
+<h2>Update Parameters</h2>
+<p>Step 3</p>
+<pre data-id="update-parameters"><code data-trim data-noescape class="python">for p in model.parameters():
+    if p.value.grad is not None:
+        p.update(p.value - RATE * (p.value.grad / float(data.N)))</code></pre>
 </section>
 <section >
 <h2>Lecture Quiz</h2>
 <blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/164632">Quiz</a></p>
+<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/167152">Quiz</a></p>
 </div></blockquote>
 </section>
 <section >
-<h1>Broadcasting</h1>
+<h1>Simple NLP</h1>
 </section>
 <section >
-<h2>High Level</h2>
+<h2>Context</h2>
 <ul class="simple">
-<li class="fragment"><p>Apply same operation multiple times</p></li>
-<li class="fragment"><p>Avoid loops and writes</p></li>
-<li class="fragment"><p>Save memory</p></li>
+<li class="fragment"><p>What are dimensions for?</p></li>
+<li class="fragment"><p>What does broadcasting buy us?</p></li>
+<li class="fragment"><p>What are non-spatial dimensions for?</p></li>
 </ul>
 </section>
 <section >
-<h2>First Challenge</h2>
+<h2>Natural Language Processing</h2>
 <ul class="simple">
-<li class="fragment"><p>Relaxing Zip constraints</p></li>
-<li class="fragment"><p>Apply zip without shapes being identical</p></li>
+<li><p>Systems for human language</p></li>
+<li><p>Broad area of study with lots of challenges</p></li>
+<li><p>Heavily uses ML, more in recent years</p></li>
 </ul>
 </section>
 <section >
-<h2>Motivation: Scalar Addition</h2>
-<div class="math notranslate nohighlight">
-\[vector1 + 10\]</div>
-</section>
-<section >
-<h2>Naive Scalar Addition 1</h2>
+<h2>Sentiment Classification</h2>
 <ul class="simple">
-<li><p>Repeat vector-size</p></li>
-</ul>
-<div class="math notranslate nohighlight">
-\[vector1 + [10, 10, 10]\]</div>
-<pre data-id="naive-scalar-addition-1"><code data-trim data-noescape class="python">vector1 + tensor([10, 10, 10])</code></pre>
-</section>
-<section >
-<h2>Naive Scalar Addition2</h2>
-<ul class="simple">
-<li><p>Write a <cite>for</cite> loop</p></li>
-</ul>
-<pre data-id="naive-scalar-addition2"><code data-trim data-noescape class="python">temp_vector = zeros(vector1.shape)
-for i in vector.shape[0]:
-    temp_vector[i] = vector1[i] + 10</code></pre>
-</section>
-<section >
-<h1>Broadcasting</h1>
-</section>
-<section >
-<h2>Broadcasting</h2>
-<ul class="simple">
-<li class="fragment"><p>No intermediate terms</p></li>
-<li class="fragment"><p>Define rules to make different shapes work together</p></li>
-<li class="fragment"><p>Avoid for loops entirely</p></li>
+<li class="fragment"><p>Canonical sentence classification problem</p></li>
+<li class="fragment"><p>Given sentence predict sentiment class</p></li>
+<li class="fragment"><p>Key aspects: word polarity</p></li>
 </ul>
 </section>
 <section >
-<h2>Zip With Broadcasting</h2>
-<img alt="_images/zip broad back.png" src="_images/zip broad back.png" />
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
 </section>
 <section >
-<h2>Zip With Broadcasting</h2>
-<p>Code</p>
-<pre data-id="id6"><code data-trim data-noescape class="python">out = zeros(3, 2)
-for i in range(3):
-    for j in range(2):
-        out[i, j] = a[i] + b[j]</code></pre>
-</section>
-<section >
-<h2>Zip Back Broadcasting</h2>
-<img alt="_images/zip broad.png" src="_images/zip broad.png" />
-</section>
-<section >
-<h2>Rules</h2>
+<h2>Problem Setup</h2>
 <ul class="simple">
-<li><p><strong>Rule 1</strong>: Dimension of size 1 broadcasts with anything</p></li>
-<li><p><strong>Rule 2</strong>: Extra dimensions of 1 can be added with <cite>view</cite></p></li>
-<li><p><strong>Rule 3</strong>: Zip automatically adds starting dims of size 1</p></li>
+<li class="fragment"><p>Training: Exactly the same as simple</p></li>
+<li class="fragment"><p>Loss: Exactly the same as simple</p></li>
+<li class="fragment"><p>Models: Mostly similar to the simple problem.</p></li>
 </ul>
 </section>
 <section >
-<h2>Matrix Scalar Addition</h2>
-<p>Matrix + Scalar</p>
-<pre data-id="matrix-scalar-addition"><code data-trim data-noescape class="python">matrix1 + tensor([10])</code></pre>
+<h2>Modeling Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>Converting words to tensors</p></li>
+<li class="fragment"><p>Converting sentences to tensors</p></li>
+<li class="fragment"><p>Handling word combinations</p></li>
+</ol>
 </section>
 <section >
-<h2>Matrix Scalar Addition</h2>
-<p>Matrix + Vector</p>
-<pre data-id="id7"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3])</code></pre>
+<h1>Word -&gt; Tensors</h1>
 </section>
 <section >
-<h2>Matrix Scalar Addition</h2>
-<p>Doesn't Work!</p>
-<pre data-id="id8"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5])</code></pre>
-<p>Does Work!</p>
-<pre data-id="id8"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)</code></pre>
-</section>
-<section >
-<h2>Applying the Rules</h2>
+<h2>What is a word?</h2>
 <ul class="simple">
-<li><p>(3, 4, 5) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
-<li><p>(3, 4, 1) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
-<li><p>(3, 4, 1) | (1, 5) =&gt; (3, 4, 5)</p></li>
-<li><p>(3, 4, 1) | (3, 5) =&gt; X</p></li>
+<li class="fragment"><p>Treat words as index in vocabulary</p></li>
+<li class="fragment"><p>Represent as a one-hot vector</p></li>
 </ul>
 </section>
 <section >
-<h2>Exercises</h2>
+<h2>Challenge1: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>One-Hot Issue</h2>
 <ul class="simple">
-<li><p>(1, 3, 4) | (1, 3, 1) =&gt; ?</p></li>
-<li><p>(1, 4, 4) | (3, 1, 5) =&gt; ?</p></li>
-<li><p>(3, 4, 1) | (1) =&gt; ?</p></li>
+<li class="fragment"><p>Tens of thousands of words</p></li>
+<li class="fragment"><p>Opposite problem as before, 2-features to 10,000</p></li>
+<li class="fragment"><p><a href="#id1"><span class="problematic" id="id2">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
 </ul>
 </section>
 <section >
-<h1>Examples</h1>
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
 </section>
 <section >
-<h2>Tensor-Scalar operations</h2>
-<img alt="_images/scalar.png" class="align-center" src="_images/scalar.png" />
-</section>
-<section >
-<h2>Matrix-vector operations</h2>
-<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
-</section>
-<section >
-<h2>Matrix-matrix operations</h2>
-<img alt="_images/threed.png" class="align-center" src="_images/threed.png" />
-</section>
-<section >
-<h2>(Transposed) Matrix multiplication</h2>
-<a class="reference internal image-reference" href="_images/matmul.png"><img alt="_images/matmul.png" class="align-center" src="_images/matmul.png" style="width: 600px;" /></a>
-</section>
-<section >
-<h2>Autodiff</h2>
+<h2>Intuition: Lookup in Table</h2>
+<p>Get word vector</p>
+<pre data-id="intuition-lookup-in-table"><code data-trim data-noescape class="python">embeddings[word]</code></pre>
 <ul class="simple">
-<li><p>Backward automatically broadcast (if needed)</p></li>
+<li><p>Challenge:  How to compute <cite>backward</cite></p></li>
 </ul>
 </section>
 <section >
-<h1>Broadcasting</h1>
+<h2>Alternative: Lookup by broadcast</h2>
+<p>Get word vector</p>
+<pre data-id="alternative-lookup-by-broadcast"><code data-trim data-noescape class="python">(embeddings * word_one_hot.view(VOCAB, 1)).sum(0)</code></pre>
 </section>
 <section >
-<h2>Implementation</h2>
-<ul class="simple">
-<li><p>Never create an intermediate value.</p></li>
-<li><p>Implicit map between output space / input space</p></li>
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>How does this share information?</h2>
+<ul>
+<li class="fragment"><p>Similar words have similar embedding dim</p></li>
+<li class="fragment"><p>Dot-product - easy way to tell similarity</p>
+<pre><code data-trim data-noescape class="python">(word_emb1 * word_emb2).sum()</code></pre>
+</li>
+<li class="fragment"><p>Differentiable!</p></li>
 </ul>
 </section>
 <section >
-<h2>Functions</h2>
+<h2>Embedding Layer</h2>
+<p>Easy to write as a layer</p>
+<pre data-id="embedding-layer"><code data-trim data-noescape class="python">class Embedding(minitorch.Module):
+  def __init__(self, vocab_size, emb_size):
+      super().__init__()
+      self.weights = \
+        minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+      self.vocab_size = vocab_size
+
+  def forward(input):
+      return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Where do these come from?</h2>
 <ul class="simple">
-<li><p><cite>shape_broadcast</cite> - create the broadcast dims</p></li>
-<li><p><cite>broadcast_index</cite> - map from broadcasted to original value</p></li>
+<li class="fragment"><p>Trained from a different model</p></li>
+<li class="fragment"><p>Extracted and posted to use</p></li>
+<li class="fragment"><p>(Many more details in NLP class)</p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Embeddings</p>
+<pre data-id="examples"><code data-trim data-noescape class="python">embedding.weights.value.update(pretrained_weights)</code></pre>
+<ul class="simple">
+<li><p><a class="reference external" href="https://projector.tensorflow.org/">https://projector.tensorflow.org/</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Query 1</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
+<p>Query 2</p>
+<pre data-id="id3"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
+</section>
+<section >
+<h1>Challenge 2 : Sentence Length</h1>
+</section>
+<section >
+<h2>Sentence Length</h2>
+<ul class="simple">
+<li class="fragment"><p>Examples may be of different length</p></li>
+<li class="fragment"><p>Need to all be converted to vectors and utilized</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge: Length Dimension</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Value Transformation</h2>
+<ul class="simple">
+<li class="fragment"><p>batch x length x vocab</p></li>
+<li class="fragment"><p>batch x length x feature</p></li>
+<li class="fragment"><p>batch x feature</p></li>
+<li class="fragment"><p>batch x hidden</p></li>
+<li class="fragment"><p>batch</p></li>
+</ul>
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Benefits</h2>
+<ul class="simple">
+<li><p>Extremely simple</p></li>
+<li><p>Embeddings encode key information</p></li>
+<li><p>Have all the tools we need</p></li>
+</ul>
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Completely ignores relative order</p></li>
+<li><p>Completley ignores absolute order</p></li>
+<li><p>Embeddings for all words, even rare ones</p></li>
 </ul>
 </section>
 <section >
