@@ -265,25 +265,28 @@ for i in range(3):
 <section >
 <h2>Gradient</h2>
 <div class="math notranslate nohighlight">
-\[F'_{x_1}([x_1, x_2, ..., x_N])
-F'_{x_2}([x_1, x_2, ..., x_N])
-...
-F'_{x_N}([x_1, x_2, ..., x_N])\]</div>
+\[\begin{split}F'_{x_1}([x_1, x_2, ..., x_N]) \\
+F'_{x_2}([x_1, x_2, ..., x_N]) \\
+... \\
+F'_{x_N}([x_1, x_2, ..., x_N]) \\\end{split}\]</div>
 <p>Each is a standard derivative</p>
 </section>
 <section >
 <h2>Gradient</h2>
 <div class="math notranslate nohighlight">
-\[[F'_{x_1}([x_1, x_2, ..., x_N]),
- F'_{x_2}([x_1, x_2, ..., x_N]),
- ...
- F'_{x_N}([x_1, x_2, ..., x_N])]\]</div>
+\[\begin{split}[F'_{x_1}([x_1, x_2, ..., x_N]), \\
+ F'_{x_2}([x_1, x_2, ..., x_N]), \\
+ ... \\
+ F'_{x_N}([x_1, x_2, ..., x_N])]\end{split}\]</div>
 <p>Tensor of derivatives.</p>
 </section>
 <section >
 <h2>Chain Rule For Gradients</h2>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}F(G(x))\\F'_x(G(x)) = F'_{G(x)}(G(x)) \cdot G'(x)\end{aligned}\end{align} \]</div>
+\[F(G(x))\]</div>
+<div class="math notranslate nohighlight">
+\[F'_x(G(x)) = F'_{G(x)}(G(x)) \cdot G'(x)\]</div>
+<p>(Not Critical for us)</p>
 </section>
 <section >
 <h2>Avoiding Gradient Math</h2>

@@ -324,10 +324,10 @@ Gradient
 
 .. math::
 
-   F'_{x_1}([x_1, x_2, ..., x_N])
-   F'_{x_2}([x_1, x_2, ..., x_N])
-   ...
-   F'_{x_N}([x_1, x_2, ..., x_N])
+   F'_{x_1}([x_1, x_2, ..., x_N]) \\
+   F'_{x_2}([x_1, x_2, ..., x_N]) \\
+   ... \\
+   F'_{x_N}([x_1, x_2, ..., x_N]) \\
 
 
 Each is a standard derivative
@@ -338,9 +338,9 @@ Gradient
 
 .. math::
 
-   [F'_{x_1}([x_1, x_2, ..., x_N]),
-    F'_{x_2}([x_1, x_2, ..., x_N]),
-    ...
+   [F'_{x_1}([x_1, x_2, ..., x_N]), \\
+    F'_{x_2}([x_1, x_2, ..., x_N]), \\
+    ... \\
     F'_{x_N}([x_1, x_2, ..., x_N])]
 
 
@@ -354,7 +354,11 @@ Chain Rule For Gradients
 
   F(G(x))
 
+.. math::
+   
   F'_x(G(x)) = F'_{G(x)}(G(x)) \cdot G'(x)
+
+(Not Critical for us)
 
   
 Avoiding Gradient Math
