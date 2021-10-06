@@ -58,12 +58,6 @@ Reduce
 .. image:: figs/Ops/reduce.png
            :align: center
 
-Errata
--------------------
-
-* Tasks
-* Bad Assert
-
 
 Reduction
 ---------
@@ -90,8 +84,6 @@ Reduction
            :align: center
 
 
-Lecture
-========
 
 Outline
 --------
@@ -101,46 +93,192 @@ Outline
    * Gradients
    * Challenges
 
-Review: Gradients
-===================
 
 
-Terminology
+Broadcasting
+==============
+
+High Level
+---------------
+
+.. revealjs_fragments::
+
+   * Apply same operation multiple times
+   * Avoid loops and writes
+   * Save memory
+
+
+First Challenge
+---------------
+
+.. revealjs_fragments::
+
+   * Relaxing Zip constraints
+   * Apply zip without shapes being identical
+
+
+Motivation: Scalar Addition
+------------------------------
+
+.. math::
+
+   vector1 + 10
+
+Naive Scalar Addition 1
+-----------------------
+
+* Repeat vector-size
+
+.. math::
+
+   vector1 + [10, 10, 10]
+
+.. code::
+
+  vector1 + tensor([10, 10, 10])
+
+Naive Scalar Addition 2
+-------------------------
+
+* Write a `for` loop
+
+.. code::
+
+  temp_vector = zeros(vector1.shape)
+  for i in vector.shape[0]:
+      temp_vector[i] = vector1[i] + 10
+
+
+
+Broadcasting
 ------------
 
 .. revealjs_fragments::
 
-   * Scalar -> Tensor
-   * Derivative -> Gradient
-   * `d_out` ->  `grad_out`
-   * Recommendation: Reason through gradients as many derivatives
+   * No intermediate terms
+   * Define rules to make different shapes work together
+   * Avoid for loops entirely
 
 
-Map Gradient
-------------
+Zip With Broadcasting
+---------------------
 
-.. image:: figs/Ops/map\ back.png
+
+.. image:: figs/Ops/zip\ broad\ back.png
+
+Zip With Broadcasting
+---------------------
+
+Code ::
+
+  out = zeros(3, 2)
+  for i in range(3):
+      for j in range(2):
+          out[i, j] = a[i] + b[j]
+
+Zip Broadcasting
+---------------------
+
+.. image:: figs/Ops/zip\ broad.png
+
+
+Rules
+-----
+
+*   **Rule 1**: Dimension of size 1 broadcasts with anything
+*   **Rule 2**: Extra dimensions of 1 can be added with `view`
+*   **Rule 3**: Zip automatically adds starting dims of size 1
+
+
+Matrix Scalar Addition
+-----------------------
+
+Matrix + Scalar ::
+
+    matrix1 + tensor([10])
+
+Matrix Scalar Addition
+-----------------------
+
+Matrix + Vector ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3])
+
+Matrix Scalar Addition
+-----------------------
+
+Doesn't Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5])
+
+Does Work! ::
+
+    matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)
+
+Applying the Rules
+-------------------
+
+
+* (3, 4, 5) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 1, 5) => (3, 4, 5)
+* (3, 4, 1) | (1, 5) => (3, 4, 5)
+* (3, 4, 1) | (3, 5) => X
+
+Exercises
+-------------------
+
+* (1, 3, 4) | (1, 3, 1) => ?
+* (1, 4, 4) | (3, 1, 5) => ?
+* (3, 4, 1) | (1) => ?
+
+
+Examples
+=========
+
+Tensor-Scalar operations
+------------------------
+
+.. image:: figs/Broadcast/scalar.png
            :align: center
 
-Zip Gradient
-------------
+Matrix-vector operations
+-------------------------
 
-.. image:: figs/Ops/zip\ back.png
+
+.. image:: figs/Broadcast/vector.png
+           :align: center
+
+Matrix-matrix operations
+---------------------------
+
+.. image:: figs/Broadcast/threed.png
+           :align: center
+
+Matrix-Matrix Operations
+------------------------
+
+
+.. image:: figs/Broadcast/matmul.png
+           :width: 600px
            :align: center
 
 
-Reduce Gradient
-----------------
 
 
-.. image:: figs/Ops/reduce\ back.png
-           :align: center
+Implementation
+---------------
+
+* Never create an intermediate value.
+* Implicit map between output space / input space
 
 
-Lecture Quiz
--------------
+Functions
+----------
 
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/164632>`_
+* `shape_broadcast` - create the broadcast dims
+
+* `broadcast_index` - map from broadcasted to original value
+
 
 
 Gradients
@@ -156,6 +294,10 @@ Derivatives
    * Result `backward` needs to run chain-rule for each arg and output.
 
 
+Graph
+------
+
+     
 Terminology
 ------------
 
@@ -167,6 +309,63 @@ Terminology
    * Recommendation: Reason through gradients as many derivatives
 
 
+Gradient
+--------
+
+.. math::
+
+   F([x_1, x_2, ..., x_N]) 
+
+Note -> producing a scalar
+
+
+Gradient
+--------
+
+.. math::
+
+   F'_{x_1}([x_1, x_2, ..., x_N])
+   F'_{x_2}([x_1, x_2, ..., x_N])
+   ...
+   F'_{x_N}([x_1, x_2, ..., x_N])
+
+
+Each is a standard derivative
+
+
+Gradient
+--------
+
+.. math::
+
+   [F'_{x_1}([x_1, x_2, ..., x_N]),
+    F'_{x_2}([x_1, x_2, ..., x_N]),
+    ...
+    F'_{x_N}([x_1, x_2, ..., x_N])]
+
+
+Tensor of derivatives.
+
+
+Chain Rule For Gradients
+---------------------------
+
+.. math::
+
+  F(G(x))
+
+  F'_x(G(x)) = F'_{G(x)}(G(x)) \cdot G'(x)
+
+  
+Avoiding Gradient Math
+---------------------------
+
+* All of this is just notation for scalars
+
+* Can always reason about it with scalars directly
+
+  
+     
 Map Gradient
 ------------
 
@@ -189,6 +388,7 @@ Reduce Gradient
 
 
 
-
+Q&A
+----
   
 
