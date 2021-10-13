@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Machine Learning Engineering</title>
+  <title>Module 2.4 - Networks with Tensors</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -32,26 +32,231 @@
   </head><body>
     <div class="reveal">
         <div class="slides">
-            <link rel="stylesheet" href="_static/revealjs/css/theme/white.css">
-<link rel="stylesheet" href="_static/default.css"><section >
-<h1>Machine Learning Engineering</h1>
+            <section >
+<h1>Module 2.4 - Networks with Tensors</h1>
 </section>
 <section >
-<h2>Lecture 15</h2>
+<h2>Module 2.4</h2>
 <blockquote>
-<div><p>Sentence Classification</p>
+<div><p>Applying Neural Networks</p>
 </div></blockquote>
 </section>
 <section >
-<h2>Today's Class</h2>
+<h1>Review</h1>
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul>
+<li><p>Permutation</p>
+<pre><code data-trim data-noescape class="python">tensor.permute(1, 0)</code></pre>
+</li>
+</ul>
+<img alt="_images/matrix1.png" src="_images/matrix1.png" />
+<img alt="_images/matrix2.png" src="_images/matrix2.png" />
+</section>
+<section >
+<h2>Shape Maniputation</h2>
+<ul>
+<li><p>Permutation</p>
+<pre><code data-trim data-noescape class="python">tensor.permute(2, 1, 0, 3)</code></pre>
+</li>
+</ul>
+<p>Rearranges dims in order given.</p>
+</section>
+<section >
+<h2>How does this work</h2>
 <ul class="simple">
-<li class="fragment"><p>Review: Training</p></li>
+<li><p><strong>Storage</strong> :  1-D array of numbers of length <cite>size</cite></p></li>
+<li><p><strong>Strides</strong> : tuple that provides the mapping from user <cite>indexing</cite>
+to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
+</ul>
+</section>
+<section >
+<h2>Tensor Functions</h2>
+<p>Unary</p>
+<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
+<p>Binary (for now, only same shape)</p>
+<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
+<p>Reductions</p>
+<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
+</section>
+<section >
+<h2>Tensor Ops</h2>
+<ol class="arabic simple">
+<li class="fragment"><p><strong>Map</strong> - Apply to all elements</p></li>
+<li class="fragment"><p><strong>Zip</strong> (same as zipWith) - Apply to all pairs</p></li>
+<li class="fragment"><p><strong>Reduce</strong> - Reduce a subset</p></li>
+</ol>
+</section>
+<section >
+<h2>Zip With Broadcasting</h2>
+<img alt="_images/zip broad back.png" src="_images/zip broad back.png" />
+</section>
+<section >
+<h2>Zip With Broadcasting</h2>
+<p>Code</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">out = zeros(3, 2)
+for i in range(3):
+    for j in range(2):
+        out[i, j] = a[i] + b[j]</code></pre>
+</section>
+<section >
+<h2>Matrix Scalar Addition</h2>
+<p>Doesn't Work!</p>
+<pre data-id="matrix-scalar-addition"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5])</code></pre>
+<p>Does Work!</p>
+<pre data-id="matrix-scalar-addition"><code data-trim data-noescape class="python">matrix1.view(4, 3) + tensor([1, 2, 3, 5]).view(4, 1)</code></pre>
+</section>
+<section >
+<h2>Applying the Rules</h2>
+<ul class="simple">
+<li><p>(3, 4, 5) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (3, 1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (1, 5) =&gt; (3, 4, 5)</p></li>
+<li><p>(3, 4, 1) | (3, 5) =&gt; X</p></li>
+</ul>
+</section>
+<section >
+<h2>Map Gradient</h2>
+<img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
+</section>
+<section >
+<h2>Zip Gradient</h2>
+<img alt="_images/zip back.png" class="align-center" src="_images/zip back.png" />
+</section>
+<section >
+<h2>Reduce Gradient</h2>
+<img alt="_images/reduce back.png" class="align-center" src="_images/reduce back.png" />
+</section>
+<section >
+<h2>Zip Broadcasting</h2>
+<img alt="_images/zip broad.png" src="_images/zip broad.png" />
+</section>
+<section >
+<h2>Example: Negative</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = -x\]</div>
+<img alt="_images/map.png" class="align-center" src="_images/map.png" />
+</section>
+<section >
+<h2>Example: Negative Back</h2>
+<div class="math notranslate nohighlight">
+\[d \times f'(x) = -d\]</div>
+<img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
+</section>
+<section >
+<h2>Example: Inverse</h2>
+<div class="math notranslate nohighlight">
+\[f(x) = 1/x\]</div>
+<img alt="_images/map.png" class="align-center" src="_images/map.png" />
+</section>
+<section >
+<h2>Example: Inverse Back</h2>
+<div class="math notranslate nohighlight">
+\[d \times f'(x) = d \times -x^2\]</div>
+<img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
+</section>
+<section >
+<h2>Matrix-vector operations</h2>
+<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
+</section>
+<section >
+<h2>Backwards (Expand)</h2>
+<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
+</section>
+<section >
+<h2>Backwards (Expand)</h2>
+<p>Rules:</p>
+<ul class="simple">
+<li><p>You can return gradient for broadcasted input.</p></li>
+<li><p>Autodiff will collapse it to the original size.</p></li>
+</ul>
+</section>
+<section >
+<h2>Chain Rule</h2>
+<p>If a variable is used twice, derivative is the use paths.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+z_1 &amp;=&amp; g(x) \\
+z_2 &amp;=&amp; h(x) \\
+f'_x(g(x), h(x)) &amp;=&amp; g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h2>Quiz</h2>
+<blockquote>
+<div><p><a class="reference internal" href="#quiz">Quiz</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Training</p></li>
 <li class="fragment"><p>Simple NLP</p></li>
-<li class="fragment"><p>Train / Test</p></li>
 </ul>
 </section>
 <section >
 <h1>Training</h1>
+</section>
+<section >
+<h2>Reminder</h2>
+<ul class="simple">
+<li><p>Dataset - Data to fit</p></li>
+<li><p>Model - Shape of fit</p></li>
+<li><p>Loss - Goodness of fit</p></li>
+</ul>
+</section>
+<section >
+<h2>Linear Model Example</h2>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Model: Math</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{lin}(x; w, b) &amp;=&amp; x_1 \times w_1 + x_2 \times w_2 + b \\
+h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
+h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
+m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h2>Implementation Tricks</h2>
+<ul class="simple">
+<li><p>Batching -&gt; Compute the loss on many examples.</p></li>
+<li><p>Parameters -&gt; Store all in Tensors.</p></li>
+<li><p>Opt -&gt; Decide how to change the parameters</p></li>
+</ul>
+</section>
+<section >
+<h2>Batching</h2>
+<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
+</section>
+<section >
+<h2>Batching</h2>
+<ul class="simple">
+<li><p>Extra dimension on all the data.</p></li>
+<li><p>Will be very important for future assignments</p></li>
+</ul>
+</section>
+<section >
+<h2>Parameters</h2>
+<ul class="simple">
+<li><p>Tensors inside the model.</p></li>
+<li><p>Receive the gradient updates</p></li>
+<li><p><cite>Accumumlated</cite> i.e. summed for each update</p></li>
+</ul>
+</section>
+<section >
+<h2>Optimizer</h2>
+<ul class="simple">
+<li><p>Decide how to update the parameters.</p></li>
+<li><p>Example</p></li>
+</ul>
 </section>
 <section >
 <h2>Parameter Fitting</h2>
@@ -62,20 +267,56 @@
 </ol>
 </section>
 <section >
-<h2>Batching</h2>
-<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
+<h2>Loss</h2>
+<ol class="arabic">
+<li><p>Compute Loss</p>
+<pre><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
+loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
+</li>
+</ol>
 </section>
 <section >
-<h2>Loss</h2>
-<p>Step 3 Compute Loss</p>
-<pre data-id="loss"><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
-loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
+<h2>Model: Code</h2>
+<ol class="arabic">
+<li><p>Model</p>
+<pre><code data-trim data-noescape class="python">class Network(minitorch.Module):
+  def __init__(self):
+    ...
+    self.layer1 = Linear(2, HIDDEN)
+    self.layer2 = Linear(HIDDEN, HIDDEN)
+    self.layer3 = Linear(HIDDEN, 1)</code></pre>
+</li>
+</ol>
+</section>
+<section >
+<h2>Layer 1: Weight</h2>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+</section>
+<section >
+<h2>Layer 1: Bias</h2>
+<img alt="_images/bias1.png" class="align-center" src="_images/bias1.png" />
+</section>
+<section >
+<h2>Key Task</h2>
+<ul class="simple">
+<li class="fragment"><p>Use broadcasting to implement the linear function</p></li>
+<li class="fragment"><p>Hint: Align <cite>batch</cite> x <cite>features</cite> x <cite>hidden</cite> to make it work</p></li>
+</ul>
+</section>
+<section >
+<h2>Layer 2: Weights</h2>
+<img alt="_images/weight2.png" class="align-center" src="_images/weight2.png" />
 </section>
 <section >
 <h2>Compute Derivatives</h2>
 <p>Step 2</p>
-<pre data-id="compute-derivatives"><code data-trim data-noescape class="python">loss.sum().backward()
-print(model.layer1.weight.value.grad)</code></pre>
+<pre data-id="compute-derivatives"><code data-trim data-noescape class="python">(loss.sum().view(1)).backward()
+print(model.layer1.w_1.value.grad)</code></pre>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+</section>
+<section >
+<h2>Layer 1: Weight Grad</h2>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 <img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
 </section>
 <section >
@@ -86,10 +327,21 @@ print(model.layer1.weight.value.grad)</code></pre>
         p.update(p.value - RATE * (p.value.grad / float(data.N)))</code></pre>
 </section>
 <section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/167152">Quiz</a></p>
-</div></blockquote>
+<h2>Broadcasting</h2>
+<ul class="simple">
+<li class="fragment"><p>Batches</p></li>
+<li class="fragment"><p>Loss Computation</p></li>
+<li class="fragment"><p>Linear computation</p></li>
+<li class="fragment"><p>Autodifferentiation</p></li>
+<li class="fragment"><p>Gradient updates</p></li>
+</ul>
+</section>
+<section >
+<h2>Observations</h2>
+<ul class="simple">
+<li class="fragment"><p>Exactly the same function as Module-1</p></li>
+<li class="fragment"><p>No loops within tensors</p></li>
+</ul>
 </section>
 <section >
 <h1>Simple NLP</h1>
@@ -158,7 +410,7 @@ print(model.layer1.weight.value.grad)</code></pre>
 <ul class="simple">
 <li class="fragment"><p>Tens of thousands of words</p></li>
 <li class="fragment"><p>Opposite problem as before, 2-features to 10,000</p></li>
-<li class="fragment"><p><a href="#id1"><span class="problematic" id="id2">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
+<li class="fragment"><p><a href="#id5"><span class="problematic" id="id6">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
 </ul>
 </section>
 <section >
@@ -224,9 +476,9 @@ print(model.layer1.weight.value.grad)</code></pre>
 <section >
 <h2>Examples</h2>
 <p>Query 1</p>
-<pre data-id="id3"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
+<pre data-id="id7"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
 <p>Query 2</p>
-<pre data-id="id3"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
+<pre data-id="id7"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
 </section>
 <section >
 <h1>Challenge 2 : Sentence Length</h1>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minitorch Slides</title>
+  <title>Simple NLP</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -33,43 +33,84 @@
     <div class="reveal">
         <div class="slides">
             <section >
-<h1>Minitorch Slides</h1>
-<blockquote>
-<div><p>(Scroll Right)</p>
-</div></blockquote>
+<h1>Simple NLP</h1>
 </section>
 <section >
-<h2>Module 0 <a class="reference internal" href="_images/match.png"><img alt="logo" src="_images/match.png" style="width: 40pt;" /></a></h2>
+<h2>Natural Language Processing</h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="module0.0.html"><span class="doc">Module 0.0 - Introduction</span></a> - <a class="reference external" href="module0.0.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module0.1.html"><span class="doc">Module 0.1 - Fundamentals</span></a> - <a class="reference external" href="module0.1.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module0.2.html"><span class="doc">Module 0.2 - Models and Modules</span></a> - <a class="reference external" href="module0.2.html?print-pdf">(pdf)</a></p></li>
+<li class="fragment"><p>Systems for human language</p></li>
+<li class="fragment"><p>Broad area of study with lots of challenges</p></li>
+<li class="fragment"><p>Heavily uses ML, more in recent years</p></li>
 </ul>
 </section>
 <section >
-<h2>Module 1 <a class="reference internal" href="_images/match.png"><img alt="logo" src="_images/match.png" style="width: 40pt;" /></a></h2>
+<h2>Sentiment Classification</h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="module1.0.html"><span class="doc">Module 1.0 - Mini-ML</span></a> - <a class="reference external" href="module1.0.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module1.1.html"><span class="doc">Module 1.1 - Learning With Derivatives</span></a> - <a class="reference external" href="module1.1.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module1.2.html"><span class="doc">Module 1.2 - Autodifferentiation</span></a> - <a class="reference external" href="module1.2.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module1.3.html"><span class="doc">Module 1.3 - Backprop</span></a> - <a class="reference external" href="module1.3.html?print-pdf">(pdf)</a></p></li>
+<li class="fragment"><p>Canonical sentence classification problem</p></li>
+<li class="fragment"><p>Given sentence predict sentiment class</p></li>
+<li class="fragment"><p>Key aspects: word polarity</p></li>
 </ul>
 </section>
 <section >
-<h2>Module 2 <a class="reference internal" href="_images/match.png"><img alt="logo" src="_images/match.png" style="width: 40pt;" /></a></h2>
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
+</section>
+<section >
+<h2>Loss</h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="module2.0.html"><span class="doc">Module 2.0 - Neural Networks</span></a> - <a class="reference external" href="module2.0.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module2.1.html"><span class="doc">Module 2.1 - Tensors</span></a> - <a class="reference external" href="module2.1.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module2.2.html"><span class="doc">Module 2.2 - Tensor Functions</span></a> - <a class="reference external" href="module2.2.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module2.3.html"><span class="doc">Module 2.3 - Gradients</span></a> - <a class="reference external" href="module2.3.html?print-pdf">(pdf)</a></p></li>
-<li><p><a class="reference internal" href="module2.4.html"><span class="doc">Module 2.4 - Networks with Tensors</span></a> - <a class="reference external" href="module2.4.html?print-pdf">(pdf)</a></p></li>
+<li class="fragment"><p>Exactly the same as simple problem!</p></li>
 </ul>
 </section>
 <section >
-<h2>Midterm Review <a class="reference internal" href="_images/match.png"><img alt="logo" src="_images/match.png" style="width: 40pt;" /></a></h2>
+<h2>Training</h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="review.html"><span class="doc">Midterm Review</span></a> - <a class="reference external" href="review.html?print-pdf">(pdf)</a></p></li>
+<li class="fragment"><p>Exactly the same as simple problem!</p></li>
 </ul>
+</section>
+<section >
+<h2>Model</h2>
+<ul class="simple">
+<li class="fragment"><p>Mostly similar to the simple problem.</p></li>
+</ul>
+</section>
+<section >
+<h2>Modeling Challenges</h2>
+<ul class="simple">
+<li class="fragment"><p>Converting words to vectors</p></li>
+<li class="fragment"><p>Sentences of arbitrary length</p></li>
+<li class="fragment"><p>Handling word combinations</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>Challenge: Vector Form</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>Reduction</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
 </section>
 
         </div>

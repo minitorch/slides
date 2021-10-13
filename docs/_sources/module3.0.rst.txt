@@ -1,0 +1,114 @@
+Simple NLP
+===========
+
+Natural Language Processing
+----------------------------
+
+.. revealjs_fragments::
+
+   * Systems for human language
+   * Broad area of study with lots of challenges
+   * Heavily uses ML, more in recent years
+
+
+
+
+Sentiment Classification
+-------------------------
+
+.. revealjs_fragments::
+
+   * Canonical sentence classification problem
+
+   * Given sentence predict sentiment class
+
+   * Key aspects: word polarity
+
+
+Data
+------
+
+.. image:: figs/NLP/negative.png
+           :align: center
+
+Data
+--------------------
+
+.. image:: figs/NLP/positive.png
+           :align: center
+
+Loss
+-----
+
+.. revealjs_fragments::
+
+   * Exactly the same as simple problem!
+
+
+
+Training
+---------
+
+.. revealjs_fragments::
+
+   * Exactly the same as simple problem!
+
+
+Model
+---------
+
+.. revealjs_fragments::
+
+   * Mostly similar to the simple problem.
+
+
+Modeling Challenges
+--------------------
+
+.. revealjs_fragments::
+
+   * Converting words to vectors
+   * Sentences of arbitrary length
+   * Handling word combinations
+
+
+Challenge: Vector Form
+------------------------
+
+.. image:: figs/NLP/onehot.png
+           :align: center
+
+Challenge: Vector Form
+------------------------
+
+.. image:: figs/NLP/senthot.png
+           :align: center
+
+
+Embedding Table
+------------------------
+
+.. image:: figs/NLP/embweight.png
+           :align: center
+
+Embedding One
+------------------------
+
+
+.. image:: figs/NLP/embone.png
+           :align: center
+
+Reduction
+------------------------
+
+.. image:: figs/NLP/pooling.png
+           :align: center
+
+Network
+------------------------
+
+.. image:: figs/NLP/sentemb.png
+           :align: center
+
+Q&A
+----
