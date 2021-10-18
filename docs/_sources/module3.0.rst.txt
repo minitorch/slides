@@ -1,89 +1,27 @@
-Simple NLP
-===========
 
-Natural Language Processing
-----------------------------
 
-.. revealjs_fragments::
-
-   * Systems for human language
-   * Broad area of study with lots of challenges
-   * Heavily uses ML, more in recent years
+Module 3.0 - Efficiency
+=============================================
 
 
 
+Module 3.0
+------------
 
-Sentiment Classification
--------------------------
+   General Efficiency
+
+
+Today's Class
+----------------
 
 .. revealjs_fragments::
 
-   * Canonical sentence classification problem
+   * Motivation: NLP
+   * Efficiency Hurdles
+   * Fast Math
 
-   * Given sentence predict sentiment class
-
-   * Key aspects: word polarity
-
-
-Data
-------
-
-.. image:: figs/NLP/negative.png
-           :align: center
-
-Data
---------------------
-
-.. image:: figs/NLP/positive.png
-           :align: center
-
-Loss
------
-
-.. revealjs_fragments::
-
-   * Exactly the same as simple problem!
-
-
-
-Training
----------
-
-.. revealjs_fragments::
-
-   * Exactly the same as simple problem!
-
-
-Model
----------
-
-.. revealjs_fragments::
-
-   * Mostly similar to the simple problem.
-
-
-Modeling Challenges
---------------------
-
-.. revealjs_fragments::
-
-   * Converting words to vectors
-   * Sentences of arbitrary length
-   * Handling word combinations
-
-
-Challenge: Vector Form
-------------------------
-
-.. image:: figs/NLP/onehot.png
-           :align: center
-
-Challenge: Vector Form
-------------------------
-
-.. image:: figs/NLP/senthot.png
-           :align: center
-
+NLP
+=============
 
 Embedding Table
 ------------------------
@@ -91,24 +29,287 @@ Embedding Table
 .. image:: figs/NLP/embweight.png
            :align: center
 
+
 Embedding One
 ------------------------
-
 
 .. image:: figs/NLP/embone.png
            :align: center
 
-Reduction
-------------------------
 
-.. image:: figs/NLP/pooling.png
+Challenge: Length Dimension
+------------------------------
+
+.. image:: figs/NLP/senthot.png
            :align: center
 
-Network
+Full Model
 ------------------------
 
-.. image:: figs/NLP/sentemb.png
+.. image:: figs/NLP/full.png
            :align: center
+
+
+Lecture Quiz
+-------------
+
+  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/170331>`_
+
+
+
+Intuition: Split 1
+--------------------------
+
+
+.. image:: figs/Graphs/split1.png
+           :align: center
+           :width: 300px
+
+
+Intuition: Split 2
+--------------------------
+
+.. image:: figs/Graphs/split2.png
+           :align: center
+           :width: 300px
+
+
+Motivation
+------------
+
+.. revealjs_fragments::
+
+   * More splits, more flexibility
+   * Faster code, more splits.
+
+
+Efficiency
+===========
+
+Context
+---------
+
+.. revealjs_fragments::
+
+   * We now have a pytorch
+   * All wrappers around `ops`
+   * Need to make `ops` fast
+
+Goal
+---------
+
+Optimize the heck out of:
+
+.. revealjs_fragments::
+
+   * map
+   * zip
+   * reduce
+
+Code
+---------
+
+Example map ::
+
+   for i in range(len(out)):
+       count(i, out_shape, out_index)
+       broadcast_index(out_index, out_shape, in_shape, in_index)
+       o = index_to_position(out_index, out_strides)
+       j = index_to_position(in_index, in_strides)
+       out[o] = fn(in_storage[j])
+
+
+Why are Python (and friends) "slow"?
+-------------------------------------
+
+.. revealjs_fragments::
+
+   * Function calls
+   * Types
+   * Loops
+
+
+Function Calls
+---------------
+
+* Function calls are not free and don't get `inlined`
+* Checks for args, special keywords and variable lists
+* Methods check for overrides and class inheritance
+
+Types
+------
+
+Critical code  ::
+
+  out[o] = in_storage[j] + 3
+
+
+* Doesn't know type of `in_storage[j]`
+* May need to coerce 3 to float or raise error
+* May even call `__add__` or `__ladd__`!
+
+Loops
+------
+
+* Loops are always run as is.
+* Can't combine similar loops or pull out constant computation.
+* Very hard to run anything in parallel.
+
+Other
+-----
+
+Many other slow things...
+
+* Lists
+* Classes
+* Magic of all kind
+
+
+Fast Math
+==========
+
+Alternative 1: Low-level
+------------------------
+
+Pros:
+
+* Fastest option
+* Commonly used
+
+Cons: Harder to modify
+
+Example: Torch, Numpy
+
+Alternative 2: New Languages
+-----------------------------
+
+Pros:
+
+* Keeps code simple
+* Can be quite fast
+
+Cons: Lose tools and experience
+
+Example: Julia
+
+Alternative 3: Compile Python
+-----------------------------
+
+Pros:
+
+* "Same" language
+* Integrate code
+
+Cons: A bit hacky :)
+
+Example: Numba
+
+Numba
+------
+
+* Python library for speeding up numerical python
+* API: Higher-order functions to produce fast mathmatical code
+* `Numba <https://numba.pydata.org/numba-doc/latest/user/5minguide.html>`_
+
+
+How does it work?
+-----------------
+
+Work ::
+
+
+  def my_code(x, y):
+     for i in range(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit()(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+Notebook
+---------
+
+`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
+
+
+Terminology : JIT Compiler
+--------------------------
+
+* Just-in-time
+* Waits until you call a function to compile it
+* Specializes code based on the argument types given.
+
+
+Terminology : LLVM
+-------------------
+
+* Underlying compiler framework to generate code
+* Used by many different languages (C++, Swift, Rust, ...)
+* Generates efficient machine code for the system
+
+
+What do we lose?
+----------------
+
+* `njit` will fail for many python operations
+* No lists, classes, python functions allowed
+* Any different types will cause recompilation
+
+
+Strategy
+--------
+
+* Use Python for general operations
+* Use Numba for the core tensor ops
+* Allow users to add new Numba functions
+
+
+Code Transformation
+----------------------
+
+Transform ::
+
+  def my_code(x, y):
+     for i in prange(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit(parallel=True)(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+
+Module 3
+==========
+
+Task 3.1
+---------
+  Parallel
+
+Task 3.2
+---------
+  Matrix Mult
+
+
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+Task 3.3
+---------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+
+Task 3.4
+---------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+Task 3.5
+---------
+
+  Train
 
 Q&A
 ----
