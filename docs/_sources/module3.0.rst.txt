@@ -1,33 +1,153 @@
 
 
-Module 3.0 - Efficiency
-=============================================
 
+Module 3.0 - Efficiency 
+=============================================
 
 
 Module 3.0
 ------------
 
-   General Efficiency
+  Efficiency 
 
 
-Today's Class
-----------------
+Outline
+---------
 
 .. revealjs_fragments::
 
-   * Motivation: NLP
-   * Efficiency Hurdles
+   * Motivating Example: Simple NLP
+   * Efficiency
    * Fast Math
+   * Parallelism
 
-NLP
-=============
+Simple NLP
+===========
+
+Classification in NLP
+----------------------------
+
+.. revealjs_fragments::
+
+
+   * Systems for predicting based on word features
+
+
+Sentiment Classification
+-------------------------
+
+.. revealjs_fragments::
+
+   * Canonical sentence classification problem
+
+   * Given sentence predict sentiment class
+
+   * Key aspects: word polarity
+
+
+Data
+------
+
+.. image:: figs/NLP/negative.png
+           :align: center
+
+Data
+--------------------
+
+.. image:: figs/NLP/positive.png
+           :align: center
+
+Loss
+-----
+
+.. revealjs_fragments::
+
+   * Same as our basic problem.
+
+.. image:: figs/NLP/weight.png
+           :align: center
+
+
+
+Training
+---------
+
+.. revealjs_fragments::
+
+   * Same as our basic problem.
+
+
+Problem Setup
+---------------
+
+.. revealjs_fragments::
+
+   * Training: Exactly the same as simple
+   * Loss: Exactly the same as simple
+   * Models: Mostly similar to the simple problem.
+
+
+
+Modeling Challenges
+--------------------
+
+.. revealjs_fragments::
+
+   1) Converting words to tensors
+   2) Converting sentences to tensors
+   3) Handling word combinations
+
+
+Word -> Tensors
+===============
+
+
+What is a word?
+----------------
+
+.. revealjs_fragments::
+   * Treat words as index in vocabulary
+   * Represent as a one-hot vector
+
+Challenge1: Vector Form
+------------------------
+
+.. image:: figs/NLP/onehot.png
+           :align: center
+
+
+One-Hot Issue
+--------------
+
+.. revealjs_fragments::
+
+   * Tens of thousands of words
+   * Opposite problem as before, 2-features to 10,000
+   * ``Embedding'' represent high-dim space in low dim
+
 
 Embedding Table
 ------------------------
 
 .. image:: figs/NLP/embweight.png
            :align: center
+
+Intuition: Lookup in Table
+---------------------------
+
+Get word vector ::
+
+  embeddings[word]
+
+* Challenge:  How to compute `backward`
+
+
+Alternative: Lookup by broadcast
+------------------------------------
+
+Get word vector ::
+
+   (embeddings * word_one_hot.view(VOCAB, 1)).sum(0)
 
 
 Embedding One
@@ -36,6 +156,78 @@ Embedding One
 .. image:: figs/NLP/embone.png
            :align: center
 
+How does this share information?
+---------------------------------
+
+.. revealjs_fragments::
+   * Similar words have similar embedding dim
+
+   * Dot-product - easy way to tell similarity ::
+
+       (word_emb1 * word_emb2).sum()
+
+   * Differentiable!
+
+
+Embedding Layer
+----------------
+
+Easy to write as a layer ::
+
+  class Embedding(minitorch.Module):
+    def __init__(self, vocab_size, emb_size):
+        super().__init__()
+        self.weights = \
+          minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+        self.vocab_size = vocab_size
+
+    def forward(input):
+        return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)
+
+Where do these come from?
+--------------------------
+
+.. revealjs_fragments::
+
+   * Trained from a different model
+   * Extracted and posted to use
+   * (Many more details in NLP class)
+
+Examples
+-----------
+
+Embeddings ::
+
+  embedding.weights.value.update(pretrained_weights)
+
+* https://projector.tensorflow.org/
+
+Examples
+-----------
+
+Query 1 ::
+
+   ^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$
+
+Query 2 ::
+
+  ^(doctor|patient|lawyer|client|clerk|customer|author|reader)$
+
+
+
+
+Challenge 2 : Sentence Length
+==============================
+
+
+Sentence Length
+-----------------
+
+.. revealjs_fragments::
+
+   * Examples may be of different length
+   * Need to all be converted to vectors and utilized
+
 
 Challenge: Length Dimension
 ------------------------------
@@ -43,44 +235,49 @@ Challenge: Length Dimension
 .. image:: figs/NLP/senthot.png
            :align: center
 
+Value Transformation
+---------------------
+
+.. revealjs_fragments::
+
+   * batch x length x vocab
+   * batch x length x feature
+   * batch x feature
+   * batch x hidden
+   * batch
+
+Network
+------------------------
+
+.. image:: figs/NLP/sentemb.png
+           :align: center
+
+
+Reduction / "Pooling"
+------------------------
+
+.. image:: figs/NLP/pooling.png
+           :align: center
+
+
+Benefits
+----------
+
+* Extremely simple
+* Embeddings encode key information
+* Have all the tools we need
+
+
 Full Model
 ------------------------
 
 .. image:: figs/NLP/full.png
            :align: center
 
+Engineering Challenge
+----------------------
 
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/170331>`_
-
-
-
-Intuition: Split 1
---------------------------
-
-
-.. image:: figs/Graphs/split1.png
-           :align: center
-           :width: 300px
-
-
-Intuition: Split 2
---------------------------
-
-.. image:: figs/Graphs/split2.png
-           :align: center
-           :width: 300px
-
-
-Motivation
-------------
-
-.. revealjs_fragments::
-
-   * More splits, more flexibility
-   * Faster code, more splits.
+* We have a model, how do we scale it? 
 
 
 Efficiency
@@ -98,9 +295,7 @@ Context
 Goal
 ---------
 
-Optimize the heck out of:
-
-.. revealjs_fragments::
+Optimize:
 
    * map
    * zip
@@ -132,8 +327,10 @@ Why are Python (and friends) "slow"?
 Function Calls
 ---------------
 
-* Function calls are not free and don't get `inlined`
-* Checks for args, special keywords and variable lists
+* Function calls are not free 
+  
+* Checks for args, special keywords and lists
+  
 * Methods check for overrides and class inheritance
 
 Types
@@ -278,6 +475,171 @@ Transform ::
   fast_my_code = numba.njit(parallel=True)(my_code)
   fast_my_code(x, y)
   fast_my_code(x, y)
+
+Parallel
+========
+
+Parallel
+---------
+
+.. revealjs_fragments::
+
+   * Run code on multiple threads
+   * Particularly suited for map / zip
+   * Baby steps towards GPU
+
+
+Parallel Range
+---------------
+
+.. revealjs_fragments::
+
+   * Replace `for` loops with parallel version
+   * Tells compiler it can run in any order
+   * Be careful! Ideally these loops don't change anything
+
+Code Transformation
+----------------------
+
+Transform ::
+
+  def my_code(x, y):
+     for i in prange(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit(parallel=True)(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+
+
+Nondeterminism
+----------------
+
+.. revealjs_fragments::
+
+   * No guarantee on ordering
+   * Need to be careful with reductions
+   * Speedups will depend on system
+
+Notebook
+---------
+
+`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
+
+
+Parallel Bugs
+-------------
+
+.. revealjs_fragments::
+
+   * Warning! Nasty bugs
+   * Tests failing randomly
+   * Crashes due to out-of-bounds
+
+
+Parallel Diagnostics
+---------------------
+
+* Diagnostics give parallel compilation
+* Useful to see if you are getting benefits
+
+Operator Fusion
+================
+
+User API
+---------
+
+* Basic mathematical operations
+* Chained together as boxes with broadcasting
+* Optimize within each individually
+
+
+Fusion
+-------
+
+* Optimization across operator boundary
+* Save speed or memory in by avoiding extra forward/backward
+* Can open even great optimization gains
+
+Automatic Fusion
+----------------
+
+* Compiled language can automatically fuse operators
+* Major area of research
+* Example: TVM, XLA, ONXX
+
+Automatic Fusion
+----------------
+
+.. image:: expgraph2.png
+           :align: center
+
+
+Manual Fusion
+--------------
+
+* Utilize a pre-fused operator when needed
+* Standard libraries for implementations
+
+
+
+Example: Matmul
+-------------------
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmulsimple.png
+           :align: center
+
+Advantages
+-----------
+
+* No three dimensional intermediate
+* No `save_for_backwards`
+* Can use core matmul libraries (in the future)
+
+
+Computations
+-----------------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+
+Starter Code
+-------------
+
+* Walk through output.
+* Find row and column of input
+* Simultaneous zip / reduce.
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul\ back.png
+           :align: center
+
+
+Matrix Multiply
+---------------
+.. math::
+
+   \begin{eqnarray*}
+   f(M, N) &=&  M N \\
+   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} N^\top \\
+   g'_N(f(M, N)) &=&  M^\top \text{grad}_{\text{out}}
+   \end{eqnarray*}
+
 
 
 Module 3

@@ -39,3 +39,9 @@ Midterm Review |logo|
 ----------------------
 
 * :doc:`review` - `(pdf) <review.html?print-pdf>`_
+
+Module 3 |logo|
+-----------------
+
+* :doc:`module3.0` - `(pdf) <module3.0.html?print-pdf>`_
+* :doc:`module3.1` - `(pdf) <module3.1.html?print-pdf>`_

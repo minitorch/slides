@@ -38,55 +38,209 @@
 <section >
 <h2>Module 3.0</h2>
 <blockquote>
-<div><p>General Efficiency</p>
+<div><p>Efficiency</p>
 </div></blockquote>
 </section>
 <section >
-<h2>Today's Class</h2>
+<h2>Outline</h2>
 <ul class="simple">
-<li class="fragment"><p>Motivation: NLP</p></li>
-<li class="fragment"><p>Efficiency Hurdles</p></li>
+<li class="fragment"><p>Motivating Example: Simple NLP</p></li>
+<li class="fragment"><p>Efficiency</p></li>
 <li class="fragment"><p>Fast Math</p></li>
+<li class="fragment"><p>Parallelism</p></li>
 </ul>
 </section>
 <section >
-<h1>NLP</h1>
+<h1>Simple NLP</h1>
+</section>
+<section >
+<h2>Classification in NLP</h2>
+<ul class="simple">
+<li class="fragment"><p>Systems for predicting based on word features</p></li>
+</ul>
+</section>
+<section >
+<h2>Sentiment Classification</h2>
+<ul class="simple">
+<li class="fragment"><p>Canonical sentence classification problem</p></li>
+<li class="fragment"><p>Given sentence predict sentiment class</p></li>
+<li class="fragment"><p>Key aspects: word polarity</p></li>
+</ul>
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
+</section>
+<section >
+<h2>Loss</h2>
+<ul class="simple">
+<li class="fragment"><p>Same as our basic problem.</p></li>
+</ul>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+</section>
+<section >
+<h2>Training</h2>
+<ul class="simple">
+<li class="fragment"><p>Same as our basic problem.</p></li>
+</ul>
+</section>
+<section >
+<h2>Problem Setup</h2>
+<ul class="simple">
+<li class="fragment"><p>Training: Exactly the same as simple</p></li>
+<li class="fragment"><p>Loss: Exactly the same as simple</p></li>
+<li class="fragment"><p>Models: Mostly similar to the simple problem.</p></li>
+</ul>
+</section>
+<section >
+<h2>Modeling Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>Converting words to tensors</p></li>
+<li class="fragment"><p>Converting sentences to tensors</p></li>
+<li class="fragment"><p>Handling word combinations</p></li>
+</ol>
+</section>
+<section >
+<h1>Word -&gt; Tensors</h1>
+</section>
+<section >
+<h2>What is a word?</h2>
+<ul class="simple">
+<li class="fragment"><p>Treat words as index in vocabulary</p></li>
+<li class="fragment"><p>Represent as a one-hot vector</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge1: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>One-Hot Issue</h2>
+<ul class="simple">
+<li class="fragment"><p>Tens of thousands of words</p></li>
+<li class="fragment"><p>Opposite problem as before, 2-features to 10,000</p></li>
+<li class="fragment"><p><a href="#id2"><span class="problematic" id="id3">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
+</ul>
 </section>
 <section >
 <h2>Embedding Table</h2>
 <img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
 </section>
 <section >
+<h2>Intuition: Lookup in Table</h2>
+<p>Get word vector</p>
+<pre data-id="intuition-lookup-in-table"><code data-trim data-noescape class="python">embeddings[word]</code></pre>
+<ul class="simple">
+<li><p>Challenge:  How to compute <cite>backward</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Alternative: Lookup by broadcast</h2>
+<p>Get word vector</p>
+<pre data-id="alternative-lookup-by-broadcast"><code data-trim data-noescape class="python">(embeddings * word_one_hot.view(VOCAB, 1)).sum(0)</code></pre>
+</section>
+<section >
 <h2>Embedding One</h2>
 <img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>How does this share information?</h2>
+<ul>
+<li class="fragment"><p>Similar words have similar embedding dim</p></li>
+<li class="fragment"><p>Dot-product - easy way to tell similarity</p>
+<pre><code data-trim data-noescape class="python">(word_emb1 * word_emb2).sum()</code></pre>
+</li>
+<li class="fragment"><p>Differentiable!</p></li>
+</ul>
+</section>
+<section >
+<h2>Embedding Layer</h2>
+<p>Easy to write as a layer</p>
+<pre data-id="embedding-layer"><code data-trim data-noescape class="python">class Embedding(minitorch.Module):
+  def __init__(self, vocab_size, emb_size):
+      super().__init__()
+      self.weights = \
+        minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+      self.vocab_size = vocab_size
+
+  def forward(input):
+      return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Where do these come from?</h2>
+<ul class="simple">
+<li class="fragment"><p>Trained from a different model</p></li>
+<li class="fragment"><p>Extracted and posted to use</p></li>
+<li class="fragment"><p>(Many more details in NLP class)</p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Embeddings</p>
+<pre data-id="examples"><code data-trim data-noescape class="python">embedding.weights.value.update(pretrained_weights)</code></pre>
+<ul class="simple">
+<li><p><a class="reference external" href="https://projector.tensorflow.org/">https://projector.tensorflow.org/</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Query 1</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
+<p>Query 2</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
+</section>
+<section >
+<h1>Challenge 2 : Sentence Length</h1>
+</section>
+<section >
+<h2>Sentence Length</h2>
+<ul class="simple">
+<li class="fragment"><p>Examples may be of different length</p></li>
+<li class="fragment"><p>Need to all be converted to vectors and utilized</p></li>
+</ul>
 </section>
 <section >
 <h2>Challenge: Length Dimension</h2>
 <img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
 </section>
 <section >
+<h2>Value Transformation</h2>
+<ul class="simple">
+<li class="fragment"><p>batch x length x vocab</p></li>
+<li class="fragment"><p>batch x length x feature</p></li>
+<li class="fragment"><p>batch x feature</p></li>
+<li class="fragment"><p>batch x hidden</p></li>
+<li class="fragment"><p>batch</p></li>
+</ul>
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Benefits</h2>
+<ul class="simple">
+<li><p>Extremely simple</p></li>
+<li><p>Embeddings encode key information</p></li>
+<li><p>Have all the tools we need</p></li>
+</ul>
+</section>
+<section >
 <h2>Full Model</h2>
 <img alt="_images/full.png" class="align-center" src="_images/full.png" />
 </section>
 <section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/170331">Quiz</a></p>
-</div></blockquote>
-</section>
-<section >
-<h2>Intuition: Split 1</h2>
-<a class="reference internal image-reference" href="_images/split1.png"><img alt="_images/split1.png" class="align-center" src="_images/split1.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Intuition: Split 2</h2>
-<a class="reference internal image-reference" href="_images/split2.png"><img alt="_images/split2.png" class="align-center" src="_images/split2.png" style="width: 300px;" /></a>
-</section>
-<section >
-<h2>Motivation</h2>
+<h2>Engineering Challenge</h2>
 <ul class="simple">
-<li class="fragment"><p>More splits, more flexibility</p></li>
-<li class="fragment"><p>Faster code, more splits.</p></li>
+<li><p>We have a model, how do we scale it?</p></li>
 </ul>
 </section>
 <section >
@@ -102,12 +256,14 @@
 </section>
 <section >
 <h2>Goal</h2>
-<p>Optimize the heck out of:</p>
-<ul class="simple">
-<li class="fragment"><p>map</p></li>
-<li class="fragment"><p>zip</p></li>
-<li class="fragment"><p>reduce</p></li>
+<p>Optimize:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>map</p></li>
+<li><p>zip</p></li>
+<li><p>reduce</p></li>
 </ul>
+</div></blockquote>
 </section>
 <section >
 <h2>Code</h2>
@@ -130,8 +286,8 @@
 <section >
 <h2>Function Calls</h2>
 <ul class="simple">
-<li><p>Function calls are not free and don't get <cite>inlined</cite></p></li>
-<li><p>Checks for args, special keywords and variable lists</p></li>
+<li><p>Function calls are not free</p></li>
+<li><p>Checks for args, special keywords and lists</p></li>
 <li><p>Methods check for overrides and class inheritance</p></li>
 </ul>
 </section>
@@ -262,6 +418,147 @@ my_code(x, y)
 fast_my_code = numba.njit(parallel=True)(my_code)
 fast_my_code(x, y)
 fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h1>Parallel</h1>
+</section>
+<section >
+<h2>Parallel</h2>
+<ul class="simple">
+<li class="fragment"><p>Run code on multiple threads</p></li>
+<li class="fragment"><p>Particularly suited for map / zip</p></li>
+<li class="fragment"><p>Baby steps towards GPU</p></li>
+</ul>
+</section>
+<section >
+<h2>Parallel Range</h2>
+<ul class="simple">
+<li class="fragment"><p>Replace <cite>for</cite> loops with parallel version</p></li>
+<li class="fragment"><p>Tells compiler it can run in any order</p></li>
+<li class="fragment"><p>Be careful! Ideally these loops don't change anything</p></li>
+</ul>
+</section>
+<section >
+<h2>Code Transformation</h2>
+<p>Transform</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in prange(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit(parallel=True)(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>Nondeterminism</h2>
+<ul class="simple">
+<li class="fragment"><p>No guarantee on ordering</p></li>
+<li class="fragment"><p>Need to be careful with reductions</p></li>
+<li class="fragment"><p>Speedups will depend on system</p></li>
+</ul>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
+</section>
+<section >
+<h2>Parallel Bugs</h2>
+<ul class="simple">
+<li class="fragment"><p>Warning! Nasty bugs</p></li>
+<li class="fragment"><p>Tests failing randomly</p></li>
+<li class="fragment"><p>Crashes due to out-of-bounds</p></li>
+</ul>
+</section>
+<section >
+<h2>Parallel Diagnostics</h2>
+<ul class="simple">
+<li><p>Diagnostics give parallel compilation</p></li>
+<li><p>Useful to see if you are getting benefits</p></li>
+</ul>
+</section>
+<section >
+<h1>Operator Fusion</h1>
+</section>
+<section >
+<h2>User API</h2>
+<ul class="simple">
+<li><p>Basic mathematical operations</p></li>
+<li><p>Chained together as boxes with broadcasting</p></li>
+<li><p>Optimize within each individually</p></li>
+</ul>
+</section>
+<section >
+<h2>Fusion</h2>
+<ul class="simple">
+<li><p>Optimization across operator boundary</p></li>
+<li><p>Save speed or memory in by avoiding extra forward/backward</p></li>
+<li><p>Can open even great optimization gains</p></li>
+</ul>
+</section>
+<section >
+<h2>Automatic Fusion</h2>
+<ul class="simple">
+<li><p>Compiled language can automatically fuse operators</p></li>
+<li><p>Major area of research</p></li>
+<li><p>Example: TVM, XLA, ONXX</p></li>
+</ul>
+</section>
+<section >
+<h2>Automatic Fusion</h2>
+<img alt="expgraph2.png" class="align-center" src="expgraph2.png" />
+</section>
+<section >
+<h2>Manual Fusion</h2>
+<ul class="simple">
+<li><p>Utilize a pre-fused operator when needed</p></li>
+<li><p>Standard libraries for implementations</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
+</section>
+<section >
+<h2>Matmul Simple</h2>
+<img alt="_images/matmulsimple.png" class="align-center" src="_images/matmulsimple.png" />
+</section>
+<section >
+<h2>Advantages</h2>
+<ul class="simple">
+<li><p>No three dimensional intermediate</p></li>
+<li><p>No <cite>save_for_backwards</cite></p></li>
+<li><p>Can use core matmul libraries (in the future)</p></li>
+</ul>
+</section>
+<section >
+<h2>Computations</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Starter Code</h2>
+<ul class="simple">
+<li><p>Walk through output.</p></li>
+<li><p>Find row and column of input</p></li>
+<li><p>Simultaneous zip / reduce.</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul back.png" class="align-center" src="_images/matmul back.png" />
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+f(M, N) &amp;=&amp;  M N \\
+g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} N^\top \\
+g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
+\end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
 <h1>Module 3</h1>

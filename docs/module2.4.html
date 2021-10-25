@@ -42,51 +42,7 @@
 </div></blockquote>
 </section>
 <section >
-<h1>Start</h1>
-</section>
-<section >
-<h2>Shape Maniputation</h2>
-<ul>
-<li><p>Permutation</p>
-<pre><code data-trim data-noescape class="python">tensor.permute(1, 0)</code></pre>
-</li>
-</ul>
-<img alt="_images/matrix1.png" src="_images/matrix1.png" />
-<img alt="_images/matrix2.png" src="_images/matrix2.png" />
-</section>
-<section >
-<h2>Shape Maniputation</h2>
-<ul>
-<li><p>Permutation</p>
-<pre><code data-trim data-noescape class="python">tensor.permute(2, 1, 0, 3)</code></pre>
-</li>
-</ul>
-<p>Rearranges dims in order given.</p>
-</section>
-<section >
-<h2>How does this work</h2>
-<ul class="simple">
-<li><p><strong>Storage</strong> :  1-D array of numbers of length <cite>size</cite></p></li>
-<li><p><strong>Strides</strong> : tuple that provides the mapping from user <cite>indexing</cite>
-to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
-</ul>
-</section>
-<section >
-<h2>Tensor Functions</h2>
-<p>Unary</p>
-<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor.log()</code></pre>
-<p>Binary (for now, only same shape)</p>
-<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor1 + tensor2</code></pre>
-<p>Reductions</p>
-<pre data-id="tensor-functions"><code data-trim data-noescape class="python">new_tensor = tensor.sum()</code></pre>
-</section>
-<section >
-<h2>Tensor Ops</h2>
-<ol class="arabic simple">
-<li class="fragment"><p><strong>Map</strong> - Apply to all elements</p></li>
-<li class="fragment"><p><strong>Zip</strong> (same as zipWith) - Apply to all pairs</p></li>
-<li class="fragment"><p><strong>Reduce</strong> - Reduce a subset</p></li>
-</ol>
+<h1>Review</h1>
 </section>
 <section >
 <h2>Zip With Broadcasting</h2>
@@ -95,7 +51,7 @@ to the <cite>position</cite> in the 1-D <cite>storage</cite>.</p></li>
 <section >
 <h2>Zip With Broadcasting</h2>
 <p>Code</p>
-<pre data-id="id2"><code data-trim data-noescape class="python">out = zeros(3, 2)
+<pre data-id="id1"><code data-trim data-noescape class="python">out = zeros(3, 2)
 for i in range(3):
     for j in range(2):
         out[i, j] = a[i] + b[j]</code></pre>
@@ -129,58 +85,20 @@ for i in range(3):
 <img alt="_images/reduce back.png" class="align-center" src="_images/reduce back.png" />
 </section>
 <section >
-<h2>Zip Broadcasting</h2>
-<img alt="_images/zip broad.png" src="_images/zip broad.png" />
-</section>
-<section >
 <h2>Example: Negative</h2>
-<div class="math notranslate nohighlight">
-\[f(x) = -x\]</div>
 <img alt="_images/map.png" class="align-center" src="_images/map.png" />
 </section>
 <section >
 <h2>Example: Negative Back</h2>
-<div class="math notranslate nohighlight">
-\[d \times f'(x) = -d\]</div>
 <img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
 </section>
 <section >
 <h2>Example: Inverse</h2>
-<div class="math notranslate nohighlight">
-\[f(x) = 1/x\]</div>
 <img alt="_images/map.png" class="align-center" src="_images/map.png" />
 </section>
 <section >
 <h2>Example: Inverse Back</h2>
-<div class="math notranslate nohighlight">
-\[d \times f'(x) = d \times -x^2\]</div>
 <img alt="_images/map back.png" class="align-center" src="_images/map back.png" />
-</section>
-<section >
-<h2>Matrix-vector operations</h2>
-<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
-</section>
-<section >
-<h2>Backwards (Expand)</h2>
-<img alt="_images/vector.png" class="align-center" src="_images/vector.png" />
-</section>
-<section >
-<h2>Backwards (Expand)</h2>
-<p>Rules:</p>
-<ul class="simple">
-<li><p>You can return gradient for broadcasted input.</p></li>
-<li><p>Autodiff will collapse it to the original size.</p></li>
-</ul>
-</section>
-<section >
-<h2>Chain Rule</h2>
-<p>If a variable is used twice, derivative is the use paths.</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{eqnarray*}
-z_1 &amp;=&amp; g(x) \\
-z_2 &amp;=&amp; h(x) \\
-f'_x(g(x), h(x)) &amp;=&amp; g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
-\end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
 <h2>Quiz</h2>
@@ -199,20 +117,25 @@ f'_x(g(x), h(x)) &amp;=&amp; g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{
 <h1>Training</h1>
 </section>
 <section >
-<h2>Reminder</h2>
-<ul class="simple">
-<li><p>Dataset - Data to fit</p></li>
-<li><p>Model - Shape of fit</p></li>
-<li><p>Loss - Goodness of fit</p></li>
-</ul>
+<h2>Parameter Fitting</h2>
+<ol class="arabic simple">
+<li><p>Compute the loss function, <span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span></p></li>
+<li><p>See how small changes would change the loss</p></li>
+<li><p>Update to parameters to locally reduce the loss</p></li>
+</ol>
 </section>
 <section >
-<h2>Linear Model Example</h2>
-<ul class="simple">
-<li><p>Parameters</p></li>
-</ul>
-<a class="reference internal image-reference" href="_images/weight.png"><img alt="_images/weight.png" class="align-center" src="_images/weight.png" style="width: 400px;" /></a>
-<a class="reference internal image-reference" href="_images/bias.png"><img alt="_images/bias.png" class="align-center" src="_images/bias.png" style="width: 400px;" /></a>
+<h2>Batching</h2>
+<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
+</section>
+<section >
+<h2>Loss</h2>
+<ol class="arabic">
+<li><p>Compute Loss</p>
+<pre><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
+loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
+</li>
+</ol>
 </section>
 <section >
 <h2>Model: Math</h2>
@@ -223,57 +146,6 @@ h_ 1 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^0, b^0)) \\
 h_ 2 &amp;=&amp; \text{ReLU}(\text{lin}(x; w^1, b^1))\\
 m(x_1, x_2) &amp;=&amp; \text{lin}(h; w, b)
 \end{eqnarray*}\end{split}\]</div>
-</section>
-<section >
-<h2>Implementation Tricks</h2>
-<ul class="simple">
-<li><p>Batching -&gt; Compute the loss on many examples.</p></li>
-<li><p>Parameters -&gt; Store all in Tensors.</p></li>
-<li><p>Opt -&gt; Decide how to change the parameters</p></li>
-</ul>
-</section>
-<section >
-<h2>Batching</h2>
-<img alt="_images/batch.png" class="align-center" src="_images/batch.png" />
-</section>
-<section >
-<h2>Batching</h2>
-<ul class="simple">
-<li><p>Extra dimension on all the data.</p></li>
-<li><p>Will be very important for future assignments</p></li>
-</ul>
-</section>
-<section >
-<h2>Parameters</h2>
-<ul class="simple">
-<li><p>Tensors inside the model.</p></li>
-<li><p>Receive the gradient updates</p></li>
-<li><p><cite>Accumumlated</cite> i.e. summed for each update</p></li>
-</ul>
-</section>
-<section >
-<h2>Optimizer</h2>
-<ul class="simple">
-<li><p>Decide how to update the parameters.</p></li>
-<li><p>Example</p></li>
-</ul>
-</section>
-<section >
-<h2>Parameter Fitting</h2>
-<ol class="arabic simple">
-<li><p>Compute the loss function, <span class="math notranslate nohighlight">\(L(w_1, w_2, b)\)</span></p></li>
-<li><p>See how small changes would change the loss</p></li>
-<li><p>Update to parameters to locally reduce the loss</p></li>
-</ol>
-</section>
-<section >
-<h2>Loss</h2>
-<ol class="arabic">
-<li><p>Compute Loss</p>
-<pre><code data-trim data-noescape class="python">out = model.forward(X).view(data.N)
-loss = -((out * y) + (out - 1.0) * (y - 1.0)).log()</code></pre>
-</li>
-</ol>
 </section>
 <section >
 <h2>Model: Code</h2>
@@ -342,6 +214,198 @@ print(model.layer1.w_1.value.grad)</code></pre>
 <li class="fragment"><p>Exactly the same function as Module-1</p></li>
 <li class="fragment"><p>No loops within tensors</p></li>
 </ul>
+</section>
+<section >
+<h1>Simple NLP</h1>
+</section>
+<section >
+<h2>Context</h2>
+<ul class="simple">
+<li class="fragment"><p>What are dimensions for?</p></li>
+<li class="fragment"><p>What does broadcasting buy us?</p></li>
+<li class="fragment"><p>What are non-spatial dimensions for?</p></li>
+</ul>
+</section>
+<section >
+<h2>Natural Language Processing</h2>
+<ul class="simple">
+<li><p>Systems for human language</p></li>
+<li><p>Broad area of study with lots of challenges</p></li>
+<li><p>Heavily uses ML, more in recent years</p></li>
+</ul>
+</section>
+<section >
+<h2>Sentiment Classification</h2>
+<ul class="simple">
+<li class="fragment"><p>Canonical sentence classification problem</p></li>
+<li class="fragment"><p>Given sentence predict sentiment class</p></li>
+<li class="fragment"><p>Key aspects: word polarity</p></li>
+</ul>
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
+</section>
+<section >
+<h2>Problem Setup</h2>
+<ul class="simple">
+<li class="fragment"><p>Training: Exactly the same as simple</p></li>
+<li class="fragment"><p>Loss: Exactly the same as simple</p></li>
+<li class="fragment"><p>Models: Mostly similar to the simple problem.</p></li>
+</ul>
+</section>
+<section >
+<h2>Modeling Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>Converting words to tensors</p></li>
+<li class="fragment"><p>Converting sentences to tensors</p></li>
+<li class="fragment"><p>Handling word combinations</p></li>
+</ol>
+</section>
+<section >
+<h1>Word -&gt; Tensors</h1>
+</section>
+<section >
+<h2>What is a word?</h2>
+<ul class="simple">
+<li class="fragment"><p>Treat words as index in vocabulary</p></li>
+<li class="fragment"><p>Represent as a one-hot vector</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge1: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>One-Hot Issue</h2>
+<ul class="simple">
+<li class="fragment"><p>Tens of thousands of words</p></li>
+<li class="fragment"><p>Opposite problem as before, 2-features to 10,000</p></li>
+<li class="fragment"><p><a href="#id2"><span class="problematic" id="id3">``</span></a>Embedding'' represent high-dim space in low dim</p></li>
+</ul>
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Intuition: Lookup in Table</h2>
+<p>Get word vector</p>
+<pre data-id="intuition-lookup-in-table"><code data-trim data-noescape class="python">embeddings[word]</code></pre>
+<ul class="simple">
+<li><p>Challenge:  How to compute <cite>backward</cite></p></li>
+</ul>
+</section>
+<section >
+<h2>Alternative: Lookup by broadcast</h2>
+<p>Get word vector</p>
+<pre data-id="alternative-lookup-by-broadcast"><code data-trim data-noescape class="python">(embeddings * word_one_hot.view(VOCAB, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>How does this share information?</h2>
+<ul>
+<li class="fragment"><p>Similar words have similar embedding dim</p></li>
+<li class="fragment"><p>Dot-product - easy way to tell similarity</p>
+<pre><code data-trim data-noescape class="python">(word_emb1 * word_emb2).sum()</code></pre>
+</li>
+<li class="fragment"><p>Differentiable!</p></li>
+</ul>
+</section>
+<section >
+<h2>Embedding Layer</h2>
+<p>Easy to write as a layer</p>
+<pre data-id="embedding-layer"><code data-trim data-noescape class="python">class Embedding(minitorch.Module):
+  def __init__(self, vocab_size, emb_size):
+      super().__init__()
+      self.weights = \
+        minitorch.Parameter(minitorch.rand((vocab_size, emb_size))
+      self.vocab_size = vocab_size
+
+  def forward(input):
+      return (self.weights.values * input.view(self.vocab_size, 1)).sum(0)</code></pre>
+</section>
+<section >
+<h2>Where do these come from?</h2>
+<ul class="simple">
+<li class="fragment"><p>Trained from a different model</p></li>
+<li class="fragment"><p>Extracted and posted to use</p></li>
+<li class="fragment"><p>(Many more details in NLP class)</p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Embeddings</p>
+<pre data-id="examples"><code data-trim data-noescape class="python">embedding.weights.value.update(pretrained_weights)</code></pre>
+<ul class="simple">
+<li><p><a class="reference external" href="https://projector.tensorflow.org/">https://projector.tensorflow.org/</a></p></li>
+</ul>
+</section>
+<section >
+<h2>Examples</h2>
+<p>Query 1</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">^(lisbon|portugal|america|washington|rome|athens|london|england|greece|italy)$</code></pre>
+<p>Query 2</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">^(doctor|patient|lawyer|client|clerk|customer|author|reader)$</code></pre>
+</section>
+<section >
+<h1>Challenge 2 : Sentence Length</h1>
+</section>
+<section >
+<h2>Sentence Length</h2>
+<ul class="simple">
+<li class="fragment"><p>Examples may be of different length</p></li>
+<li class="fragment"><p>Need to all be converted to vectors and utilized</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge: Length Dimension</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Value Transformation</h2>
+<ul class="simple">
+<li class="fragment"><p>batch x length x vocab</p></li>
+<li class="fragment"><p>batch x length x feature</p></li>
+<li class="fragment"><p>batch x feature</p></li>
+<li class="fragment"><p>batch x hidden</p></li>
+<li class="fragment"><p>batch</p></li>
+</ul>
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Benefits</h2>
+<ul class="simple">
+<li><p>Extremely simple</p></li>
+<li><p>Embeddings encode key information</p></li>
+<li><p>Have all the tools we need</p></li>
+</ul>
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Completely ignores relative order</p></li>
+<li><p>Completley ignores absolute order</p></li>
+<li><p>Embeddings for all words, even rare ones</p></li>
+</ul>
+</section>
+<section >
+<h2>Q&amp;A</h2>
 </section>
 
         </div>

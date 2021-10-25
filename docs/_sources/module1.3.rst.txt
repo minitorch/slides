@@ -274,7 +274,7 @@ Multivariable Chain
    \begin{eqnarray*}
    z_1 &=& g(x) \\
    z_2 &=& h(x) \\
-   f'_x(g(x), h(x)) &=& g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
+   f'_x(g(x), h(y)) &=& g'(x) \times f'_{z_1}(z_1, z_2) + h'(x) \times f'_{z_2}(z_1, z_2)
    \end{eqnarray*}
 
 
