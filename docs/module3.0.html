@@ -287,7 +287,7 @@
 <h2>Function Calls</h2>
 <ul class="simple">
 <li><p>Function calls are not free</p></li>
-<li><p>Checks for args, special keywords and lists</p></li>
+<li><p>Checks for args, special keywords andm lists</p></li>
 <li><p>Methods check for overrides and class inheritance</p></li>
 </ul>
 </section>
@@ -420,145 +420,8 @@ fast_my_code(x, y)
 fast_my_code(x, y)</code></pre>
 </section>
 <section >
-<h1>Parallel</h1>
-</section>
-<section >
-<h2>Parallel</h2>
-<ul class="simple">
-<li class="fragment"><p>Run code on multiple threads</p></li>
-<li class="fragment"><p>Particularly suited for map / zip</p></li>
-<li class="fragment"><p>Baby steps towards GPU</p></li>
-</ul>
-</section>
-<section >
-<h2>Parallel Range</h2>
-<ul class="simple">
-<li class="fragment"><p>Replace <cite>for</cite> loops with parallel version</p></li>
-<li class="fragment"><p>Tells compiler it can run in any order</p></li>
-<li class="fragment"><p>Be careful! Ideally these loops don't change anything</p></li>
-</ul>
-</section>
-<section >
-<h2>Code Transformation</h2>
-<p>Transform</p>
-<pre data-id="id7"><code data-trim data-noescape class="python">def my_code(x, y):
-   for i in prange(100):
-       x[i] = y + 20
-...
-my_code(x, y)
-fast_my_code = numba.njit(parallel=True)(my_code)
-fast_my_code(x, y)
-fast_my_code(x, y)</code></pre>
-</section>
-<section >
-<h2>Nondeterminism</h2>
-<ul class="simple">
-<li class="fragment"><p>No guarantee on ordering</p></li>
-<li class="fragment"><p>Need to be careful with reductions</p></li>
-<li class="fragment"><p>Speedups will depend on system</p></li>
-</ul>
-</section>
-<section >
 <h2>Notebook</h2>
 <p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
-</section>
-<section >
-<h2>Parallel Bugs</h2>
-<ul class="simple">
-<li class="fragment"><p>Warning! Nasty bugs</p></li>
-<li class="fragment"><p>Tests failing randomly</p></li>
-<li class="fragment"><p>Crashes due to out-of-bounds</p></li>
-</ul>
-</section>
-<section >
-<h2>Parallel Diagnostics</h2>
-<ul class="simple">
-<li><p>Diagnostics give parallel compilation</p></li>
-<li><p>Useful to see if you are getting benefits</p></li>
-</ul>
-</section>
-<section >
-<h1>Operator Fusion</h1>
-</section>
-<section >
-<h2>User API</h2>
-<ul class="simple">
-<li><p>Basic mathematical operations</p></li>
-<li><p>Chained together as boxes with broadcasting</p></li>
-<li><p>Optimize within each individually</p></li>
-</ul>
-</section>
-<section >
-<h2>Fusion</h2>
-<ul class="simple">
-<li><p>Optimization across operator boundary</p></li>
-<li><p>Save speed or memory in by avoiding extra forward/backward</p></li>
-<li><p>Can open even great optimization gains</p></li>
-</ul>
-</section>
-<section >
-<h2>Automatic Fusion</h2>
-<ul class="simple">
-<li><p>Compiled language can automatically fuse operators</p></li>
-<li><p>Major area of research</p></li>
-<li><p>Example: TVM, XLA, ONXX</p></li>
-</ul>
-</section>
-<section >
-<h2>Automatic Fusion</h2>
-<img alt="expgraph2.png" class="align-center" src="expgraph2.png" />
-</section>
-<section >
-<h2>Manual Fusion</h2>
-<ul class="simple">
-<li><p>Utilize a pre-fused operator when needed</p></li>
-<li><p>Standard libraries for implementations</p></li>
-</ul>
-</section>
-<section >
-<h2>Example: Matmul</h2>
-<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
-</section>
-<section >
-<h2>Example: Matmul</h2>
-<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
-</section>
-<section >
-<h2>Matmul Simple</h2>
-<img alt="_images/matmulsimple.png" class="align-center" src="_images/matmulsimple.png" />
-</section>
-<section >
-<h2>Advantages</h2>
-<ul class="simple">
-<li><p>No three dimensional intermediate</p></li>
-<li><p>No <cite>save_for_backwards</cite></p></li>
-<li><p>Can use core matmul libraries (in the future)</p></li>
-</ul>
-</section>
-<section >
-<h2>Computations</h2>
-<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
-</section>
-<section >
-<h2>Starter Code</h2>
-<ul class="simple">
-<li><p>Walk through output.</p></li>
-<li><p>Find row and column of input</p></li>
-<li><p>Simultaneous zip / reduce.</p></li>
-</ul>
-</section>
-<section >
-<h2>Example: Matmul</h2>
-<img alt="_images/matmul back.png" class="align-center" src="_images/matmul back.png" />
-</section>
-<section >
-<h2>Matrix Multiply</h2>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{eqnarray*}
-f(M, N) &amp;=&amp;  M N \\
-g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} N^\top \\
-g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
-\end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
 <h1>Module 3</h1>

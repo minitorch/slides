@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 3.1 - Efficiency</title>
+  <title>Module 3.1 - Parallelism</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -33,105 +33,12 @@
     <div class="reveal">
         <div class="slides">
             <section >
-<h1>Module 3.1 - Efficiency</h1>
+<h1>Module 3.1 - Parallelism</h1>
 </section>
 <section >
 <h2>Module 3.1</h2>
 <blockquote>
-<div><p>Network Efficiency</p>
-</div></blockquote>
-</section>
-<section >
-<h1>Module 3</h1>
-</section>
-<section >
-<h2>Task 3.1</h2>
-<blockquote>
-<div><p>Parallel</p>
-</div></blockquote>
-</section>
-<section >
-<h2>Task 3.2</h2>
-<blockquote>
-<div><p>Matrix Mult</p>
-</div></blockquote>
-<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
-</section>
-<section >
-<h2>Today's Class</h2>
-<ul class="simple">
-<li class="fragment"><p>Review: Numba</p></li>
-<li class="fragment"><p>Operator Fusion</p></li>
-<li class="fragment"><p>MatMul</p></li>
-</ul>
-</section>
-<section >
-<h1>Numba</h1>
-</section>
-<section >
-<h2>Alternative 3: Compile Python</h2>
-<p>Pros:</p>
-<ul class="simple">
-<li><p>&quot;Same&quot; language</p></li>
-<li><p>Integrate code</p></li>
-</ul>
-<p>Cons: A bit hacky :)</p>
-<p>Example: Numba</p>
-</section>
-<section >
-<h2>Function Calls</h2>
-<ul class="simple">
-<li><p>Function calls are not free and don't get <cite>inlined</cite></p></li>
-<li><p>Checks for args, special keywords and variable lists</p></li>
-<li><p>Methods check for overrides and class inheritance</p></li>
-</ul>
-</section>
-<section >
-<h2>Types</h2>
-<p>Critical code</p>
-<pre data-id="types"><code data-trim data-noescape class="python">out[o] = in_storage[j] + 3</code></pre>
-<ul class="simple">
-<li><p>Doesn't know type of <cite>in_storage[j]</cite></p></li>
-<li><p>May need to coerce 3 to float or raise error</p></li>
-<li><p>May even call <cite>__add__</cite> or <cite>__ladd__</cite>!</p></li>
-</ul>
-</section>
-<section >
-<h2>Numba</h2>
-<ul class="simple">
-<li><p>Python library for speeding up numerical python</p></li>
-<li><p>API: Higher-order functions to produce fast mathmatical code</p></li>
-<li><p><a class="reference external" href="https://numba.pydata.org/numba-doc/latest/user/5minguide.html">Numba</a></p></li>
-</ul>
-</section>
-<section >
-<h2>How does it work?</h2>
-<p>Numba</p>
-<pre data-id="how-does-it-work"><code data-trim data-noescape class="python">def my_code(x, y):
-   for i in range(100):
-       x[i] = y + 20
-...
-my_code(x, y)
-fast_my_code = numba.njit()(my_code)
-fast_my_code(x, y)
-fast_my_code(x, y)</code></pre>
-</section>
-<section >
-<h2>What do we lose?</h2>
-<ul class="simple">
-<li><p><cite>njit</cite> will fail for many python operations</p></li>
-<li><p>No lists, classes, python functions allowed</p></li>
-<li><p>Any different types will cause recompilation</p></li>
-</ul>
-</section>
-<section >
-<h2>Notebook</h2>
-<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
-</section>
-<section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/170828">Quiz</a></p>
+<div><p>Efficiency</p>
 </div></blockquote>
 </section>
 <section >
@@ -172,10 +79,6 @@ fast_my_code(x, y)</code></pre>
 <li class="fragment"><p>Need to be careful with reductions</p></li>
 <li class="fragment"><p>Speedups will depend on system</p></li>
 </ul>
-</section>
-<section >
-<h2>Notebook</h2>
-<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
 </section>
 <section >
 <h2>Parallel Bugs</h2>
@@ -276,7 +179,115 @@ g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
 \end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
-<h2>Q&amp;A</h2>
+<h2>Simple Matmul</h2>
+<p>Code</p>
+<pre data-id="simple-matmul"><code data-trim data-noescape class="python">A.shape == (I, J)
+B.shape == (J, K)
+out.shape == (I, K)</code></pre>
+</section>
+<section >
+<h2>Simple Matmul Pseudocode</h2>
+<p>Code</p>
+<pre data-id="simple-matmul-pseudocode"><code data-trim data-noescape class="python">for outer_index in out.indices():
+    for inner_val in range(J):
+        out[outer_index] += A[outer_index[0], inner_val] * \
+                            B[inner_val, outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Complexities</h2>
+<ul class="simple">
+<li><p>Indices to strides</p></li>
+<li><p>Minimizing index operations</p></li>
+<li><p>Broadcasting</p></li>
+</ul>
+</section>
+<section >
+<h2>Matmul Speedups</h2>
+<p>What can be parallelized?</p>
+<pre data-id="matmul-speedups"><code data-trim data-noescape class="python">for outer_index in out.indices():
+    for inner_val in range(J):
+        out[outer_index] += A[outer_index[0], inner_val] * \
+                            B[inner_val, outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Compare to zip / reduce</h2>
+<p>Code</p>
+<pre data-id="compare-to-zip-reduce"><code data-trim data-noescape class="python">ZIP STEP
+C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+for C_outer in C.indices():
+    C[C_out] = A[outer_index[0], inner_val] * \
+               B[inner_val, outer_index[1]]
+REDUCE STEP
+for outer_index in out.indices():
+   for inner_val in range(J):
+      out[outer_index] = C[outer_index[0], inner_val,
+                           outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+f(M, N) &amp;=&amp;  M N \\
+g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} N^\top \\
+g'_N(f(M, N)) &amp;=&amp;  M^\top \text{grad}_{\text{out}}
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h1>GPUs</h1>
+</section>
+<section >
+<h2>Popularizing GPUs</h2>
+<a class="reference internal image-reference" href="nvidia.jpg"><img alt="nvidia.jpg" class="align-center" src="nvidia.jpg" style="width: 300px;" /></a>
+</section>
+<section >
+<h2>NVidia - 25 Years</h2>
+<img alt="nvidiastock.png" class="align-center" src="nvidiastock.png" />
+</section>
+<section >
+<h2>Main Driver</h2>
+<img alt="videogame.png" class="align-center" src="videogame.png" />
+</section>
+<section >
+<h2>Programming Video Games</h2>
+<ul class="simple">
+<li><p>Custom shader languages</p></li>
+<li><p>Graphics targeted operations</p></li>
+</ul>
+</section>
+<section >
+<h2>General Purpose GPUs</h2>
+<ul class="simple">
+<li class="fragment"><p>NVidia: can we make these programmable</p></li>
+<li class="fragment"><p>~2008: CUDA langauge</p></li>
+<li class="fragment"><p>Maybe something world changing...</p></li>
+</ul>
+</section>
+<section >
+<h2>Maybe?</h2>
+<img alt="bitcoin-img.svg" class="align-center" src="bitcoin-img.svg" /></section>
+<section >
+<h2>(Not totally kidding)</h2>
+<a class="reference internal image-reference" href="bitcoin.png"><img alt="bitcoin.png" class="align-center" src="bitcoin.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Machine Learning</h2>
+<ul class="simple">
+<li class="fragment"><p>Growth in ML parallels GPU development</p></li>
+<li class="fragment"><p>Major deep learning results require GPU</p></li>
+<li class="fragment"><p>All modern training is on GPU (or more)</p></li>
+</ul>
+</section>
+<section >
+<h2>ML</h2>
+<img alt="translate.gif" class="align-center" src="translate.gif" />
+</section>
+<section >
+<h2>Is this enough?</h2>
+<img alt="gpus.png" class="align-center" src="gpus.png" />
+</section>
+<section >
+<h2>GPUs</h2>
+<img alt="3090.png" class="align-center" src="3090.png" />
 </section>
 
         </div>

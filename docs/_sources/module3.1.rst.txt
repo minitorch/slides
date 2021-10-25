@@ -1,115 +1,15 @@
 
 
-Module 3.1 - Efficiency
+
+Module 3.1 - Parallelism
 =============================================
+
 
 Module 3.1
 ------------
 
-   Network Efficiency
-
-
-Module 3
-==========
-
-Task 3.1
----------
-  Parallel
-
-Task 3.2
----------
-  Matrix Mult
-
-
-.. image:: figs/Ops/matmul.png
-           :align: center
-
-
-Today's Class
-----------------
-
-.. revealjs_fragments::
-
-   * Review: Numba
-   * Operator Fusion
-   * MatMul
-
-
-Numba
-======
-
-Alternative 3: Compile Python
------------------------------
-
-Pros:
-
-* "Same" language
-* Integrate code
-
-Cons: A bit hacky :)
-
-Example: Numba
-
-Function Calls
----------------
-
-* Function calls are not free and don't get `inlined`
-* Checks for args, special keywords and variable lists
-* Methods check for overrides and class inheritance
-
-
-Types
-------
-
-Critical code  ::
-
-  out[o] = in_storage[j] + 3
-
-* Doesn't know type of `in_storage[j]`
-* May need to coerce 3 to float or raise error
-* May even call `__add__` or `__ladd__`!
-
-Numba
-------
-
-* Python library for speeding up numerical python
-* API: Higher-order functions to produce fast mathmatical code
-* `Numba <https://numba.pydata.org/numba-doc/latest/user/5minguide.html>`_
-
-How does it work?
------------------
-
-Numba ::
-
-  def my_code(x, y):
-     for i in range(100):
-         x[i] = y + 20
-  ...
-  my_code(x, y)
-  fast_my_code = numba.njit()(my_code)
-  fast_my_code(x, y)
-  fast_my_code(x, y)
-
-What do we lose?
-----------------
-
-* `njit` will fail for many python operations
-* No lists, classes, python functions allowed
-* Any different types will cause recompilation
-
-Notebook
----------
-
-`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
-
-
-
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/170828>`_
-
-
+  Efficiency 
+  
 Parallel
 ========
 
@@ -157,10 +57,6 @@ Nondeterminism
    * Need to be careful with reductions
    * Speedups will depend on system
 
-Notebook
----------
-
-`Colab Notebook <https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq>`_
 
 
 Parallel Bugs
@@ -274,6 +170,151 @@ Matrix Multiply
    g'_N(f(M, N)) &=&  M^\top \text{grad}_{\text{out}}
    \end{eqnarray*}
 
+Simple Matmul
+-------------------
 
-Q&A
-----
+Code ::
+
+  A.shape == (I, J)
+  B.shape == (J, K)
+  out.shape == (I, K)
+
+
+Simple Matmul Pseudocode
+-------------------------
+
+Code ::
+
+  for outer_index in out.indices():
+      for inner_val in range(J):
+          out[outer_index] += A[outer_index[0], inner_val] * \
+                              B[inner_val, outer_index[1]]
+
+
+Complexities
+-------------
+
+* Indices to strides
+* Minimizing index operations
+* Broadcasting
+
+
+Matmul Speedups
+-------------------------
+
+What can be parallelized? ::
+
+  for outer_index in out.indices():
+      for inner_val in range(J):
+          out[outer_index] += A[outer_index[0], inner_val] * \
+                              B[inner_val, outer_index[1]]
+
+Compare to zip / reduce
+-----------------------
+
+Code ::
+
+  ZIP STEP
+  C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+  for C_outer in C.indices():
+      C[C_out] = A[outer_index[0], inner_val] * \
+                 B[inner_val, outer_index[1]]
+  REDUCE STEP
+  for outer_index in out.indices():
+     for inner_val in range(J):
+        out[outer_index] = C[outer_index[0], inner_val,
+                             outer_index[1]]
+
+Matrix Multiply
+---------------
+.. math::
+
+   \begin{eqnarray*}
+   f(M, N) &=&  M N \\
+   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} N^\top \\
+   g'_N(f(M, N)) &=&  M^\top \text{grad}_{\text{out}}
+   \end{eqnarray*}
+
+
+GPUs
+=====
+
+Popularizing GPUs
+------------------
+
+.. image:: nvidia.jpg
+           :width: 300px
+           :align: center
+
+NVidia - 25 Years
+-----------------
+
+.. image:: nvidiastock.png
+           :align: center
+
+
+Main Driver
+-----------------
+
+.. image:: videogame.png
+           :align: center
+
+Programming Video Games
+------------------------
+
+* Custom shader languages
+* Graphics targeted operations
+
+General Purpose GPUs
+---------------------
+
+.. revealjs_fragments::
+
+   * NVidia: can we make these programmable
+   * ~2008: CUDA langauge
+   * Maybe something world changing...
+
+Maybe?
+--------
+
+.. image:: bitcoin-img.svg
+           :align: center
+
+(Not totally kidding)
+---------------------
+
+.. image:: bitcoin.png
+           :width: 500px
+           :align: center
+
+Machine Learning
+-----------------
+
+.. revealjs_fragments::
+
+   * Growth in ML parallels GPU development
+   * Major deep learning results require GPU
+   * All modern training is on GPU (or more)
+
+ML
+---
+
+.. image:: translate.gif
+           :align: center
+
+
+Is this enough?
+----------------
+
+.. image:: gpus.png
+           :align: center
+
+
+GPUs
+------
+
+.. image:: 3090.png
+           :align: center
+
+
+
