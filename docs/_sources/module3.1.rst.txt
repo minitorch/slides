@@ -472,21 +472,21 @@ GPUs
 Popularizing GPUs
 ------------------
 
-.. image:: nvidia.jpg
+.. image:: images/nvidia.jpg
            :width: 300px
            :align: center
 
 NVidia - 25 Years
 -----------------
 
-.. image:: nvidiastock.png
+.. image:: images/nvidiastock.png
            :align: center
 
 
 Main Driver
 -----------------
 
-.. image:: videogame.png
+.. image:: images/videogame.png
            :align: center
 
 Programming Video Games
