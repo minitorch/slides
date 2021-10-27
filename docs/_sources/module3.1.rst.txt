@@ -507,13 +507,13 @@ General Purpose GPUs
 Maybe?
 --------
 
-.. image:: bitcoin-img.svg
+.. image:: images/bitcoin-img.svg
            :align: center
 
 (Not totally kidding)
 ---------------------
 
-.. image:: bitcoin.png
+.. image:: images/bitcoin.png
            :width: 500px
            :align: center
 
@@ -529,21 +529,21 @@ Machine Learning
 ML
 ---
 
-.. image:: translate.gif
+.. image:: images/translate.gif
            :align: center
 
 
 Is this enough?
 ----------------
 
-.. image:: gpus.png
+.. image:: images/gpus.png
            :align: center
 
 
 GPUs
 ------
 
-.. image:: 3090.png
+.. image:: images/3090.png
            :align: center
 
 
