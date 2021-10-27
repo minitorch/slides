@@ -38,8 +38,202 @@
 <section >
 <h2>Module 3.1</h2>
 <blockquote>
-<div><p>Efficiency</p>
+<div><p>Parallelism</p>
 </div></blockquote>
+</section>
+<section >
+<h1>Review</h1>
+</section>
+<section >
+<h2>Classification in NLP</h2>
+<ul class="simple">
+<li class="fragment"><p>Systems for predicting based on word features</p></li>
+</ul>
+</section>
+<section >
+<h2>What is a word?</h2>
+<ul class="simple">
+<li class="fragment"><p>Treat words as index in vocabulary</p></li>
+<li class="fragment"><p>Represent as a one-hot vector</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge1: Vector Form</h2>
+<img alt="_images/onehot.png" class="align-center" src="_images/onehot.png" />
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Challenge: Length Dimension</h2>
+<img alt="_images/senthot.png" class="align-center" src="_images/senthot.png" />
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Quiz</h2>
+<p>Quiz</p>
+</section>
+<section >
+<h1>Efficiency</h1>
+</section>
+<section >
+<h2>Context</h2>
+<ul class="simple">
+<li class="fragment"><p>We now have a pytorch</p></li>
+<li class="fragment"><p>All wrappers around <cite>ops</cite></p></li>
+<li class="fragment"><p>Need to make <cite>ops</cite> fast</p></li>
+</ul>
+</section>
+<section >
+<h2>Goal</h2>
+<p>Optimize:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>map</p></li>
+<li><p>zip</p></li>
+<li><p>reduce</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section >
+<h2>Code</h2>
+<p>Example map</p>
+<pre data-id="code"><code data-trim data-noescape class="python">for i in range(len(out)):
+    count(i, out_shape, out_index)
+    broadcast_index(out_index, out_shape, in_shape, in_index)
+    o = index_to_position(out_index, out_strides)
+    j = index_to_position(in_index, in_strides)
+    out[o] = fn(in_storage[j])</code></pre>
+</section>
+<section >
+<h2>Why are Python (and friends) &quot;slow&quot;?</h2>
+<ul class="simple">
+<li class="fragment"><p>Function calls</p></li>
+<li class="fragment"><p>Types</p></li>
+<li class="fragment"><p>Loops</p></li>
+</ul>
+</section>
+<section >
+<h2>Function Calls</h2>
+<ul class="simple">
+<li><p>Function calls are not free</p></li>
+<li><p>Checks for args, special keywords andm lists</p></li>
+<li><p>Methods check for overrides and class inheritance</p></li>
+</ul>
+</section>
+<section >
+<h2>Types</h2>
+<p>Critical code</p>
+<pre data-id="types"><code data-trim data-noescape class="python">out[o] = in_storage[j] + 3</code></pre>
+<ul class="simple">
+<li><p>Doesn't know type of <cite>in_storage[j]</cite></p></li>
+<li><p>May need to coerce 3 to float or raise error</p></li>
+<li><p>May even call <cite>__add__</cite> or <cite>__ladd__</cite>!</p></li>
+</ul>
+</section>
+<section >
+<h2>Loops</h2>
+<ul class="simple">
+<li><p>Loops are always run as is.</p></li>
+<li><p>Can't combine similar loops or pull out constant computation.</p></li>
+<li><p>Very hard to run anything in parallel.</p></li>
+</ul>
+</section>
+<section >
+<h2>Other</h2>
+<p>Many other slow things...</p>
+<ul class="simple">
+<li><p>Lists</p></li>
+<li><p>Classes</p></li>
+<li><p>Magic of all kind</p></li>
+</ul>
+</section>
+<section >
+<h1>Fast Math</h1>
+</section>
+<section >
+<h2>Numba</h2>
+<ul class="simple">
+<li><p>Python library for speeding up numerical python</p></li>
+<li><p>API: Higher-order functions to produce fast mathmatical code</p></li>
+<li><p><a class="reference external" href="https://numba.pydata.org/numba-doc/latest/user/5minguide.html">Numba</a></p></li>
+</ul>
+</section>
+<section >
+<h2>How does it work?</h2>
+<p>Work</p>
+<pre data-id="how-does-it-work"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in range(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit()(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
+</section>
+<section >
+<h2>Terminology : JIT Compiler</h2>
+<ul class="simple">
+<li><p>Just-in-time</p></li>
+<li><p>Waits until you call a function to compile it</p></li>
+<li><p>Specializes code based on the argument types given.</p></li>
+</ul>
+</section>
+<section >
+<h2>Terminology : LLVM</h2>
+<ul class="simple">
+<li><p>Underlying compiler framework to generate code</p></li>
+<li><p>Used by many different languages (C++, Swift, Rust, ...)</p></li>
+<li><p>Generates efficient machine code for the system</p></li>
+</ul>
+</section>
+<section >
+<h2>What do we lose?</h2>
+<ul class="simple">
+<li><p><cite>njit</cite> will fail for many python operations</p></li>
+<li><p>No lists, classes, python functions allowed</p></li>
+<li><p>Any different types will cause recompilation</p></li>
+</ul>
+</section>
+<section >
+<h2>Strategy</h2>
+<ul class="simple">
+<li><p>Use Python for general operations</p></li>
+<li><p>Use Numba for the core tensor ops</p></li>
+<li><p>Allow users to add new Numba functions</p></li>
+</ul>
+</section>
+<section >
+<h2>Code Transformation</h2>
+<p>Transform</p>
+<pre data-id="code-transformation"><code data-trim data-noescape class="python">def my_code(x, y):
+   for i in prange(100):
+       x[i] = y + 20
+...
+my_code(x, y)
+fast_my_code = numba.njit(parallel=True)(my_code)
+fast_my_code(x, y)
+fast_my_code(x, y)</code></pre>
+</section>
+<section >
+<h2>Notebook</h2>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1Hiq-1SlKkFh_kkYRhmCvF2-ZOn3oxMv6#scrollTo=mlEoKQzKXkMq">Colab Notebook</a></p>
 </section>
 <section >
 <h1>Parallel</h1>
@@ -63,7 +257,7 @@
 <section >
 <h2>Code Transformation</h2>
 <p>Transform</p>
-<pre data-id="code-transformation"><code data-trim data-noescape class="python">def my_code(x, y):
+<pre data-id="id5"><code data-trim data-noescape class="python">def my_code(x, y):
    for i in prange(100):
        x[i] = y + 20
 ...
