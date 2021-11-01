@@ -1,0 +1,41 @@
+
+
+Module 3.4 - Advanced Matrix Multiplication
+=============================================
+
+
+
+Suggestions: Matmul
+---------------------
+
+.. revealjs_fragments::
+
+   * Inner loop is key: can we optimize it?
+   * Key special case: Batch Matrix-Vector.
+   * GPU?
+
+
+Backward Steps
+-------------------
+
+* Reduce backward?
+* Broadcast Zip backward?
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul\ back.png
+           :align: center
+
+
+Matrix Multiply
+---------------
+.. math::
+
+   \begin{eqnarray*}
+   f(M, N) &=&  M @ N \\
+   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} @ N.permute(1, 0) \\
+   g'_N(f(M, N)) &=&  M.permute(1, 0) @ \text{grad}_{\text{out}}
+   \end{eqnarray*}
+
+     

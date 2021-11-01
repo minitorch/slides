@@ -1,0 +1,515 @@
+
+
+Module 3.2 - GPUs
+=============================================
+
+
+Module 3.2
+------------
+
+  Matmul and CUDA
+
+
+Review
+=======
+
+
+Strategy
+--------
+
+* Use Python for general operations
+* Use Numba for the core tensor ops
+* Allow users to add new Numba functions
+
+How does it work?
+-----------------
+
+Work ::
+
+
+  def my_code(x, y):
+     for i in range(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit()(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+Terminology : JIT Compiler
+--------------------------
+
+* Just-in-time
+* Waits until you call a function to compile it
+* Specializes code based on the argument types given.
+
+Code Transformation
+----------------------
+
+Transform ::
+
+  def my_code(x, y):
+     for i in prange(100):
+         x[i] = y + 20
+  ...
+  my_code(x, y)
+  fast_my_code = numba.njit(parallel=True)(my_code)
+  fast_my_code(x, y)
+  fast_my_code(x, y)
+
+
+
+Nondeterminism
+----------------
+
+.. revealjs_fragments::
+
+   * No guarantee on ordering
+   * Need to be careful with reductions
+   * Speedups will depend on system
+
+
+Quiz 1
+--------
+
+Quiz
+     
+
+  
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Matmul
+   * CUDA
+   * Threads
+   * Memory
+
+Example: Matmul
+-------------------
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+Computations
+-----------------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+                   
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmulsimple.png
+           :align: center
+
+
+Starter Code
+-------------
+
+* Walk through output.
+* Find row and column of input
+* Simultaneous zip / reduce.
+
+
+Simple Matmul
+-------------------
+
+Code ::
+
+  A.shape == (I, J)
+  B.shape == (J, K)
+  out.shape == (I, K)
+
+
+Simple Matmul Pseudocode
+-------------------------
+
+Code ::
+
+  for outer_index in out.indices():
+      for inner_index in range(J):
+          out[outer_index] += A[outer_index[0], inner_index] * \
+                              B[inner_index, outer_index[1]]
+
+Compare to zip / reduce
+-----------------------
+
+Code ::
+
+  ZIP STEP
+  C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+  for C_outer in C.indices():
+      C[C_out] = A[outer_index[0], inner_val] * \
+                 B[inner_val, outer_index[1]]
+  REDUCE STEP
+  for outer_index in out.indices():
+     for inner_val in range(J):
+        out[outer_index] = C[outer_index[0], inner_val,
+                             outer_index[1]]
+
+
+Optimizations
+--------------
+
+* Avoiding indexing
+* Where to put parallelism?
+     
+GPUs
+=====
+
+AlphaGo - 2016
+---------------
+
+.. image:: images/alpha.png
+           :align: center
+
+
+AlphaGo - 2016
+---------------
+
+.. image:: images/alphagogpu.png
+           :align: center
+
+StyleGan 2 - 2019
+------------------
+
+.. image:: https://neurohive.io/wp-content/uploads/2019/12/rsz_screenshot_1-scaled.png
+           :align: center
+                   
+StyleGan 2 - 2019
+------------------
+
+.. image:: images/stylegan.png
+           :align: center
+
+
+
+CUDA
+-----
+
+.. image:: images/nvidia.jpg
+           :width: 100px
+           :align: center
+
+
+
+* NVidia's programming language for GPU
+* Compute Unified Device Architecture
+* Like standard programming but in parallel
+
+
+NVidia Structure
+-----------------
+
+.. image:: images/videogame.png
+           :align: center
+
+NVidia Structure
+-----------------
+
+                   
+.. image:: images/nvidiastock.png
+           :align: center
+
+Main Driver
+-----------------
+
+* Custom shader languages
+* Graphics targeted operations
+
+General Purpose GPUs
+---------------------
+
+.. revealjs_fragments::
+
+   * NVidia: can we make these programmable
+   * ~2008: CUDA langauge
+
+
+
+Machine Learning
+-----------------
+
+.. revealjs_fragments::
+
+   * Growth in ML parallels GPU development
+   * Major deep learning results require GPU
+   * All modern training is on GPU (or more)
+
+ML
+---
+
+.. image:: images/translate.gif
+           :align: center
+
+
+Is this enough?
+----------------
+
+.. image:: images/gpus.png
+           :align: center
+
+
+GPUs
+------
+
+.. image:: images/3090.png
+           :align: center
+
+Challeges
+---------
+
+* Hard to code for directly.
+* Particularly hard to code efficiently.
+* Goal: hide complexity from users.
+
+
+     
+Threads
+========
+
+
+CUDA Abstraction
+-----------------
+
+.. image:: figs/gpu/thread@3x.png
+           :align: center
+
+
+Thread code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 1](a, b)
+
+CUDA Abstraction
+------------------
+
+.. image:: figs/gpu/block1d@3x.png
+           :align: center
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 10](a, b)
+
+CUDA Abstraction
+------------------
+
+.. image:: figs/gpu/blockdim@3x.png
+           :align: center
+           :width: 500px
+
+Threads code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, (10, 10)](a, b)
+
+
+
+CUDA Abstraction
+------------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+Block code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[(10, 10), (10, 10)](a, b)
+
+Check
+-------
+
+Code::
+
+  def printer(a):
+    print("hello!")
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, 10](a)
+
+Output
+--------
+
+Output ::
+
+  hello!
+  hello!
+  hello!
+  hello!
+  hello!
+  ...
+
+Stack
+-------
+
+.. revealjs_fragments::
+
+   * Threads: Run the code
+   * Block: Groups "close" threads
+   * Grid: All the thread blocks
+   * Total Threads: `threads_per_block` x `total_blocks`
+
+
+
+
+Thread Names
+==============
+
+CUDA Code
+---------
+
+.. revealjs_fragments::
+
+   * Every thread runs simultaneously
+   * (Roughly) in lockstep
+   * How can we get anything done?
+
+Thread Names
+-------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+           :width: 500px
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[1, (10, 10)](a)
+
+Output
+------
+
+Output ::
+
+ 6 3
+ 7 3
+ 8 3
+ 9 3
+ 0 4
+ 1 4
+ 2 4
+ 3 4
+ 4 4
+
+Block Names
+-------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.blockIdx.x,
+          numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, (10, 10)](a)
+
+Output
+-------
+
+Output ::
+
+  7 6 9
+  7 7 9
+  7 8 9
+  7 9 9
+  2 6 9
+  2 7 9
+
+What's my name?
+---------------
+
+Name ::
+
+  BLOCKS_X = 32
+  BLOCKS_Y = 32
+  THREADS_X = 10
+  THREADS_Y = 10
+  def fn(a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    y = numba.cuda.blockIdx.y * THREADS_Y + numba.cuda.threadIdx.y
+    ...
+  fn = numba.cuda.jit()(fn)
+  fn[(BLOCKS_X, BLOCKS_Y), (THREADS_X, THREAD_Y)](a)
+
+Simple Map
+-----------
+Map ::
+
+  BLOCKS_X = 32
+  THREADS_X = 32
+  def fn(out, a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    if x >=0 and x < a.size:
+      out[x] = a[x] + 10
+  fn = numba.cuda.jit()(fn)
+  fn[BLOCKS_X, THREADS_X](a)
+
+Guards
+------
+
+Guards ::
+
+  x = numba.cuda.blockIdx.x * BLOCKS_X + numba.cuda.threadIdx.x
+  if x >=0 and x < a.size:
+
+Map Guard
+----------
+
+.. image:: figs/gpu/map@3x.png
+           :align: center
+           :width: 500px
+
+Colab
+------
+
+* https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV
