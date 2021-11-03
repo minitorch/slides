@@ -1,13 +1,281 @@
 
-Module 3.3 - Advanced GPU
+Module 3.3 - GPU 2
 =============================================
-
 
 Module 3.3
 ------------
 
-  Advanced GPU
+  GPU
 
+Example: Matmul
+-------------------
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+Example: Matmul
+-------------------
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+Computations
+-----------------
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+                   
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmulsimple.png
+           :align: center
+
+
+Simple Matmul Pseudocode
+-------------------------
+
+Code ::
+
+  for outer_index in out.indices():
+      for inner_index in range(J):
+          out[outer_index] += A[outer_index[0], inner_index] * \
+                              B[inner_index, outer_index[1]]
+
+Compare to zip / reduce
+-----------------------
+
+Code ::
+
+  ZIP STEP
+  C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+  for C_outer in C.indices():
+      C[C_out] = A[outer_index[0], inner_val] * \
+                 B[inner_val, outer_index[1]]
+  REDUCE STEP
+  for outer_index in out.indices():
+     for inner_val in range(J):
+        out[outer_index] = C[outer_index[0], inner_val,
+                             outer_index[1]]
+
+
+Quiz
+-----
+
+Quiz
+
+
+Today's Class
+----------------
+
+.. revealjs_fragments::
+
+   * Threads
+   * Memory
+   * Communication
+ 
+Threads
+========
+
+
+CUDA Abstraction
+-----------------
+
+.. image:: figs/gpu/thread@3x.png
+           :align: center
+
+
+Thread code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[1, 1](a, b)
+
+
+CUDA Abstraction
+------------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+Block code
+---------------
+
+Code ::
+
+  def add(a, b):
+    b = a + 10
+  cuda_add = numba.cuda.jit()(add)
+
+  cuda_add[(10, 10), (10, 10)](a, b)
+
+Check
+-------
+
+Code::
+
+  def printer(a):
+    print("hello!")
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, 10](a)
+
+Output
+--------
+
+Output ::
+
+  hello!
+  hello!
+  hello!
+  hello!
+  hello!
+  ...
+
+Stack
+-------
+
+.. revealjs_fragments::
+
+   * Threads: Run the code
+   * Block: Groups "close" threads
+   * Grid: All the thread blocks
+   * Total Threads: `threads_per_block` x `total_blocks`
+
+
+Thread Names
+==============
+
+CUDA Code
+---------
+
+.. revealjs_fragments::
+
+   * Every thread runs simultaneously
+   * (Roughly) in lockstep
+   * How can we get anything done?
+
+Thread Names
+-------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+           :width: 500px
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[1, (10, 10)](a)
+
+Output
+------
+
+Output ::
+
+ 6 3
+ 7 3
+ 8 3
+ 9 3
+ 0 4
+ 1 4
+ 2 4
+ 3 4
+ 4 4
+
+Block Names
+-------------
+
+.. image:: figs/gpu/blockid@3x.png
+           :align: center
+           :width: 500px
+
+
+Thread Names
+------------
+
+Printing code::
+
+  def printer(a):
+    print(numba.cuda.blockIdx.x,
+          numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+    a[:] = 10 + 50
+  printer = numba.cuda.jit()(printer)
+  a = numpy.zeros(10)
+  printer[10, (10, 10)](a)
+
+Output
+-------
+
+Output ::
+
+  7 6 9
+  7 7 9
+  7 8 9
+  7 9 9
+  2 6 9
+  2 7 9
+
+What's my name?
+---------------
+
+Name ::
+
+  BLOCKS_X = 32
+  BLOCKS_Y = 32
+  THREADS_X = 10
+  THREADS_Y = 10
+  def fn(a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    y = numba.cuda.blockIdx.y * THREADS_Y + numba.cuda.threadIdx.y
+    ...
+  fn = numba.cuda.jit()(fn)
+  fn[(BLOCKS_X, BLOCKS_Y), (THREADS_X, THREAD_Y)](a)
+
+Simple Map
+-----------
+Map ::
+
+  BLOCKS_X = 32
+  THREADS_X = 32
+  def fn(out, a):
+    x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+    if x >=0 and x < a.size:
+      out[x] = a[x] + 10
+  fn = numba.cuda.jit()(fn)
+  fn[BLOCKS_X, THREADS_X](a)
+
+Guards
+------
+
+Guards ::
+
+  x = numba.cuda.blockIdx.x * BLOCKS_X + numba.cuda.threadIdx.x
+  if x >=0 and x < a.size:
+
+Map Guard
+----------
+
+.. image:: figs/gpu/map@3x.png
+           :align: center
+           :width: 500px
+
+Colab
+------
+
+* https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV
 
 
 Communication
@@ -22,6 +290,13 @@ Memory
 * Local > Shared > Global
 * Fast code does minimal global reads
 
+
+Memory is Speed
+-----------------
+
+* Faster to read from closer storage.
+* Faster to write from closer storage.
+  
 Local Memory
 -------------
 
@@ -110,8 +385,6 @@ code ::
         out[0] = shared[0]
 
 
-Q&A
-----
 
   
 Constraints
@@ -122,6 +395,10 @@ Constraints
 * Memory must be relatively small
 
 
+Algorithms
+===========
+  
+
 Thinking about Speed
 ---------------------
 
@@ -130,15 +407,6 @@ Thinking about Speed
 * Typical: Remove loops, code operations
 
 
-
-GPU
----------------------
-
-* Lots of parallelism for computation
-
-* Challenge: reduce memory reads
-
-* Local > Shared > Global
 
 
 Sliding Average
@@ -162,17 +430,6 @@ Compute sliding average over a list ::
                out[i] += a[i + j]
            out[i] = out[i] / sub_size
 
-Example: Parallel Local Sum
-------------------------------
-
-Compute sliding average over a list ::
-
-    def slide_numba(out, a):
-       for i in numba.prange(out.size):
-           out[i] = 0
-           for j in range(sub_size):
-               out[i] += a[i + j]
-           out[i] = out[i] / sub_size
 
 Planning for CUDA
 ------------------
@@ -330,39 +587,3 @@ Matrix Multiplication
 * Lots of tricks to make it efficient...
 
 
-General Efficiency
-==================
-
-Pedagogy
----------
-
-.. revealjs_fragments::
-
-   * Module-3 will require some optimizations
-   * These are up to you to implement.
-   * Try first on CPU
-
-
-
-Suggestions: Map
------------------
-
-.. revealjs_fragments::
-
-   * When do you need to index?
-   * When do you need to broadcast?
-   * Can you directly utilize storage?
-
-
-Reduce
-========
-     
-
-Suggestions: Reduce
--------------------
-
-.. revealjs_fragments::
-
-   * Special cases: dimension reduce + full reduce, how do they differ?
-   * Do we need to call index everytime?
-   * Do we need to write to global memory every time?

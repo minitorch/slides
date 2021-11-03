@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 3.3 - Advanced GPU</title>
+  <title>Module 3.3 - GPU 2</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -33,13 +33,226 @@
     <div class="reveal">
         <div class="slides">
             <section >
-<h1>Module 3.3 - Advanced GPU</h1>
+<h1>Module 3.3 - GPU 2</h1>
 </section>
 <section >
 <h2>Module 3.3</h2>
 <blockquote>
-<div><p>Advanced GPU</p>
+<div><p>GPU</p>
 </div></blockquote>
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
+</section>
+<section >
+<h2>Example: Matmul</h2>
+<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
+</section>
+<section >
+<h2>Computations</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Matmul Simple</h2>
+<img alt="_images/matmulsimple.png" class="align-center" src="_images/matmulsimple.png" />
+</section>
+<section >
+<h2>Simple Matmul Pseudocode</h2>
+<p>Code</p>
+<pre data-id="simple-matmul-pseudocode"><code data-trim data-noescape class="python">for outer_index in out.indices():
+    for inner_index in range(J):
+        out[outer_index] += A[outer_index[0], inner_index] * \
+                            B[inner_index, outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Compare to zip / reduce</h2>
+<p>Code</p>
+<pre data-id="compare-to-zip-reduce"><code data-trim data-noescape class="python">ZIP STEP
+C = zeros(broadcast_shape(A.view(I, J, 1), B.view(1, J, K)))
+for C_outer in C.indices():
+    C[C_out] = A[outer_index[0], inner_val] * \
+               B[inner_val, outer_index[1]]
+REDUCE STEP
+for outer_index in out.indices():
+   for inner_val in range(J):
+      out[outer_index] = C[outer_index[0], inner_val,
+                           outer_index[1]]</code></pre>
+</section>
+<section >
+<h2>Quiz</h2>
+<p>Quiz</p>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Threads</p></li>
+<li class="fragment"><p>Memory</p></li>
+<li class="fragment"><p>Communication</p></li>
+</ul>
+</section>
+<section >
+<h1>Threads</h1>
+</section>
+<section >
+<h2>CUDA Abstraction</h2>
+<img alt="_images/thread&#64;3x.png" class="align-center" src="_images/thread&#64;3x.png" />
+</section>
+<section >
+<h2>Thread code</h2>
+<p>Code</p>
+<pre data-id="thread-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[1, 1](a, b)</code></pre>
+</section>
+<section >
+<h2>CUDA Abstraction</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Block code</h2>
+<p>Code</p>
+<pre data-id="block-code"><code data-trim data-noescape class="python">def add(a, b):
+  b = a + 10
+cuda_add = numba.cuda.jit()(add)
+
+cuda_add[(10, 10), (10, 10)](a, b)</code></pre>
+</section>
+<section >
+<h2>Check</h2>
+<p>Code:</p>
+<pre data-id="check"><code data-trim data-noescape class="python">def printer(a):
+  print(&quot;hello!&quot;)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[10, 10](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="output"><code data-trim data-noescape class="python">hello!
+hello!
+hello!
+hello!
+hello!
+...</code></pre>
+</section>
+<section >
+<h2>Stack</h2>
+<ul class="simple">
+<li class="fragment"><p>Threads: Run the code</p></li>
+<li class="fragment"><p>Block: Groups &quot;close&quot; threads</p></li>
+<li class="fragment"><p>Grid: All the thread blocks</p></li>
+<li class="fragment"><p>Total Threads: <cite>threads_per_block</cite> x <cite>total_blocks</cite></p></li>
+</ul>
+</section>
+<section >
+<h1>Thread Names</h1>
+</section>
+<section >
+<h2>CUDA Code</h2>
+<ul class="simple">
+<li class="fragment"><p>Every thread runs simultaneously</p></li>
+<li class="fragment"><p>(Roughly) in lockstep</p></li>
+<li class="fragment"><p>How can we get anything done?</p></li>
+</ul>
+</section>
+<section >
+<h2>Thread Names</h2>
+<a class="reference internal image-reference" href="_images/threadid&#64;3x.png"><img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Thread Names</h2>
+<p>Printing code:</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">def printer(a):
+  print(numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[1, (10, 10)](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="id5"><code data-trim data-noescape class="python">6 3
+7 3
+8 3
+9 3
+0 4
+1 4
+2 4
+3 4
+4 4</code></pre>
+</section>
+<section >
+<h2>Block Names</h2>
+<a class="reference internal image-reference" href="_images/blockid&#64;3x.png"><img alt="_images/blockid&#64;3x.png" class="align-center" src="_images/blockid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Thread Names</h2>
+<p>Printing code:</p>
+<pre data-id="id6"><code data-trim data-noescape class="python">def printer(a):
+  print(numba.cuda.blockIdx.x,
+        numba.cuda.threadIdx.x, numba.cuda.threadIdx.y)
+  a[:] = 10 + 50
+printer = numba.cuda.jit()(printer)
+a = numpy.zeros(10)
+printer[10, (10, 10)](a)</code></pre>
+</section>
+<section >
+<h2>Output</h2>
+<p>Output</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">7 6 9
+7 7 9
+7 8 9
+7 9 9
+2 6 9
+2 7 9</code></pre>
+</section>
+<section >
+<h2>What's my name?</h2>
+<p>Name</p>
+<pre data-id="what-s-my-name"><code data-trim data-noescape class="python">BLOCKS_X = 32
+BLOCKS_Y = 32
+THREADS_X = 10
+THREADS_Y = 10
+def fn(a):
+  x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+  y = numba.cuda.blockIdx.y * THREADS_Y + numba.cuda.threadIdx.y
+  ...
+fn = numba.cuda.jit()(fn)
+fn[(BLOCKS_X, BLOCKS_Y), (THREADS_X, THREAD_Y)](a)</code></pre>
+</section>
+<section >
+<h2>Simple Map</h2>
+<p>Map</p>
+<pre data-id="simple-map"><code data-trim data-noescape class="python">BLOCKS_X = 32
+THREADS_X = 32
+def fn(out, a):
+  x = numba.cuda.blockIdx.x * THREADS_X + numba.cuda.threadIdx.x
+  if x &gt;=0 and x &lt; a.size:
+    out[x] = a[x] + 10
+fn = numba.cuda.jit()(fn)
+fn[BLOCKS_X, THREADS_X](a)</code></pre>
+</section>
+<section >
+<h2>Guards</h2>
+<p>Guards</p>
+<pre data-id="guards"><code data-trim data-noescape class="python">x = numba.cuda.blockIdx.x * BLOCKS_X + numba.cuda.threadIdx.x
+if x &gt;=0 and x &lt; a.size:</code></pre>
+</section>
+<section >
+<h2>Map Guard</h2>
+<a class="reference internal image-reference" href="_images/map&#64;3x.png"><img alt="_images/map&#64;3x.png" class="align-center" src="_images/map&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Colab</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV">https://colab.research.google.com/drive/1nzH-BHZi-LYK9Ee4t3xvfSr73-qaASwQ#scrollTo=mVmikf3wrekV</a></p></li>
+</ul>
 </section>
 <section >
 <h1>Communication</h1>
@@ -50,6 +263,13 @@
 <li><p>CUDA also has a memory stack</p></li>
 <li><p>Local &gt; Shared &gt; Global</p></li>
 <li><p>Fast code does minimal global reads</p></li>
+</ul>
+</section>
+<section >
+<h2>Memory is Speed</h2>
+<ul class="simple">
+<li><p>Faster to read from closer storage.</p></li>
+<li><p>Faster to write from closer storage.</p></li>
 </ul>
 </section>
 <section >
@@ -91,7 +311,7 @@ local_fn[BLOCKS, THREADS](out, a)</code></pre>
 <section >
 <h2>Example</h2>
 <p>Code</p>
-<pre data-id="id1"><code data-trim data-noescape class="python">def block_fn(out, a):
+<pre data-id="id8"><code data-trim data-noescape class="python">def block_fn(out, a):
   shared = numba.cuda.shared.array(10, numba.int32)
   shared[0] = 10
   numba.cuda.syncthreads()
@@ -125,9 +345,6 @@ block_fn[BLOCKS, THREADS](out, a)</code></pre>
       out[0] = shared[0]</code></pre>
 </section>
 <section >
-<h2>Q&amp;A</h2>
-</section>
-<section >
 <h2>Constraints</h2>
 <ul class="simple">
 <li><p>Memory must be typed</p></li>
@@ -136,18 +353,13 @@ block_fn[BLOCKS, THREADS](out, a)</code></pre>
 </ul>
 </section>
 <section >
+<h1>Algorithms</h1>
+</section>
+<section >
 <h2>Thinking about Speed</h2>
 <ul class="simple">
 <li><p>Algorithms: Reduce computation complexity</p></li>
 <li><p>Typical: Remove loops, code operations</p></li>
-</ul>
-</section>
-<section >
-<h2>GPU</h2>
-<ul class="simple">
-<li><p>Lots of parallelism for computation</p></li>
-<li><p>Challenge: reduce memory reads</p></li>
-<li><p>Local &gt; Shared &gt; Global</p></li>
 </ul>
 </section>
 <section >
@@ -162,16 +374,6 @@ out = [3, 3.5, 5.5, 4, 3]</code></pre>
 <p>Compute sliding average over a list</p>
 <pre data-id="example-local-sum"><code data-trim data-noescape class="python">def slide_py(out, a):
    for i in range(out.size):
-       out[i] = 0
-       for j in range(sub_size):
-           out[i] += a[i + j]
-       out[i] = out[i] / sub_size</code></pre>
-</section>
-<section >
-<h2>Example: Parallel Local Sum</h2>
-<p>Compute sliding average over a list</p>
-<pre data-id="example-parallel-local-sum"><code data-trim data-noescape class="python">def slide_numba(out, a):
-   for i in numba.prange(out.size):
        out[i] = 0
        for j in range(sub_size):
            out[i] += a[i + j]
@@ -234,7 +436,7 @@ numba.cuda.syncthreads()</code></pre>
 <section >
 <h2>Better CUDA</h2>
 <p>Two global reads per thread</p>
-<pre data-id="id4"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+<pre data-id="id12"><code data-trim data-noescape class="python">def slide_cuda(out, a):
    shared = numba.cuda.shared.array(THREADS + sub_size)
    i = numba.cuda.blockIdx.x * THREADS \
        + numba.cuda.threadIdx.x
@@ -263,7 +465,7 @@ numba.cuda.syncthreads()</code></pre>
 <section >
 <h2>Example 2: Broadcasted Zip</h2>
 <p>Zip</p>
-<pre data-id="id5"><code data-trim data-noescape class="python">I, J = out.shape
+<pre data-id="id13"><code data-trim data-noescape class="python">I, J = out.shape
 def zip_py(out, a, b):
    for i in range(I):
        for j in range(J):
@@ -306,36 +508,6 @@ def zip_py(out, a, b):
 <li><p>Major operation to implement on CUDA</p></li>
 <li><p>Every cell needs to be used multiple times</p></li>
 <li><p>Lots of tricks to make it efficient...</p></li>
-</ul>
-</section>
-<section >
-<h1>General Efficiency</h1>
-</section>
-<section >
-<h2>Pedagogy</h2>
-<ul class="simple">
-<li class="fragment"><p>Module-3 will require some optimizations</p></li>
-<li class="fragment"><p>These are up to you to implement.</p></li>
-<li class="fragment"><p>Try first on CPU</p></li>
-</ul>
-</section>
-<section >
-<h2>Suggestions: Map</h2>
-<ul class="simple">
-<li class="fragment"><p>When do you need to index?</p></li>
-<li class="fragment"><p>When do you need to broadcast?</p></li>
-<li class="fragment"><p>Can you directly utilize storage?</p></li>
-</ul>
-</section>
-<section >
-<h1>Reduce</h1>
-</section>
-<section >
-<h2>Suggestions: Reduce</h2>
-<ul class="simple">
-<li class="fragment"><p>Special cases: dimension reduce + full reduce, how do they differ?</p></li>
-<li class="fragment"><p>Do we need to call index everytime?</p></li>
-<li class="fragment"><p>Do we need to write to global memory every time?</p></li>
 </ul>
 </section>
 
