@@ -1,18 +1,455 @@
 
 
-Module 3.4 - Advanced Matrix Multiplication
+Module 3.4 - Matrix Multiplication
 =============================================
 
+Module 3.4
+------------
+
+  Matrix Multiplication 
 
 
-Suggestions: Matmul
----------------------
+
+CUDA Code
+---------
 
 .. revealjs_fragments::
 
-   * Inner loop is key: can we optimize it?
-   * Key special case: Batch Matrix-Vector.
-   * GPU?
+   * Every thread runs simultaneously
+   * (Roughly) in lockstep
+   * How can we get anything done?
+
+Thread Names
+-------------
+
+.. image:: figs/gpu/threadid@3x.png
+           :align: center
+           :width: 500px
+
+Memory
+-------
+
+
+* CUDA also has a memory stack
+* Local > Shared > Global
+* Fast code does minimal global reads
+  
+Local Memory
+-------------
+
+.. image:: figs/gpu/local\ mem@3x.png
+           :align: center
+           :width: 500px
+
+Constraints
+------------
+
+* Memory must be typed
+* Memory must be *constant* size
+* Memory must be relatively small
+
+Block Shared Memory
+-------------------
+
+.. image:: figs/gpu/sharedmem@3x.png
+           :align: center
+           :width: 500px
+
+
+Quiz
+-----
+
+Quiz
+
+
+CUDA Algorithms
+================
+
+Example 1: Sliding Average
+----------------------------
+
+Compute sliding average over a list ::
+
+   sub_size = 2
+   a = [4, 2, 5, 6, 2, 4]
+   out = [3, 3.5, 5.5, 4, 3]
+
+
+Basic CUDA
+-----------
+
+Compute CUDA ::
+
+    def slide_cuda(out, a):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           out[i] = 0
+           for j in range(sub_size):
+                out[i] += a[i + j]
+           out[i] = out[i] / sub_size
+
+
+Better CUDA
+-----------
+
+Two global reads per thread ::
+
+    def slide_cuda(out, a):
+       shared = numba.cuda.shared.array(THREADS + sub_size)
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       local_idx = numba.cuda.threadIdx.x
+       if i + sub_size < a.size:
+           shared[local_idx] = a[i]
+           if local_idx < sub_size and i + THREADS < a.size::
+               shared[local_idx  + THREADS] = a[i + THREADS]
+           numba.cuda.syncthreads()
+           temp = 0
+           for j in range(sub_size):
+                temp += shared[local_idx + j]
+           out[i] = temp / sub_size
+
+
+Example 2: Reduction
+----------------------------
+
+Compute sum reduction over a list ::
+
+
+   a = [4, 2, 5, 6, 1, 2, 4, 1]
+   out = [26]
+
+Algorithm
+------------------
+
+* Parallel Prefix Sum Computation
+
+* Form a binary tree and sum elements 
+   
+
+Associative Trick
+------------------
+
+Formula ::
+   
+   a = 4 + 2 + 5 + 6 + 1 + 2 + 4 + 1
+
+Same as ::
+   
+   a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))
+
+Associative Trick
+------------------
+
+Round 1 ::
+
+   a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))
+
+Round 2 ::
+
+   a = ((6 + 11) + (3 + 5))
+
+Round 3 ::
+
+   a = (17 + 8)
+
+Round 4 ::
+
+   a = 25
+
+Thread Assignments
+------------------
+
+Round 1 (4 threads needed, 8 loads) ::
+
+   a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))
+
+Round 2 (2 threads needed, 4 loads) ::
+
+   a = ((6 + 11) + (3 + 5))
+
+Round 3 (1 thread needed, 2 loads) ::
+
+   a = (17 + 8)
+
+Round 4 ::
+
+   a = 25
+
+Open Questions
+---------------
+
+* When do we read / write from global memory?
+
+* Where do we store the intermediate terms?
+
+* Which threads work and which do nothing?
+  
+* How does this work with tensors?
+
+Table
+------
+
+.. list-table:: Computation
+   :widths: 25 25 25 25
+   :header-rows: 1
+
+   * - Thread 0
+     - Thread 1
+     - Thread 2
+     - Thread 3
+   * - 4 + 2
+     - 5 + 6
+     - 1 + 2
+     - 4 + 1
+   * - 6 + 11
+     - (zzz)
+     - 3 + 5
+     - (zzz)
+   * - 17 + 18
+     - (zzz)
+     - (zzz)
+     - (zzz)
+
+Harder Questions
+-----------------
+
+* What if the sequence is too short?
+
+* What if the sequence is too long?
+
+
+Too Short - Padding
+--------------------
+
+* Recall that we always have a `start`, e.g. 0
+
+  
+* Can pad our sequence with `start`
+
+  
+* In practice can be done by initializing shared memory. 
+
+Short Sequence 
+----------------
+
+.. list-table:: Computation
+   :widths: 25 25 25 25
+   :header-rows: 1
+
+   * - Thread 0
+     - Thread 1
+     - Thread 2
+     - Thread 3
+   * - 4 + 2
+     - 5 + 6
+     - 1 + 0
+     - 0 + 0
+   * - 6 + 11
+     - (zzz)
+     - 1
+     - (zzz)
+   * - 17 + 1
+     - (zzz)
+     - (zzz)
+     - (zzz)
+
+Too Long - Multiple Runs
+--------------------------
+
+* Sequence may have more elements than our block.  
+
+* Do not want to share values between of blocks.
+
+* However, can run the code multiple times.
+
+
+Example - Long Sequence
+---------------------------
+
+Formula ::
+   
+   a = 4 + 2 + 5 + 6 + 1 + 2 + 4 + 1 + 10
+
+Block size 8 ::
+   
+   a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1))) + 10
+
+
+Homework Tips
+--------------
+
+* Implement simple cases first. (power of 2, no padding).
+
+* Then try shorter sequences, and longer with tensor.
+
+* Draw lots of diagrams, hard to debug the code directly
+   
+   
+Matmul Revisited
+==================
+
+Matmul Simple
+-------------------
+
+.. image:: figs/Ops/matmul.png
+           :align: center
+
+                   
+Matrix Multiply
+----------------
+
+* Key algorithm for deep learning
+
+* Has properties of both zip and reduce
+
+* Core loop is about summing up elements
+
+Recall
+-------------------
+
+
+.. image:: figs/Ops/matmul3d1.png
+           :align: center
+
+
+.. image:: figs/Ops/matmul3d2.png
+           :align: center
+
+
+  
+Warmup
+---------------------------
+
+Pseudocode ::
+
+    for i:
+        for j:
+             for k:
+                 out[i, j] += a[i, k] * b[k, j]
+
+
+Basic CUDA
+-----------
+
+Basic CUDA ::
+
+    def mm_simple(out, a, b, K):
+       i = numba.cuda.blockIdx.x * THREADS \
+           + numba.cuda.threadIdx.x
+       j = numba.cuda.blockIdx.y * THREADS \
+           + numba.cuda.threadIdx.y
+       for k in range(K):
+            out[i, j] += a[i, k] * b[k, j]
+
+Issues?
+
+            
+                 
+Data Dependencies
+---------------------------
+
+* Which elements does out[i, j] depend on?
+
+* How many are there?
+
+
+Dependencies
+--------------
+  
+.. image :: https://4a169a8d-a-62cb3a1a-s-sites.googlegroups.com/site/5kk70gpu/matrixmul-example/naive.png
+
+  
+
+Square Matrix
+--------------
+
+* Assume a, b, out are all 2x2 matrices
+  
+* Idea -> copy all needed values to shared?
+
+
+
+  
+Basic CUDA - Square Small
+--------------------------
+
+Basic CUDA ::
+
+    def mm_shared1(out, a, b, K):
+       ...
+       sharedA[local_i, local_j] = a[i, j]
+       sharedB[local_i, local_j] = b[i, j]
+       ... 
+       for k in range(K):
+            t += sharedA[local_i, k] * sharedB[k, local_j]
+       out[i, j] = t
+
+Counts? Issues?
+       
+
+Data Dependencies
+---------------------------
+
+* If the matrix is big, out[i, j] may depend on 1000s of elements. 
+
+* Grows larger than block size.
+
+* Idea: Move the shared memory.
+
+Diagram
+---------
+
+Large Square
+
+.. image:: https://www.es.ele.tue.nl/~mwijtvliet/5KK73/pages/mmcuda_files/GPU_tiling.png
+
+  
+Basic CUDA - Square Large
+--------------------------
+
+Basic CUDA ::
+
+    def mm_shared1(out, a, b, K):
+       ...
+       for s in range(0, K, THREADS):
+         sharedA[local_i, local_j] = a[i, s + j]
+         sharedB[local_i, local_j] = b[s + i, j]
+         ... 
+         for k in range(THREADS):
+              t += sharedA[local_i, s + k] * sharedB[s + k, local_j]
+       out[i, j] = t
+            
+
+
+Non-Square - Dependencies
+-----------------------------
+
+.. image :: https://upload.wikimedia.org/wikipedia/commons/1/11/Matrix_multiplication_diagram.svg
+   :width: 400
+
+
+Challenges
+------------
+
+* How do you handle the different size of the matrix?
+
+* How does this interact with the block size?
+
+
+Matmul Backward
+==================
+
+
+Matrix Multiply
+----------------
+
+* Python convention uses @ sign
+
+* If a[i, k] and b[k, j] then out[i, j]
+
+* We allow first dimension to be batch. 
 
 
 Backward Steps
@@ -28,14 +465,38 @@ Example: Matmul
            :align: center
 
 
+
+                   
 Matrix Multiply
 ---------------
+
 .. math::
 
    \begin{eqnarray*}
-   f(M, N) &=&  M @ N \\
-   g'_M(f(M, N)) &=&  \text{grad}_{\text{out}} @ N.permute(1, 0) \\
-   g'_N(f(M, N)) &=&  M.permute(1, 0) @ \text{grad}_{\text{out}}
+   out[i,j] &=& f(a, b) = \sum_{k'} a[i, k'] \times b[k', j] \\
+   f'_{a[i, k]}(a, b) &=&  \sum_j b[k, j] \\
    \end{eqnarray*}
 
-     
+
+With the backward term
+   
+.. math::
+
+      \sum_j d_{out}[i,j] \times  b[k,  j] 
+
+
+Matrix Multiply
+---------------
+
+.. math::
+
+      \sum_j d_{out}[i,j] \times  b[k,  j] 
+
+This is a matrix multiply with b permuted ::
+
+  back_a = grad @ b.permute(1, 0)
+
+Neat, don't need a custom backward for matmul.
+
+
+

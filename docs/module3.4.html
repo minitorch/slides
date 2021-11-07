@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 3.4 - Advanced Matrix Multiplication</title>
+  <title>Module 3.4 - Matrix Multiplication</title>
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
@@ -33,14 +33,372 @@
     <div class="reveal">
         <div class="slides">
             <section >
-<h1>Module 3.4 - Advanced Matrix Multiplication</h1>
+<h1>Module 3.4 - Matrix Multiplication</h1>
 </section>
 <section >
-<h2>Suggestions: Matmul</h2>
+<h2>Module 3.4</h2>
+<blockquote>
+<div><p>Matrix Multiplication</p>
+</div></blockquote>
+</section>
+<section >
+<h2>CUDA Code</h2>
 <ul class="simple">
-<li class="fragment"><p>Inner loop is key: can we optimize it?</p></li>
-<li class="fragment"><p>Key special case: Batch Matrix-Vector.</p></li>
-<li class="fragment"><p>GPU?</p></li>
+<li class="fragment"><p>Every thread runs simultaneously</p></li>
+<li class="fragment"><p>(Roughly) in lockstep</p></li>
+<li class="fragment"><p>How can we get anything done?</p></li>
+</ul>
+</section>
+<section >
+<h2>Thread Names</h2>
+<a class="reference internal image-reference" href="_images/threadid&#64;3x.png"><img alt="_images/threadid&#64;3x.png" class="align-center" src="_images/threadid&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Memory</h2>
+<ul class="simple">
+<li><p>CUDA also has a memory stack</p></li>
+<li><p>Local &gt; Shared &gt; Global</p></li>
+<li><p>Fast code does minimal global reads</p></li>
+</ul>
+</section>
+<section >
+<h2>Local Memory</h2>
+<a class="reference internal image-reference" href="_images/local mem&#64;3x.png"><img alt="_images/local mem&#64;3x.png" class="align-center" src="_images/local mem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Constraints</h2>
+<ul class="simple">
+<li><p>Memory must be typed</p></li>
+<li><p>Memory must be <em>constant</em> size</p></li>
+<li><p>Memory must be relatively small</p></li>
+</ul>
+</section>
+<section >
+<h2>Block Shared Memory</h2>
+<a class="reference internal image-reference" href="_images/sharedmem&#64;3x.png"><img alt="_images/sharedmem&#64;3x.png" class="align-center" src="_images/sharedmem&#64;3x.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Quiz</h2>
+<p>Quiz</p>
+</section>
+<section >
+<h1>CUDA Algorithms</h1>
+</section>
+<section >
+<h2>Example 1: Sliding Average</h2>
+<p>Compute sliding average over a list</p>
+<pre data-id="example-1-sliding-average"><code data-trim data-noescape class="python">sub_size = 2
+a = [4, 2, 5, 6, 2, 4]
+out = [3, 3.5, 5.5, 4, 3]</code></pre>
+</section>
+<section >
+<h2>Basic CUDA</h2>
+<p>Compute CUDA</p>
+<pre data-id="basic-cuda"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       out[i] = 0
+       for j in range(sub_size):
+            out[i] += a[i + j]
+       out[i] = out[i] / sub_size</code></pre>
+</section>
+<section >
+<h2>Better CUDA</h2>
+<p>Two global reads per thread</p>
+<pre data-id="better-cuda"><code data-trim data-noescape class="python">def slide_cuda(out, a):
+   shared = numba.cuda.shared.array(THREADS + sub_size)
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   local_idx = numba.cuda.threadIdx.x
+   if i + sub_size &lt; a.size:
+       shared[local_idx] = a[i]
+       if local_idx &lt; sub_size and i + THREADS &lt; a.size::
+           shared[local_idx  + THREADS] = a[i + THREADS]
+       numba.cuda.syncthreads()
+       temp = 0
+       for j in range(sub_size):
+            temp += shared[local_idx + j]
+       out[i] = temp / sub_size</code></pre>
+</section>
+<section >
+<h2>Example 2: Reduction</h2>
+<p>Compute sum reduction over a list</p>
+<pre data-id="example-2-reduction"><code data-trim data-noescape class="python">a = [4, 2, 5, 6, 1, 2, 4, 1]
+out = [26]</code></pre>
+</section>
+<section >
+<h2>Algorithm</h2>
+<ul class="simple">
+<li><p>Parallel Prefix Sum Computation</p></li>
+<li><p>Form a binary tree and sum elements</p></li>
+</ul>
+</section>
+<section >
+<h2>Associative Trick</h2>
+<p>Formula</p>
+<pre data-id="associative-trick"><code data-trim data-noescape class="python">a = 4 + 2 + 5 + 6 + 1 + 2 + 4 + 1</code></pre>
+<p>Same as</p>
+<pre data-id="associative-trick"><code data-trim data-noescape class="python">a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))</code></pre>
+</section>
+<section >
+<h2>Associative Trick</h2>
+<p>Round 1</p>
+<pre data-id="id1"><code data-trim data-noescape class="python">a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))</code></pre>
+<p>Round 2</p>
+<pre data-id="id1"><code data-trim data-noescape class="python">a = ((6 + 11) + (3 + 5))</code></pre>
+<p>Round 3</p>
+<pre data-id="id1"><code data-trim data-noescape class="python">a = (17 + 8)</code></pre>
+<p>Round 4</p>
+<pre data-id="id1"><code data-trim data-noescape class="python">a = 25</code></pre>
+</section>
+<section >
+<h2>Thread Assignments</h2>
+<p>Round 1 (4 threads needed, 8 loads)</p>
+<pre data-id="thread-assignments"><code data-trim data-noescape class="python">a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1)))</code></pre>
+<p>Round 2 (2 threads needed, 4 loads)</p>
+<pre data-id="thread-assignments"><code data-trim data-noescape class="python">a = ((6 + 11) + (3 + 5))</code></pre>
+<p>Round 3 (1 thread needed, 2 loads)</p>
+<pre data-id="thread-assignments"><code data-trim data-noescape class="python">a = (17 + 8)</code></pre>
+<p>Round 4</p>
+<pre data-id="thread-assignments"><code data-trim data-noescape class="python">a = 25</code></pre>
+</section>
+<section >
+<h2>Open Questions</h2>
+<ul class="simple">
+<li><p>When do we read / write from global memory?</p></li>
+<li><p>Where do we store the intermediate terms?</p></li>
+<li><p>Which threads work and which do nothing?</p></li>
+<li><p>How does this work with tensors?</p></li>
+</ul>
+</section>
+<section >
+<h2>Table</h2>
+<table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">Computation</span></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Thread 0</p></th>
+<th class="head"><p>Thread 1</p></th>
+<th class="head"><p>Thread 2</p></th>
+<th class="head"><p>Thread 3</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4 + 2</p></td>
+<td><p>5 + 6</p></td>
+<td><p>1 + 2</p></td>
+<td><p>4 + 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>6 + 11</p></td>
+<td><p>(zzz)</p></td>
+<td><p>3 + 5</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+<tr class="row-even"><td><p>17 + 18</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section >
+<h2>Harder Questions</h2>
+<ul class="simple">
+<li><p>What if the sequence is too short?</p></li>
+<li><p>What if the sequence is too long?</p></li>
+</ul>
+</section>
+<section >
+<h2>Too Short - Padding</h2>
+<ul class="simple">
+<li><p>Recall that we always have a <cite>start</cite>, e.g. 0</p></li>
+<li><p>Can pad our sequence with <cite>start</cite></p></li>
+<li><p>In practice can be done by initializing shared memory.</p></li>
+</ul>
+</section>
+<section >
+<h2>Short Sequence</h2>
+<table class="colwidths-given docutils align-default" id="id8">
+<caption><span class="caption-text">Computation</span></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Thread 0</p></th>
+<th class="head"><p>Thread 1</p></th>
+<th class="head"><p>Thread 2</p></th>
+<th class="head"><p>Thread 3</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4 + 2</p></td>
+<td><p>5 + 6</p></td>
+<td><p>1 + 0</p></td>
+<td><p>0 + 0</p></td>
+</tr>
+<tr class="row-odd"><td><p>6 + 11</p></td>
+<td><p>(zzz)</p></td>
+<td><p>1</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+<tr class="row-even"><td><p>17 + 1</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section >
+<h2>Too Long - Multiple Runs</h2>
+<ul class="simple">
+<li><p>Sequence may have more elements than our block.</p></li>
+<li><p>Do not want to share values between of blocks.</p></li>
+<li><p>However, can run the code multiple times.</p></li>
+</ul>
+</section>
+<section >
+<h2>Example - Long Sequence</h2>
+<p>Formula</p>
+<pre data-id="example-long-sequence"><code data-trim data-noescape class="python">a = 4 + 2 + 5 + 6 + 1 + 2 + 4 + 1 + 10</code></pre>
+<p>Block size 8</p>
+<pre data-id="example-long-sequence"><code data-trim data-noescape class="python">a = (((4 + 2) + (5 + 6)) + ((1 + 2) + (4 + 1))) + 10</code></pre>
+</section>
+<section >
+<h2>Homework Tips</h2>
+<ul class="simple">
+<li><p>Implement simple cases first. (power of 2, no padding).</p></li>
+<li><p>Then try shorter sequences, and longer with tensor.</p></li>
+<li><p>Draw lots of diagrams, hard to debug the code directly</p></li>
+</ul>
+</section>
+<section >
+<h1>Matmul Revisited</h1>
+</section>
+<section >
+<h2>Matmul Simple</h2>
+<img alt="_images/matmul1.png" class="align-center" src="_images/matmul1.png" />
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<ul class="simple">
+<li><p>Key algorithm for deep learning</p></li>
+<li><p>Has properties of both zip and reduce</p></li>
+<li><p>Core loop is about summing up elements</p></li>
+</ul>
+</section>
+<section >
+<h2>Recall</h2>
+<img alt="_images/matmul3d1.png" class="align-center" src="_images/matmul3d1.png" />
+<img alt="_images/matmul3d2.png" class="align-center" src="_images/matmul3d2.png" />
+</section>
+<section >
+<h2>Warmup</h2>
+<p>Pseudocode</p>
+<pre data-id="warmup"><code data-trim data-noescape class="python">for i:
+    for j:
+         for k:
+             out[i, j] += a[i, k] * b[k, j]</code></pre>
+</section>
+<section >
+<h2>Basic CUDA</h2>
+<p>Basic CUDA</p>
+<pre data-id="id2"><code data-trim data-noescape class="python">def mm_simple(out, a, b, K):
+   i = numba.cuda.blockIdx.x * THREADS \
+       + numba.cuda.threadIdx.x
+   j = numba.cuda.blockIdx.y * THREADS \
+       + numba.cuda.threadIdx.y
+   for k in range(K):
+        out[i, j] += a[i, k] * b[k, j]</code></pre>
+<p>Issues?</p>
+</section>
+<section >
+<h2>Data Dependencies</h2>
+<ul class="simple">
+<li><p>Which elements does out[i, j] depend on?</p></li>
+<li><p>How many are there?</p></li>
+</ul>
+</section>
+<section >
+<h2>Dependencies</h2>
+<img alt="https://4a169a8d-a-62cb3a1a-s-sites.googlegroups.com/site/5kk70gpu/matrixmul-example/naive.png" src="https://4a169a8d-a-62cb3a1a-s-sites.googlegroups.com/site/5kk70gpu/matrixmul-example/naive.png" />
+</section>
+<section >
+<h2>Square Matrix</h2>
+<ul class="simple">
+<li><p>Assume a, b, out are all 2x2 matrices</p></li>
+<li><p>Idea -&gt; copy all needed values to shared?</p></li>
+</ul>
+</section>
+<section >
+<h2>Basic CUDA - Square Small</h2>
+<p>Basic CUDA</p>
+<pre data-id="basic-cuda-square-small"><code data-trim data-noescape class="python">def mm_shared1(out, a, b, K):
+   ...
+   sharedA[local_i, local_j] = a[i, j]
+   sharedB[local_i, local_j] = b[i, j]
+   ...
+   for k in range(K):
+        t += sharedA[local_i, k] * sharedB[k, local_j]
+   out[i, j] = t</code></pre>
+<p>Counts? Issues?</p>
+</section>
+<section >
+<h2>Data Dependencies</h2>
+<ul class="simple">
+<li><p>If the matrix is big, out[i, j] may depend on 1000s of elements.</p></li>
+<li><p>Grows larger than block size.</p></li>
+<li><p>Idea: Move the shared memory.</p></li>
+</ul>
+</section>
+<section >
+<h2>Diagram</h2>
+<p>Large Square</p>
+<img alt="https://www.es.ele.tue.nl/~mwijtvliet/5KK73/pages/mmcuda_files/GPU_tiling.png" src="https://www.es.ele.tue.nl/~mwijtvliet/5KK73/pages/mmcuda_files/GPU_tiling.png" />
+</section>
+<section >
+<h2>Basic CUDA - Square Large</h2>
+<p>Basic CUDA</p>
+<pre data-id="basic-cuda-square-large"><code data-trim data-noescape class="python">def mm_shared1(out, a, b, K):
+   ...
+   for s in range(0, K, THREADS):
+     sharedA[local_i, local_j] = a[i, s + j]
+     sharedB[local_i, local_j] = b[s + i, j]
+     ...
+     for k in range(THREADS):
+          t += sharedA[local_i, s + k] * sharedB[s + k, local_j]
+   out[i, j] = t</code></pre>
+</section>
+<section >
+<h2>Non-Square - Dependencies</h2>
+<a class="reference internal image-reference" href="https://upload.wikimedia.org/wikipedia/commons/1/11/Matrix_multiplication_diagram.svg"><img alt="https://upload.wikimedia.org/wikipedia/commons/1/11/Matrix_multiplication_diagram.svg" src="https://upload.wikimedia.org/wikipedia/commons/1/11/Matrix_multiplication_diagram.svg" width="400" /></a>
+</section>
+<section >
+<h2>Challenges</h2>
+<ul class="simple">
+<li><p>How do you handle the different size of the matrix?</p></li>
+<li><p>How does this interact with the block size?</p></li>
+</ul>
+</section>
+<section >
+<h1>Matmul Backward</h1>
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<ul class="simple">
+<li><p>Python convention uses &#64; sign</p></li>
+<li><p>If a[i, k] and b[k, j] then out[i, j]</p></li>
+<li><p>We allow first dimension to be batch.</p></li>
 </ul>
 </section>
 <section >
@@ -58,10 +416,20 @@
 <h2>Matrix Multiply</h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray*}
-f(M, N) &amp;=&amp;  M &#64; N \\
-g'_M(f(M, N)) &amp;=&amp;  \text{grad}_{\text{out}} &#64; N.permute(1, 0) \\
-g'_N(f(M, N)) &amp;=&amp;  M.permute(1, 0) &#64; \text{grad}_{\text{out}}
+out[i,j] &amp;=&amp; f(a, b) = \sum_{k'} a[i, k'] \times b[k', j] \\
+f'_{a[i, k]}(a, b) &amp;=&amp;  \sum_j b[k, j] \\
 \end{eqnarray*}\end{split}\]</div>
+<p>With the backward term</p>
+<div class="math notranslate nohighlight">
+\[\sum_j d_{out}[i,j] \times  b[k,  j]\]</div>
+</section>
+<section >
+<h2>Matrix Multiply</h2>
+<div class="math notranslate nohighlight">
+\[\sum_j d_{out}[i,j] \times  b[k,  j]\]</div>
+<p>This is a matrix multiply with b permuted</p>
+<pre data-id="id6"><code data-trim data-noescape class="python">back_a = grad &#64; b.permute(1, 0)</code></pre>
+<p>Neat, don't need a custom backward for matmul.</p>
 </section>
 
         </div>
