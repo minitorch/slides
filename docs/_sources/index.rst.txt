@@ -47,3 +47,4 @@ Module 3 |logo|
 * :doc:`module3.1` - `(pdf) <module3.1.html?print-pdf>`_
 * :doc:`module3.2` - `(pdf) <module3.2.html?print-pdf>`_
 * :doc:`module3.3` - `(pdf) <module3.3.html?print-pdf>`_
+* :doc:`module3.4` - `(pdf) <module3.4.html?print-pdf>`_
