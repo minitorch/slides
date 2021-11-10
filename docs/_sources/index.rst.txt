@@ -48,3 +48,8 @@ Module 3 |logo|
 * :doc:`module3.2` - `(pdf) <module3.2.html?print-pdf>`_
 * :doc:`module3.3` - `(pdf) <module3.3.html?print-pdf>`_
 * :doc:`module3.4` - `(pdf) <module3.4.html?print-pdf>`_
+
+Module 4 |logo|
+-----------------
+
+* :doc:`module4.0` - `(pdf) <module4.0.html?print-pdf>`_
