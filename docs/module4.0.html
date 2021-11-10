@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 4.0 - Applications</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 4.0 - Applications</h1>
+</section>
+<section >
+<h2>Module 4.0</h2>
+<blockquote>
+<div><p>Applications</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Review</h1>
+</section>
+<section >
+<h2>Example 2: Reduction</h2>
+<p>Compute sum reduction over a list</p>
+<pre data-id="example-2-reduction"><code data-trim data-noescape class="python">a = [4, 2, 5, 6, 1, 2, 4, 1]
+out = [26]</code></pre>
+</section>
+<section >
+<h2>Algorithm</h2>
+<ul class="simple">
+<li><p>Parallel Prefix Sum Computation</p></li>
+<li><p>Form a binary tree and sum elements</p></li>
+</ul>
+</section>
+<section >
+<h2>Table</h2>
+<table class="colwidths-given docutils align-default" id="id11">
+<caption><span class="caption-text">Computation</span></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Thread 0</p></th>
+<th class="head"><p>Thread 1</p></th>
+<th class="head"><p>Thread 2</p></th>
+<th class="head"><p>Thread 3</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4 + 2</p></td>
+<td><p>5 + 6</p></td>
+<td><p>1 + 2</p></td>
+<td><p>4 + 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>6 + 11</p></td>
+<td><p>(zzz)</p></td>
+<td><p>3 + 5</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+<tr class="row-even"><td><p>17 + 18</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+<td><p>(zzz)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section >
+<h2>Reduce with Tensors</h2>
+<ul class="simple">
+<li><p>Use the blocks for the out cells (convert blockIdx to out index)</p></li>
+<li><p>Use the threads for the reduce dim (convert threadIdx to 1d index)</p></li>
+<li><p>What changes? Global loading. Need to use strides (what did you do in fast ops)</p></li>
+</ul>
+</section>
+<section >
+<h2>Dependencies</h2>
+<img alt="https://4a169a8d-a-62cb3a1a-s-sites.googlegroups.com/site/5kk70gpu/matrixmul-example/naive.png" src="https://4a169a8d-a-62cb3a1a-s-sites.googlegroups.com/site/5kk70gpu/matrixmul-example/naive.png" />
+</section>
+<section >
+<h2>Square Matrix</h2>
+<ul class="simple">
+<li><p>Assume a, b, out are all 2x2 matrices</p></li>
+<li><p>Idea -&gt; copy all needed values to shared?</p></li>
+</ul>
+</section>
+<section >
+<h2>Basic CUDA - Square Small</h2>
+<p>Basic CUDA</p>
+<pre data-id="basic-cuda-square-small"><code data-trim data-noescape class="python">def mm_shared1(out, a, b, K):
+   ...
+   sharedA[local_i, local_j] = a[i, j]
+   sharedB[local_i, local_j] = b[i, j]
+   ...
+   for k in range(K):
+        t += sharedA[local_i, k] * sharedB[k, local_j]
+   out[i, j] = t</code></pre>
+<p>Counts? Issues?</p>
+</section>
+<section >
+<h2>Diagram</h2>
+<p>Large Square</p>
+<img alt="https://www.es.ele.tue.nl/~mwijtvliet/5KK73/pages/mmcuda_files/GPU_tiling.png" src="https://www.es.ele.tue.nl/~mwijtvliet/5KK73/pages/mmcuda_files/GPU_tiling.png" />
+</section>
+<section >
+<h2>Basic CUDA - Square Large</h2>
+<p>Basic CUDA</p>
+<pre data-id="basic-cuda-square-large"><code data-trim data-noescape class="python">def mm_shared1(out, a, b, K):
+   ...
+   for s in range(0, K, THREADS):
+     sharedA[local_i, local_j] = a[i, s + j]
+     sharedB[local_i, local_j] = b[s + i, j]
+     ...
+     for k in range(THREADS):
+          t += sharedA[local_i, s + k] * sharedB[s + k, local_j]
+   out[i, j] = t</code></pre>
+</section>
+<section >
+<h2>Today's Class</h2>
+<ul class="simple">
+<li class="fragment"><p>Architecture</p></li>
+<li class="fragment"><p>Memory</p></li>
+<li class="fragment"><p>Communication</p></li>
+</ul>
+</section>
+<section >
+<h1>Architecture</h1>
+</section>
+<section >
+<h2>Goal: Image Recognition</h2>
+</section>
+<section >
+<h2>Data Set</h2>
+<a class="reference internal image-reference" href="_images/mnist.png"><img alt="_images/mnist.png" class="align-center" src="_images/mnist.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Labels</h2>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/im2.png"><img alt="_images/im2.png" class="align-center" src="_images/im2.png" style="width: 200px;" /></a>
+</section>
+<section >
+<h2>Data Points</h2>
+<a class="reference internal image-reference" href="_images/data1.png"><img alt="_images/data1.png" class="align-center" src="_images/data1.png" style="width: 250px;" /></a>
+<a class="reference internal image-reference" href="_images/data2.png"><img alt="_images/data2.png" class="align-center" src="_images/data2.png" style="width: 250px;" /></a>
+</section>
+<section >
+<h2>Strategy</h2>
+<p>Build a neural network to classify these</p>
+<a class="reference internal image-reference" href="_images/im1.png"><img alt="_images/im1.png" class="align-center" src="_images/im1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Three Challenges</h2>
+<ol class="arabic simple">
+<li class="fragment"><p>How do we handle input features?</p></li>
+<li class="fragment"><p>How do we look at variable-size areas?</p></li>
+<li class="fragment"><p>How do we predict multiple labels?</p></li>
+</ol>
+</section>
+<section >
+<h2>Network</h2>
+<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<blockquote>
+<div><p><a class="reference external" href="https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing">https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing</a></p>
+</div></blockquote>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<a class="reference internal image-reference" href="_images/mnist1.png"><img alt="_images/mnist1.png" class="align-center" src="_images/mnist1.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv&#64;3x.png"><img alt="_images/conv&#64;3x.png" class="align-center" src="_images/conv&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv2&#64;3x.png"><img alt="_images/conv2&#64;3x.png" class="align-center" src="_images/conv2&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Representation</h2>
+<a class="reference internal image-reference" href="_images/mnistregion.png"><img alt="_images/mnistregion.png" class="align-center" src="_images/mnistregion.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: Variable Size Area</h2>
+<a class="reference internal image-reference" href="_images/pool2d&#64;3x.png"><img alt="_images/pool2d&#64;3x.png" class="align-center" src="_images/pool2d&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: Variable Size Area</h2>
+<a class="reference internal image-reference" href="_images/pool2d&#64;3x.png"><img alt="_images/pool2d&#64;3x.png" class="align-center" src="_images/pool2d&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: MNist Zoom</h2>
+<a class="reference internal image-reference" href="_images/mnistzoom.png"><img alt="_images/mnistzoom.png" class="align-center" src="_images/mnistzoom.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 3: Multiple Output</h2>
+<a class="reference internal image-reference" href="_images/value.png"><img alt="_images/value.png" class="align-center" src="_images/value.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/softmax.png"><img alt="_images/softmax.png" class="align-center" src="_images/softmax.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 3: Multiple Output</h2>
+<a class="reference internal image-reference" href="_images/hist.png"><img alt="_images/hist.png" class="align-center" src="_images/hist.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h1>Convolution</h1>
+</section>
+<section >
+<h2>Challenge</h2>
+<blockquote>
+<div><p>How do we handle locality in features?</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Example</h2>
+<p><a class="reference external" href="https://poloclub.github.io/cnn-explainer/">https://poloclub.github.io/cnn-explainer/</a></p>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv&#64;3x.png"><img alt="_images/conv&#64;3x.png" class="align-center" src="_images/conv&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Intuition</h2>
+<ul class="simple">
+<li class="fragment"><p>Same neural network as before</p></li>
+<li class="fragment"><p>Brute force, run it everywhere</p></li>
+<li class="fragment"><p>Hope to detect important patterns and combine them</p></li>
+</ul>
+</section>
+<section >
+<h2>Simplification</h2>
+<ul class="simple">
+<li class="fragment"><p>1D Line</p></li>
+<li class="fragment"><p>1 Hidden</p></li>
+</ul>
+</section>
+<section >
+<h2>Convolution Forward</h2>
+<img alt="_images/conv1d.png" class="align-center" src="_images/conv1d.png" />
+</section>
+<section >
+<h2>Computation</h2>
+<p>Output Values</p>
+<pre data-id="computation"><code data-trim data-noescape class="python">output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]</code></pre>
+</section>
+<section >
+<h2>Alternative View</h2>
+<p>Unroll</p>
+<pre data-id="alternative-view"><code data-trim data-noescape class="python">input = minitorch.tensor([1, 2, 3, 4, 5, 6])
+input = unroll(input, K)
+print(input)
+
+[[1, 2, 3],
+ [2, 3, 4],
+ [3, 4, 5],
+ [4, 5, 6],
+ [5, 6, 0],
+ [6, 0, 0],
+ ]</code></pre>
+</section>
+<section >
+<h2>Alternative View</h2>
+<p>Unroll + zip + reduce</p>
+<pre data-id="id7"><code data-trim data-noescape class="python">weight = minitorch.tensor([5, 2, 3])
+output = (input &#64; weight.view(K, 1)).view(T)
+print(output)
+
+[18, ..., 30 ]</code></pre>
+</section>
+<section >
+<h2>Alternative View</h2>
+<img alt="_images/convvec.png" class="align-center" src="_images/convvec.png" />
+</section>
+<section >
+<h2>Gradient</h2>
+<p>Output Values</p>
+<pre data-id="gradient"><code data-trim data-noescape class="python">output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]</code></pre>
+<p>Gradient values</p>
+<pre data-id="gradient"><code data-trim data-noescape class="python">grad_input[2] = weight[0] * grad_output[2] + weight[1] * grad_output[1]  + weight[2] * grad_output[0]</code></pre>
+</section>
+<section >
+<h2>Conv Back - Input</h2>
+<p>Reverse the convolutional anchor</p>
+<img alt="_images/conv1dback.png" class="align-center" src="_images/conv1dback.png" />
+</section>
+<section >
+<h2>Gradient of Weight</h2>
+<p>Output Values</p>
+<pre data-id="gradient-of-weight"><code data-trim data-noescape class="python">output[0] = weight[0] * input[0] + weight[1] * input[1]  + weight[2] * input[2]
+output[1] = weight[0] * input[1] + weight[1] * input[2]  + weight[2] * input[3]
+output[2] = weight[0] * input[2] + weight[1] * input[3]  + weight[2] * input[4]</code></pre>
+<p>Gradient values</p>
+<pre data-id="gradient-of-weight"><code data-trim data-noescape class="python">grad_weight[2] = grad_output[0] * input[2]  + grad_output[1] * input[3] + grad_output[2] * input[4]</code></pre>
+</section>
+<section >
+<h2>Conv Back - Weight</h2>
+<img alt="_images/conv1dback2.png" class="align-center" src="_images/conv1dback2.png" />
+</section>
+<section >
+<h1>Channels</h1>
+</section>
+<section >
+<h2>Intuition</h2>
+<ul class="simple">
+<li><p>Each position may have multiple values</p></li>
+<li><p>These may be meaningful - i.e. color channels</p></li>
+<li><p>These may be learned - i.e. hidden states</p></li>
+</ul>
+</section>
+<section >
+<h2>Key Points</h2>
+<ul class="simple">
+<li><p>Convolution is a Linear applied to all channels in position</p></li>
+<li><p>If weight is length K and there are 10 channels, the input to the linear
+is 10 * K.</p></li>
+<li><p>Output channels are just like the output of the Linear.</p></li>
+</ul>
+</section>
+<section >
+<h2>Graphical Representation</h2>
+<a class="reference internal image-reference" href="_images/channels.png"><img alt="_images/channels.png" class="align-center" src="_images/channels.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Mathematical View</h2>
+<p>Code (note matmul on <cite>in_channels * K</cite>)</p>
+<pre data-id="mathematical-view"><code data-trim data-noescape class="python">input = minitorch.rand(in_channels, T)
+weight = minitorch.rand(out_channels, in_channels, K)
+input = unroll(input, K).permute(1, 2, 0)
+output = (weight.view(out_channels, in_channels * K) &#64; input.view(in_channels * K, T))</code></pre>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li class="fragment"><p>All about understanding sizes.</p></li>
+<li class="fragment"><p>Should be similar to matmul, start with output</p></li>
+<li class="fragment"><p>If outside boundaries, use 0</p></li>
+</ul>
+</section>
+<section >
+<h2>Applications</h2>
+<p>1D convolution is very highly used</p>
+</section>
+<section >
+<h2>NLP</h2>
+<img alt="_images/sentcnn.png" class="align-center" src="_images/sentcnn.png" />
+</section>
+<section >
+<h2>Speech Recognition</h2>
+<img alt="_images/speech.png" class="align-center" src="_images/speech.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>
