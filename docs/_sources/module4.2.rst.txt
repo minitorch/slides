@@ -1,0 +1,360 @@
+Module 4.1 - Images
+=============================================
+
+Module 4.1
+------------
+
+   Images
+
+Review: Conv
+=============
+
+
+View #1: Conv as sliding
+-------------------------
+
+.. image:: figs/Conv/conv1d.png
+           :align: center
+
+Computation
+-----------
+
+Output Values ::
+
+  out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+  out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+  out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]
+  ...
+
+
+Gradient
+=========
+                   
+Gradient
+---------
+
+Output Values ::
+
+  out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+  out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+  out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]
+
+Gradient values ::
+
+  d_in[2] = w[0] * d_out[2] + w[1] * d_out[1]  + w[2] * d_out[0]
+
+
+Conv Back - Input
+------------------
+
+Reverse the convolutional anchor
+
+.. image:: figs/Conv/conv1dback.png
+           :align: center
+
+
+Graphical Representation
+-------------------------
+
+.. image:: figs/Conv/channels.png
+           :align: center
+           :width: 400px
+
+Outline
+========
+
+* Image Rec
+* Conv 2d
+
+
+Image Recognition
+===================
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv@3x.png
+           :align: center
+           :width: 400px
+
+
+Example
+--------
+
+https://poloclub.github.io/cnn-explainer/
+
+
+Data Set
+-------------
+
+
+.. image:: figs/Conv/mnist.png
+           :align: center
+           :width: 200px
+
+
+Data Labels
+------------
+
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 200px
+
+.. image:: figs/Conv/im2.png
+           :align: center
+           :width: 200px
+
+Data Points
+------------
+
+
+
+.. image:: figs/Graphs/data1.png
+           :align: center
+           :width: 250px
+
+
+.. image:: figs/Graphs/data2.png
+           :align: center
+           :width: 250px
+
+
+Strategy
+---------
+
+Build a neural network to classify these
+
+.. image:: figs/Conv/im1.png
+           :align: center
+           :width: 400px
+
+
+Three Challenges
+------------------
+
+.. revealjs_fragments::
+
+   1) How do we handle input features?
+   2) How do we look at variable-size areas?
+   3) How do we predict multiple labels?
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 500px
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+  https://colab.research.google.com/drive/18pfkiPBLS-IOTMng-umraXnGE7IX6pWE?usp=sharing
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+
+.. image:: images/mnist.png
+           :align: center
+           :width: 400px
+
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv@3x.png
+           :align: center
+           :width: 400px
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv2@3x.png
+           :align: center
+           :width: 400px
+
+
+Challenge 1: Input Representation
+----------------------------------
+
+.. image:: images/mnistregion.png
+           :align: center
+           :width: 400px
+
+
+Challenge 2: Variable Size Area
+---------------------------------
+
+.. image:: figs/Conv/pool2d@3x.png
+           :align: center
+           :width: 400px
+
+
+Challenge 2: Variable Size Area
+---------------------------------
+
+.. image:: figs/Conv/pool2d@3x.png
+           :align: center
+           :width: 400px
+
+Challenge 2: MNist Zoom
+---------------------------------
+
+.. image:: images/mnistzoom.png
+           :align: center
+           :width: 400px
+
+
+Challenge 3: Multiple Output
+---------------------------------
+
+.. image:: figs/Conv/value.png
+           :align: center
+           :width: 400px
+
+.. image:: figs/Conv/softmax.png
+           :align: center
+           :width: 400px
+
+Challenge 3: Multiple Output
+---------------------------------
+
+.. image:: images/hist.png
+           :align: center
+           :width: 500px
+
+     
+Two Dimensional Convolution
+----------------------------
+
+* Instead of line, now use box
+* Box is anchored at the top-left
+* Zip-reduce is over full box!
+
+
+Convolution
+-----------
+
+.. image:: figs/Conv/conv.png
+           :align: center
+
+Conventions
+-------------
+
+Sizes ::
+
+ # Input image - batch x in_channel x height x width
+ # Weight - out_channel x in_channel x kernel_height x kernel_width
+ # Output image - batch x out_channel x height x width
+
+Alternative View
+----------------
+
+
+
+One step -> mat mul
+
+
+Code ::
+
+
+  output[b, oc, h, w] = sum([weight[oc, ic, kh, kw] * input[b, ic, h + kh, w + kw]
+                             for ic, kh, kw in ...])
+  # Input image - batch x (in_channel * height * width)
+  # Weight - (in_channel * kernel_height * kernel_width) x out_channel
+
+
+Backward
+---------
+
+.. image:: figs/Conv/backward.png
+           :align: center
+
+Backward
+---------
+
+Same idea as 1D
+
+* Reverse weight (bottom-top, left-right)
+* Anchor bottom-right
+* Compute convolution
+
+Channels
+--------
+
+Nothing different from 1D version
+
+.. image:: figs/Conv/conv2.png
+           :align: center
+           :width: 500px
+
+Implementation
+--------------
+
+.. revealjs_fragments::
+
+   * All about understanding sizes.
+   * Should be similar to matmul, start with output
+   * If outside boundaries, use 0
+
+
+Advice
+-------
+
+* Implement 1D first it is easier
+* Compute a couple manually yourself.
+* All about indexing
+
+Where are we?
+---------------
+
+https://poloclub.github.io/cnn-explainer/
+
+
+3D Convolution?
+----------------
+
+* Yeah!
+* Several neat versions
+
+3D Convolution Voxels
+---------------------
+
+.. image:: 3dconv.png
+   :width: 700px
+
+3D Convolution Chemistry
+-------------------------
+
+.. image:: chem.gif
+   :width: 700px
+
+3D Convolution Video
+-------------------------
+
+.. image:: video.jpeg
+   :width: 700px
+
+Graph Convolution
+-------------------------
+
+.. image:: graph.png
+   :width: 700px
+
+
+Pooling
+----------
+
+* Adjusts the scale at each layer
+* Conv stays the same size, image "zooms" out
+
+
+Pooling
+----------
+
+* Adjusts the scale at each layer
+* Conv stays the same size, image "zooms" out
+           

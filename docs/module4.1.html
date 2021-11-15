@@ -1,0 +1,416 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 4.1 - Convolution</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 4.1 - Convolution</h1>
+</section>
+<section >
+<h2>Module 4.1</h2>
+<blockquote>
+<div><p>Convolution</p>
+</div></blockquote>
+</section>
+<section >
+<h1>Review: NLP</h1>
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/negative.png" class="align-center" src="_images/negative.png" />
+</section>
+<section >
+<h2>Data</h2>
+<img alt="_images/positive.png" class="align-center" src="_images/positive.png" />
+</section>
+<section >
+<h2>Loss</h2>
+<ul class="simple">
+<li class="fragment"><p>Same as our basic problem.</p></li>
+</ul>
+<img alt="_images/weight1.png" class="align-center" src="_images/weight1.png" />
+</section>
+<section >
+<h2>Embedding Table</h2>
+<img alt="_images/embweight.png" class="align-center" src="_images/embweight.png" />
+</section>
+<section >
+<h2>Embedding One</h2>
+<img alt="_images/embone.png" class="align-center" src="_images/embone.png" />
+</section>
+<section >
+<h2>Network</h2>
+<img alt="_images/sentemb.png" class="align-center" src="_images/sentemb.png" />
+</section>
+<section >
+<h2>Reduction / &quot;Pooling&quot;</h2>
+<img alt="_images/pooling.png" class="align-center" src="_images/pooling.png" />
+</section>
+<section >
+<h2>Full Model</h2>
+<img alt="_images/full.png" class="align-center" src="_images/full.png" />
+</section>
+<section >
+<h2>Bag-of-Words</h2>
+<ul class="simple">
+<li><p>Each word contributes to final decision</p></li>
+<li><p>Sacrifice order, gain parameter efficiency</p></li>
+</ul>
+</section>
+<section >
+<h2>Challenge</h2>
+<ul class="simple">
+<li><p>How do you handle some locality?</p></li>
+<li><p>Pairs of neighboring words</p></li>
+</ul>
+</section>
+<section >
+<h2>Ideal</h2>
+<ul class="simple">
+<li><p>Neural network that looks at subset of the input.</p></li>
+<li><p>Can learn features to spot patterns that come together.</p></li>
+<li><p>Same model, different locations</p></li>
+</ul>
+</section>
+<section >
+<h2>Convolution</h2>
+<ul class="simple">
+<li><p>Very important neural network function</p></li>
+<li><p>Highly efficient in parallel hardware</p></li>
+</ul>
+</section>
+<section >
+<h2>NLP</h2>
+<img alt="_images/sentcnn.png" class="align-center" src="_images/sentcnn.png" />
+</section>
+<section >
+<h1>Convolution</h1>
+</section>
+<section >
+<h2>Challenge</h2>
+<blockquote>
+<div><p>How do we handle locality in features?</p>
+</div></blockquote>
+</section>
+<section >
+<h2>Intuition</h2>
+<ul class="simple">
+<li class="fragment"><p>Same neural network as before</p></li>
+<li class="fragment"><p>Brute force, run it everywhere</p></li>
+<li class="fragment"><p>Hope to detect important patterns and combine them</p></li>
+</ul>
+</section>
+<section >
+<h2>Minitorch Convention</h2>
+<ul class="simple">
+<li><p>All convolutions are same size out as in.</p></li>
+<li><p>(This is different than torch, but makes it easier)</p></li>
+</ul>
+</section>
+<section >
+<h2>View #1: Conv as sliding</h2>
+<img alt="_images/conv1d.png" class="align-center" src="_images/conv1d.png" />
+</section>
+<section >
+<h2>Computation</h2>
+<p>Output Values</p>
+<pre data-id="computation"><code data-trim data-noescape class="python">out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]
+...</code></pre>
+</section>
+<section >
+<h2>View #2: Conv as unrolling</h2>
+<p>Input:</p>
+<pre data-id="view-2-conv-as-unrolling"><code data-trim data-noescape class="python">input = minitorch.tensor([1, 2, 3, 4, 5, 6])</code></pre>
+<p>&quot;Unroll&quot;</p>
+<pre data-id="view-2-conv-as-unrolling"><code data-trim data-noescape class="python">[[1, 2, 3],
+ [2, 3, 4],
+ [3, 4, 5],
+ [4, 5, 6],
+ [5, 6, 0],
+ [6, 0, 0]]</code></pre>
+</section>
+<section >
+<h2>Unrolled View</h2>
+<p>Unroll + matmul</p>
+<pre data-id="unrolled-view"><code data-trim data-noescape class="python">weight = minitorch.tensor([5, 2, 3]).view(3, 1)
+output = input &#64; weight</code></pre>
+<p>Output (1 * 5 + 2 * 2 + 3 * 3)</p>
+<pre data-id="unrolled-view"><code data-trim data-noescape class="python">[18, ..., 30 ]</code></pre>
+</section>
+<section >
+<h2>View #3: Conv as Broadcast</h2>
+<img alt="_images/convvec.png" class="align-center" src="_images/convvec.png" />
+</section>
+<section >
+<h1>Gradient</h1>
+</section>
+<section >
+<h2>Gradient</h2>
+<p>Output Values</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]</code></pre>
+<p>Gradient values</p>
+<pre data-id="id4"><code data-trim data-noescape class="python">d_in[2] = w[0] * d_out[2] + w[1] * d_out[1]  + w[2] * d_out[0]</code></pre>
+</section>
+<section >
+<h2>Conv Back - Input</h2>
+<p>Reverse the convolutional anchor</p>
+<img alt="_images/conv1dback.png" class="align-center" src="_images/conv1dback.png" />
+</section>
+<section >
+<h2>Gradient of Weight</h2>
+<p>Out Values</p>
+<pre data-id="gradient-of-weight"><code data-trim data-noescape class="python">out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]</code></pre>
+<p>Gradient values</p>
+<pre data-id="gradient-of-weight"><code data-trim data-noescape class="python">d_w[2] = d_out[0] * in[2]  + d_out[1] * in[3] + d_out[2] * in[4]</code></pre>
+</section>
+<section >
+<h2>Conv Back - Weight</h2>
+<img alt="_images/conv1dback2.png" class="align-center" src="_images/conv1dback2.png" />
+</section>
+<section >
+<h2>How do we implement?</h2>
+<ul class="simple">
+<li><p>Which parts can be done in parallel?</p></li>
+<li><p>What needs to be loaded in?</p></li>
+</ul>
+</section>
+<section >
+<h1>Channels</h1>
+</section>
+<section >
+<h2>Scaling</h2>
+<ul class="simple">
+<li><p>Conv above corresponds to 1 (hidden) feature.</p></li>
+<li><p>We may want lots of different input and output features</p></li>
+</ul>
+</section>
+<section >
+<h2>Intuition</h2>
+<ul class="simple">
+<li><p>Each position may have multiple values</p></li>
+<li><p>These may be meaningful - i</p></li>
+<li><p>These may be learned - i.e. hidden states</p></li>
+</ul>
+</section>
+<section >
+<h2>Key Points</h2>
+<ul class="simple">
+<li><p>Convolution applied to all input channels in position</p></li>
+<li><p>If weight is length K and there are 10 channels, the input to the linear
+is 10 * K.</p></li>
+<li><p>Output channels are just like the output of the Linear.</p></li>
+</ul>
+</section>
+<section >
+<h2>NLP</h2>
+<img alt="_images/sentcnn.png" class="align-center" src="_images/sentcnn.png" />
+</section>
+<section >
+<h2>Computation (input channels)</h2>
+<p>Output Values</p>
+<pre data-id="computation-input-channels"><code data-trim data-noescape class="python">out[0] = w[0, 0] * in[0, 0] + w[1, 0] * in[1, 0]  + w[2, 0] * in[2, 0] \
+         w[0, 1] * in[0, 1] + w[1, 1] * in[1, 1]  + w[2, 1] * in[2, 1]
+...</code></pre>
+</section>
+<section >
+<h2>Computation (output channels)</h2>
+<p>Output Values</p>
+<pre data-id="computation-output-channels"><code data-trim data-noescape class="python">out[0, 0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+out[0, 1] = w2[1] * in[0] + w2[1] * in[1]  + w2[2] * in[2]
+...</code></pre>
+</section>
+<section >
+<h2>Graphical Representation</h2>
+<a class="reference internal image-reference" href="_images/channels.png"><img alt="_images/channels.png" class="align-center" src="_images/channels.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>View: Unroll</h2>
+<p>Pseudo, Code (note matmul on <cite>in_channels * K</cite>)</p>
+<pre data-id="view-unroll"><code data-trim data-noescape class="python">in = unroll(in, 3)
+output = weight.view(out_channels, in_channels * 3) &#64; in.view(in_channels * 3, T)</code></pre>
+</section>
+<section >
+<h2>Implementation</h2>
+<ul class="simple">
+<li class="fragment"><p>All about understanding sizes.</p></li>
+<li class="fragment"><p>Should be similar to matmul, start with output</p></li>
+<li class="fragment"><p>If outside boundaries, use 0</p></li>
+</ul>
+</section>
+<section >
+<h1>Pooling</h1>
+</section>
+<section >
+<h2>Challenge</h2>
+<ul class="simple">
+<li><p>How do we look at bigger areas with convolutions?</p></li>
+</ul>
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Number of parameters scale with weight size</p></li>
+<li><p>&quot;Bigger&quot; patterns require more ways to split data.</p></li>
+</ul>
+</section>
+<section >
+<h2>Standard Reduction</h2>
+<a class="reference internal image-reference" href="_images/pool1.png"><img alt="_images/pool1.png" class="align-center" src="_images/pool1.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>&quot;Pooling&quot;</h2>
+<p>Reduction applied to each region:</p>
+<a class="reference internal image-reference" href="_images/pool2.png"><img alt="_images/pool2.png" class="align-center" src="_images/pool2.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Simple Implementation</h2>
+<ul class="simple">
+<li><p>Ensure that it is contiguous</p></li>
+<li><p>Use View to &quot;fold&quot; the tensor</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool3.png"><img alt="_images/pool3.png" class="align-center" src="_images/pool3.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Why does folding work?</h2>
+<ul class="simple">
+<li><p>View requires &quot;contiguous&quot; tensor</p></li>
+<li><p>View(4, 2) makes strides (2, 1)</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool3.png"><img alt="_images/pool3.png" class="align-center" src="_images/pool3.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Simple Implementation</h2>
+<ul class="simple">
+<li><p>Reduce along created fold</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool4.png"><img alt="_images/pool4.png" class="align-center" src="_images/pool4.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>2D Pooling</h2>
+<a class="reference internal image-reference" href="_images/pool2d.png"><img alt="_images/pool2d.png" class="align-center" src="_images/pool2d.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>2D Pooling</h2>
+<ul class="simple">
+<li><p>Need to isolate squares into a single dimension.</p></li>
+<li><p>Tensor origami :)</p></li>
+</ul>
+</section>
+<section >
+<h2>Exercise</h2>
+<ul class="simple">
+<li><p>If I have a (10, 10) cube. How do I sum up neighboring rows?</p></li>
+<li><p>Goal (5, 10) cube.</p></li>
+</ul>
+</section>
+<section >
+<h2>Fast Implementations?</h2>
+<ul>
+<li><p>If your reduce is on CUDA, can exploit small groups</p></li>
+<li><p>I.e. Prefix sum for each group on one block.</p>
+<p>Goal</p>
+</li>
+</ul>
+<hr class="docutils" />
+<ul class="simple">
+<li><p>Early layers: Capture basic shapes</p></li>
+<li><p>Middle layers: How these connect</p></li>
+<li><p>Later layers: Full objects</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<img alt="_images/vis.png" src="_images/vis.png" />
+</section>
+<section >
+<h2>Q&amp;A</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>
