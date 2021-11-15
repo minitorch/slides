@@ -53,3 +53,5 @@ Module 4 |logo|
 -----------------
 
 * :doc:`module4.0` - `(pdf) <module4.0.html?print-pdf>`_
+* :doc:`module4.1` - `(pdf) <module4.1.html?print-pdf>`_
+* :doc:`module4.2` - `(pdf) <module4.1.html?print-pdf>`_
