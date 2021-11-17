@@ -1,7 +1,7 @@
-Module 4.1 - Images
+Module 4.2 - Images
 =============================================
 
-Module 4.1
+Module 421
 ------------
 
    Images
@@ -53,18 +53,120 @@ Reverse the convolutional anchor
            :align: center
 
 
+NLP
+----
+
+.. image:: images/sentcnn.png
+   :align: center
+
+
+Computation (input channels)
+----------------------------
+
+Output Values ::
+
+  out[0] = w[0, 0] * in[0, 0] + w[1, 0] * in[1, 0]  + w[2, 0] * in[2, 0] \
+           w[0, 1] * in[0, 1] + w[1, 1] * in[1, 1]  + w[2, 1] * in[2, 1] 
+  ...
+
+                   
 Graphical Representation
 -------------------------
 
-.. image:: figs/Conv/channels.png
+.. image:: figs/Conv/convchan.png
            :align: center
            :width: 400px
 
-Outline
-========
 
+Outline
+---------
+
+* Pooling
 * Image Rec
 * Conv 2d
+
+  
+Pooling
+========
+
+Challenge
+---------
+
+* How do we look at bigger areas with convolutions?
+
+
+Issues
+---------
+
+* Number of parameters scale with weight size
+* "Bigger" patterns require more ways to split data.
+
+
+Standard Reduction
+-------------------
+
+.. image:: figs/Conv/pool1.png
+           :align: center
+           :width: 500px
+
+"Pooling"
+-----------
+
+Reduction applied to each region:
+
+.. image:: figs/Conv/pool2.png
+           :align: center
+           :width: 500px
+
+Simple Implementation
+----------------------
+
+* Ensure that it is contiguous
+* Use View to "fold" the tensor
+
+.. image:: figs/Conv/pool3.png
+           :align: center
+           :width: 500px
+
+Why does folding work?
+-----------------------
+
+* View requires "contiguous" tensor
+* View(4, 2) makes strides (2, 1)
+  
+.. image:: figs/Conv/pool3.png
+           :align: center
+           :width: 500px
+
+Simple Implementation
+----------------------
+
+* Reduce along created fold
+
+
+.. image:: figs/Conv/pool4.png
+           :align: center
+           :width: 500px
+
+2D Pooling
+-----------
+
+* Need to isolate squares into a single dimension.
+
+* Tensor origami :)
+
+Exercise
+-----------
+
+* If I have a (10, 10) cube. How do I sum up neighboring rows?
+
+* Goal (5, 10) cube. 
+
+Fast Implementations?
+---------------------
+
+* If your reduce is on CUDA, can exploit small groups
+* I.e. Prefix sum for each group on one block.
 
 
 Image Recognition
@@ -76,12 +178,6 @@ Challenge 1: Input Features
 .. image:: figs/Conv/conv@3x.png
            :align: center
            :width: 400px
-
-
-Example
---------
-
-https://poloclub.github.io/cnn-explainer/
 
 
 Data Set
@@ -313,6 +409,35 @@ Where are we?
 
 https://poloclub.github.io/cnn-explainer/
 
+Pooling
+----------
+
+* Adjusts the scale at each layer
+* Conv stays the same size, image "zooms" out
+
+
+
+2D Pooling
+-----------
+
+.. image:: figs/Conv/pool2d.png
+           :align: center
+           :width: 500px
+
+Goal
+------
+
+* Early layers: Capture basic shapes
+* Middle layers: How these connect
+* Later layers: Full objects
+
+
+Example
+--------
+
+.. image:: images/vis.png
+
+
 
 3D Convolution?
 ----------------
@@ -323,38 +448,27 @@ https://poloclub.github.io/cnn-explainer/
 3D Convolution Voxels
 ---------------------
 
-.. image:: 3dconv.png
+.. image:: images/3dconv.png
    :width: 700px
 
 3D Convolution Chemistry
 -------------------------
 
-.. image:: chem.gif
+.. image:: images/chem.gif
    :width: 700px
 
 3D Convolution Video
 -------------------------
 
-.. image:: video.jpeg
+.. image:: images/video.jpeg
    :width: 700px
 
 Graph Convolution
 -------------------------
 
-.. image:: graph.png
+.. image:: images/graph.png
    :width: 700px
 
 
-Pooling
-----------
 
-* Adjusts the scale at each layer
-* Conv stays the same size, image "zooms" out
-
-
-Pooling
-----------
-
-* Adjusts the scale at each layer
-* Conv stays the same size, image "zooms" out
            
