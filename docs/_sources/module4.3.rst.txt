@@ -1,0 +1,506 @@
+Module 4.3 - Advanced NNs
+=============================================
+
+Module 4.3
+------------
+
+Advanced NNs
+
+View #1: Conv as sliding
+-------------------------
+
+.. image:: figs/Conv/conv1d.png
+           :align: center
+
+Computation
+-----------
+
+Output Values ::
+
+  out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+  out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+  out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]
+  ...
+
+
+Two Dimensional Convolution
+----------------------------
+
+* Instead of line, now use box
+* Box is anchored at the top-left
+* Zip-reduce is over full box!
+
+
+Convolution
+-----------
+
+.. image:: figs/Conv/conv.png
+           :align: center
+
+Conventions
+-------------
+
+Sizes ::
+
+ # Input image - batch x in_channel x height x width
+ # Weight - out_channel x in_channel x kernel_height x kernel_width
+ # Output image - batch x out_channel x height x width
+
+
+Issues
+---------
+
+* Number of parameters scale with weight size
+* "Bigger" patterns require more ways to split data.
+
+
+Standard Reduction
+-------------------
+
+.. image:: figs/Conv/pool1.png
+           :align: center
+           :width: 500px
+
+"Pooling"
+-----------
+
+Reduction applied to each region:
+
+.. image:: figs/Conv/pool2.png
+           :align: center
+           :width: 500px
+
+Simple Implementation
+----------------------
+
+* Ensure that it is contiguous
+* Use View to "fold" the tensor
+
+.. image:: figs/Conv/pool3.png
+           :align: center
+           :width: 500px
+
+Why does folding work?
+-----------------------
+
+* View requires "contiguous" tensor
+* View(4, 2) makes strides (2, 1)
+  
+.. image:: figs/Conv/pool3.png
+           :align: center
+           :width: 500px
+
+Quiz
+-----
+
+
+                   
+Outline
+---------
+
+.. revealjs_fragments::
+
+   * Differentiate all the things!
+   * ReLU, Step, Sigmoid
+   * Max, Argmax, Softmax
+
+
+
+     
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 700px
+
+Challenge 1: Input Features
+----------------------------
+
+.. image:: figs/Conv/conv@3x.png
+           :align: center
+           :width: 400px
+
+Challenge 2: Variable Size Area
+---------------------------------
+
+.. image:: figs/Conv/pool2d@3x.png
+           :align: center
+           :width: 400px
+
+                   
+Challenge 3: Multiple Output
+---------------------------------
+
+.. image:: images/hist.png
+           :align: center
+           :width: 500px
+                   
+
+More Reductions
+----------------
+
+* Heading for a `max` reduction
+
+* Heading for a `softmax` output
+
+* Quick detour
+
+
+ReLU, Step, Sigmoid
+====================
+
+
+Basic Operations
+-----------------
+
+* Introduced in Module-0
+  
+* Widely used in ML
+  
+* What is it?
+  
+Simple Function: ReLU
+------------------------
+
+Main "activation" function 
+
+.. image:: figs/Graphs/relu2.png
+           :align: center
+           :width: 400px
+
+Primarily used to split the data.
+
+Simple Function: Step
+--------------------------
+
+Step function is used to determine correct answer
+
+.. image:: images/step.png
+           :align: center
+           :width: 400px
+
+
+In minitorch :math:`f(x) = x > 0`
+                   
+
+
+
+ReLU
+-------------
+
+Mathematically,
+
+.. math::
+
+   \text{ReLU}(x) = \max\{0, x\}
+
+Simplest `max` function.
+
+
+Step
+------
+
+Mathematically,
+
+.. math::
+
+   \text{step}(x) = x > 0 = \arg\max\{0, x\}
+
+Simplest `argmax` function.
+
+
+Relationship
+-------------
+
+Step is derivative of ReLU
+
+.. math::
+   \begin{eqnarray*}
+   \text{ReLU}'(x) &=& \begin{cases} 0 & \text{if } x \leq 0 \\ 1 & \text{ow}  \end{cases} \\
+   \text{step}(x) &=& \text{ReLU}'(x)
+   \end{eqnarray*}
+
+
+What's wrong with step?
+------------------------
+   
+.. image:: figs/Graphs/incorrect.png
+           :align: center
+           :width: 350px
+
+Loss of step tells us how many points are wrong.
+                   
+   
+Derivative of Step?
+--------------------
+
+Mathematically,
+
+.. math::
+   \text{step}'(x) = \begin{cases} 0 & \text{if } x \leq 0 \\ 0 & \text{ow}  \end{cases} \\
+
+
+Not a useful function to differentiate
+
+
+Altenative Function: Sigmoid
+-----------------------------
+
+Used to determine the loss function
+
+
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 400px
+
+Sigmoid acts as a "soft" version
+--------------------------------
+
+.. image:: figs/Graphs/distance.png
+           :align: center
+           :width: 350px
+
+
+                  
+Soft (arg)max?
+--------------------
+
+Would be nice to have a version that with a useful derivative
+
+.. math::
+   \text{sigmoid}(x) &=& \text{softmax} \{0, x\} \\
+
+
+Useful soft version of argmax.
+
+
+
+Max, Argmax, Softmax
+====================
+
+Challenge
+---------
+
+How do we generalize sigmoid to multiple outputs?
+
+.. image:: figs/Conv/value.png
+
+
+Max reduction
+--------------
+
+* Max is a binary associative operator
+
+* :math:`\max(a, b)` returns max value
+
+* Generalized :math:`\text{ReLU}(a) = \max(a, 0)`
+
+
+Max Pooling
+-----------
+
+* Common to apply pooling with max
+* Sets pooled value to "most active" in block
+* Forward code is easy to implement
+
+
+Max Backward
+-------------
+
+* Unlike sum, max throws away other values
+* Only top value gets used
+* Backward needs to know this.
+
+Argmax
+------
+
+* Function that returns `argmax`, one-hot
+* Generalizes step
+
+.. image:: figs/Conv/argmax.png
+
+
+
+Max Backward
+----------------
+
+* First compute `argmax`
+* Only send gradient to `argmax` gradinput
+* Everything else is 0
+
+
+Ties
+-----
+
+* What if there are two or more argmax's?
+* Max is non-differentiable, like `ReLU(0)`.
+* Short answer: Ignore, pick one
+
+HW
+----
+
+* When writing tests for max, ties will break finite-differences
+* Suggestion: perturb your input by adding a small amount of random noise.
+
+Soft argmax?
+-------------
+
+* Need a soft version of argmax.
+* Generalizes sigmoid for our new loss function
+* Standard name -> softmax
+
+Softmax
+-------
+
+.. math::
+
+   \text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}
+
+Sigmoid is Softmax
+-------------------
+
+.. math::
+
+   \text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)
+
+
+Softmax
+---------
+
+.. image:: figs/Conv/softmax.png
+
+
+Review
+-------
+
+======= ============
+Binary  Multiclass
+======= ============
+ReLU     Max
+Step     Argmax
+Sigmoid  Softmax
+======= ============
+
+
+Softmax
+=========
+
+Network
+-------------
+
+.. image:: figs/Conv/networkcnn.png
+           :align: center
+           :width: 500px
+
+
+Softmax Layer
+-------------
+
+* Produces a probability distribution over outputs (Sum to 1)
+* Derivative similar to sigmoid
+* Lots of interesting practical properties
+
+
+Softmax in Context
+-------------------
+
+* Not a map!
+* Gradient spreads out from one point to all.
+
+
+Softmax
+-------
+
+* `Colab <https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu>`_
+
+
+Soft Gates
+============
+
+New Methods
+----------------
+
+* Sigmoid and softmax produce distributions
+* Can be used to "control" information flow
+
+Example
+-------
+
+Returns a combination of x and y
+
+.. math::
+
+   f(x, y, r) = x * \sigma(r) + y * (1 - \sigma(r))
+
+
+Gradient is controlled
+-----------------------
+
+.. math::
+
+   f'_x(x, y, r) &= \sigma(r) \\
+   f'_y(x, y, r) &= (1 - \sigma( r))\\
+   f'_r(x, y, r) &= (x -  y) \sigma'(r)
+
+
+Neural Network Gates
+-----------------------
+
+Learn which one of the previous layers is most useful.
+
+.. math::
+
+   r &= NN_1 \\
+   x &= NN_2 \\
+   y &= NN_3
+
+
+Gradient Flow
+--------------
+
+* Layers that are used get more updates
+* Gradient signals which aspect was important
+* Can have extra layers
+
+
+Selecting Choices
+-------------------
+
+.. revealjs_fragments::
+
+   * Gating gives us a binary choice
+   * What if we want to select between many elements?
+   * Softmax!
+
+Softmax Gating
+---------------
+
+Combines many elements of X based on R
+
+.. math::
+
+   f(X, R) = X \times softmax(R)
+
+
+Softmax Gating
+---------------
+
+* Brand name: Attention
+*
+
+Example: Translation
+--------------------
+
+* Show example
+
+
+Example: GPT-3
+--------------------
+
+* Show example
+
+
+
+QA
+---

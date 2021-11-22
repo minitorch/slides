@@ -1,13 +1,11 @@
 Module 4.2 - Images
 =============================================
 
-Module 421
+Module 4.2
 ------------
 
    Images
 
-Review: Conv
-=============
 
 
 View #1: Conv as sliding

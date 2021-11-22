@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+
+<html lang="english">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 4.3 - Advanced NNs</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/dist/reveal.css" />
+    <link rel="stylesheet" href="_static/revealjs4/dist/theme/white.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/revealjs4/plugin/highlight/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+
+  </head><body>
+    <div class="reveal">
+        <div class="slides">
+            <section >
+<h1>Module 4.3 - Advanced NNs</h1>
+</section>
+<section >
+<h2>Module 4.3</h2>
+<p>Advanced NNs</p>
+</section>
+<section >
+<h2>View #1: Conv as sliding</h2>
+<img alt="_images/conv1d.png" class="align-center" src="_images/conv1d.png" />
+</section>
+<section >
+<h2>Computation</h2>
+<p>Output Values</p>
+<pre data-id="computation"><code data-trim data-noescape class="python">out[0] = w[0] * in[0] + w[1] * in[1]  + w[2] * in[2]
+out[1] = w[0] * in[1] + w[1] * in[2]  + w[2] * in[3]
+out[2] = w[0] * in[2] + w[1] * in[3]  + w[2] * in[4]
+...</code></pre>
+</section>
+<section >
+<h2>Two Dimensional Convolution</h2>
+<ul class="simple">
+<li><p>Instead of line, now use box</p></li>
+<li><p>Box is anchored at the top-left</p></li>
+<li><p>Zip-reduce is over full box!</p></li>
+</ul>
+</section>
+<section >
+<h2>Convolution</h2>
+<img alt="_images/conv.png" class="align-center" src="_images/conv.png" />
+</section>
+<section >
+<h2>Conventions</h2>
+<p>Sizes</p>
+<pre data-id="conventions"><code data-trim data-noescape class="python"># Input image - batch x in_channel x height x width
+# Weight - out_channel x in_channel x kernel_height x kernel_width
+# Output image - batch x out_channel x height x width</code></pre>
+</section>
+<section >
+<h2>Issues</h2>
+<ul class="simple">
+<li><p>Number of parameters scale with weight size</p></li>
+<li><p>&quot;Bigger&quot; patterns require more ways to split data.</p></li>
+</ul>
+</section>
+<section >
+<h2>Standard Reduction</h2>
+<a class="reference internal image-reference" href="_images/pool1.png"><img alt="_images/pool1.png" class="align-center" src="_images/pool1.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>&quot;Pooling&quot;</h2>
+<p>Reduction applied to each region:</p>
+<a class="reference internal image-reference" href="_images/pool2.png"><img alt="_images/pool2.png" class="align-center" src="_images/pool2.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Simple Implementation</h2>
+<ul class="simple">
+<li><p>Ensure that it is contiguous</p></li>
+<li><p>Use View to &quot;fold&quot; the tensor</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool3.png"><img alt="_images/pool3.png" class="align-center" src="_images/pool3.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Why does folding work?</h2>
+<ul class="simple">
+<li><p>View requires &quot;contiguous&quot; tensor</p></li>
+<li><p>View(4, 2) makes strides (2, 1)</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/pool3.png"><img alt="_images/pool3.png" class="align-center" src="_images/pool3.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Quiz</h2>
+</section>
+<section >
+<h2>Outline</h2>
+<ul class="simple">
+<li class="fragment"><p>Differentiate all the things!</p></li>
+<li class="fragment"><p>ReLU, Step, Sigmoid</p></li>
+<li class="fragment"><p>Max, Argmax, Softmax</p></li>
+</ul>
+</section>
+<section >
+<h2>Network</h2>
+<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 700px;" /></a>
+</section>
+<section >
+<h2>Challenge 1: Input Features</h2>
+<a class="reference internal image-reference" href="_images/conv&#64;3x.png"><img alt="_images/conv&#64;3x.png" class="align-center" src="_images/conv&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 2: Variable Size Area</h2>
+<a class="reference internal image-reference" href="_images/pool2d&#64;3x.png"><img alt="_images/pool2d&#64;3x.png" class="align-center" src="_images/pool2d&#64;3x.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Challenge 3: Multiple Output</h2>
+<a class="reference internal image-reference" href="_images/hist.png"><img alt="_images/hist.png" class="align-center" src="_images/hist.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>More Reductions</h2>
+<ul class="simple">
+<li><p>Heading for a <cite>max</cite> reduction</p></li>
+<li><p>Heading for a <cite>softmax</cite> output</p></li>
+<li><p>Quick detour</p></li>
+</ul>
+</section>
+<section >
+<h1>ReLU, Step, Sigmoid</h1>
+</section>
+<section >
+<h2>Basic Operations</h2>
+<ul class="simple">
+<li><p>Introduced in Module-0</p></li>
+<li><p>Widely used in ML</p></li>
+<li><p>What is it?</p></li>
+</ul>
+</section>
+<section >
+<h2>Simple Function: ReLU</h2>
+<p>Main &quot;activation&quot; function</p>
+<a class="reference internal image-reference" href="_images/relu2.png"><img alt="_images/relu2.png" class="align-center" src="_images/relu2.png" style="width: 400px;" /></a>
+<p>Primarily used to split the data.</p>
+</section>
+<section >
+<h2>Simple Function: Step</h2>
+<p>Step function is used to determine correct answer</p>
+<a class="reference internal image-reference" href="_images/step.png"><img alt="_images/step.png" class="align-center" src="_images/step.png" style="width: 400px;" /></a>
+<p>In minitorch <span class="math notranslate nohighlight">\(f(x) = x &gt; 0\)</span></p>
+</section>
+<section >
+<h2>ReLU</h2>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[\text{ReLU}(x) = \max\{0, x\}\]</div>
+<p>Simplest <cite>max</cite> function.</p>
+</section>
+<section >
+<h2>Step</h2>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[\text{step}(x) = x &gt; 0 = \arg\max\{0, x\}\]</div>
+<p>Simplest <cite>argmax</cite> function.</p>
+</section>
+<section >
+<h2>Relationship</h2>
+<p>Step is derivative of ReLU</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{ReLU}'(x) &amp;=&amp; \begin{cases} 0 &amp; \text{if } x \leq 0 \\ 1 &amp; \text{ow}  \end{cases} \\
+\text{step}(x) &amp;=&amp; \text{ReLU}'(x)
+\end{eqnarray*}\end{split}\]</div>
+</section>
+<section >
+<h2>What's wrong with step?</h2>
+<a class="reference internal image-reference" href="_images/incorrect.png"><img alt="_images/incorrect.png" class="align-center" src="_images/incorrect.png" style="width: 350px;" /></a>
+<p>Loss of step tells us how many points are wrong.</p>
+</section>
+<section >
+<h2>Derivative of Step?</h2>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{step}'(x) = \begin{cases} 0 &amp; \text{if } x \leq 0 \\ 0 &amp; \text{ow}  \end{cases} \\\end{split}\]</div>
+<p>Not a useful function to differentiate</p>
+</section>
+<section >
+<h2>Altenative Function: Sigmoid</h2>
+<p>Used to determine the loss function</p>
+<a class="reference internal image-reference" href="_images/sigmoid.png"><img alt="_images/sigmoid.png" class="align-center" src="_images/sigmoid.png" style="width: 400px;" /></a>
+</section>
+<section >
+<h2>Sigmoid acts as a &quot;soft&quot; version</h2>
+<a class="reference internal image-reference" href="_images/distance.png"><img alt="_images/distance.png" class="align-center" src="_images/distance.png" style="width: 350px;" /></a>
+</section>
+<section >
+<h2>Soft (arg)max?</h2>
+<p>Would be nice to have a version that with a useful derivative</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{sigmoid}(x) &amp;=&amp; \text{softmax} \{0, x\} \\\end{split}\]</div>
+<p>Useful soft version of argmax.</p>
+</section>
+<section >
+<h1>Max, Argmax, Softmax</h1>
+</section>
+<section >
+<h2>Challenge</h2>
+<p>How do we generalize sigmoid to multiple outputs?</p>
+<img alt="_images/value.png" src="_images/value.png" />
+</section>
+<section >
+<h2>Max reduction</h2>
+<ul class="simple">
+<li><p>Max is a binary associative operator</p></li>
+<li><p><span class="math notranslate nohighlight">\(\max(a, b)\)</span> returns max value</p></li>
+<li><p>Generalized <span class="math notranslate nohighlight">\(\text{ReLU}(a) = \max(a, 0)\)</span></p></li>
+</ul>
+</section>
+<section >
+<h2>Max Pooling</h2>
+<ul class="simple">
+<li><p>Common to apply pooling with max</p></li>
+<li><p>Sets pooled value to &quot;most active&quot; in block</p></li>
+<li><p>Forward code is easy to implement</p></li>
+</ul>
+</section>
+<section >
+<h2>Max Backward</h2>
+<ul class="simple">
+<li><p>Unlike sum, max throws away other values</p></li>
+<li><p>Only top value gets used</p></li>
+<li><p>Backward needs to know this.</p></li>
+</ul>
+</section>
+<section >
+<h2>Argmax</h2>
+<ul class="simple">
+<li><p>Function that returns <cite>argmax</cite>, one-hot</p></li>
+<li><p>Generalizes step</p></li>
+</ul>
+<img alt="_images/argmax.png" src="_images/argmax.png" />
+</section>
+<section >
+<h2>Max Backward</h2>
+<ul class="simple">
+<li><p>First compute <cite>argmax</cite></p></li>
+<li><p>Only send gradient to <cite>argmax</cite> gradinput</p></li>
+<li><p>Everything else is 0</p></li>
+</ul>
+</section>
+<section >
+<h2>Ties</h2>
+<ul class="simple">
+<li><p>What if there are two or more argmax's?</p></li>
+<li><p>Max is non-differentiable, like <cite>ReLU(0)</cite>.</p></li>
+<li><p>Short answer: Ignore, pick one</p></li>
+</ul>
+</section>
+<section >
+<h2>HW</h2>
+<ul class="simple">
+<li><p>When writing tests for max, ties will break finite-differences</p></li>
+<li><p>Suggestion: perturb your input by adding a small amount of random noise.</p></li>
+</ul>
+</section>
+<section >
+<h2>Soft argmax?</h2>
+<ul class="simple">
+<li><p>Need a soft version of argmax.</p></li>
+<li><p>Generalizes sigmoid for our new loss function</p></li>
+<li><p>Standard name -&gt; softmax</p></li>
+</ul>
+</section>
+<section >
+<h2>Softmax</h2>
+<div class="math notranslate nohighlight">
+\[\text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}\]</div>
+</section>
+<section >
+<h2>Sigmoid is Softmax</h2>
+<div class="math notranslate nohighlight">
+\[\text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)\]</div>
+</section>
+<section >
+<h2>Softmax</h2>
+<img alt="_images/softmax.png" src="_images/softmax.png" />
+</section>
+<section >
+<h2>Review</h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Binary</p></th>
+<th class="head"><p>Multiclass</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ReLU</p></td>
+<td><p>Max</p></td>
+</tr>
+<tr class="row-odd"><td><p>Step</p></td>
+<td><p>Argmax</p></td>
+</tr>
+<tr class="row-even"><td><p>Sigmoid</p></td>
+<td><p>Softmax</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section >
+<h1>Softmax</h1>
+</section>
+<section >
+<h2>Network</h2>
+<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 500px;" /></a>
+</section>
+<section >
+<h2>Softmax Layer</h2>
+<ul class="simple">
+<li><p>Produces a probability distribution over outputs (Sum to 1)</p></li>
+<li><p>Derivative similar to sigmoid</p></li>
+<li><p>Lots of interesting practical properties</p></li>
+</ul>
+</section>
+<section >
+<h2>Softmax in Context</h2>
+<ul class="simple">
+<li><p>Not a map!</p></li>
+<li><p>Gradient spreads out from one point to all.</p></li>
+</ul>
+</section>
+<section >
+<h2>Softmax</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu">Colab</a></p></li>
+</ul>
+</section>
+<section >
+<h1>Soft Gates</h1>
+</section>
+<section >
+<h2>New Methods</h2>
+<ul class="simple">
+<li><p>Sigmoid and softmax produce distributions</p></li>
+<li><p>Can be used to &quot;control&quot; information flow</p></li>
+</ul>
+</section>
+<section >
+<h2>Example</h2>
+<p>Returns a combination of x and y</p>
+<div class="math notranslate nohighlight">
+\[f(x, y, r) = x * \sigma(r) + y * (1 - \sigma(r))\]</div>
+</section>
+<section >
+<h2>Gradient is controlled</h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}f'_x(x, y, r) &amp;= \sigma(r) \\
+f'_y(x, y, r) &amp;= (1 - \sigma( r))\\
+f'_r(x, y, r) &amp;= (x -  y) \sigma'(r)\end{split}\]</div>
+</section>
+<section >
+<h2>Neural Network Gates</h2>
+<p>Learn which one of the previous layers is most useful.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}r &amp;= NN_1 \\
+x &amp;= NN_2 \\
+y &amp;= NN_3\end{split}\]</div>
+</section>
+<section >
+<h2>Gradient Flow</h2>
+<ul class="simple">
+<li><p>Layers that are used get more updates</p></li>
+<li><p>Gradient signals which aspect was important</p></li>
+<li><p>Can have extra layers</p></li>
+</ul>
+</section>
+<section >
+<h2>Selecting Choices</h2>
+<ul class="simple">
+<li class="fragment"><p>Gating gives us a binary choice</p></li>
+<li class="fragment"><p>What if we want to select between many elements?</p></li>
+<li class="fragment"><p>Softmax!</p></li>
+</ul>
+</section>
+<section >
+<h2>Softmax Gating</h2>
+<p>Combines many elements of X based on R</p>
+<div class="math notranslate nohighlight">
+\[f(X, R) = X \times softmax(R)\]</div>
+</section>
+<section >
+<h2>Softmax Gating</h2>
+<ul class="simple">
+<li><p>Brand name: Attention</p></li>
+<li></li>
+</ul>
+</section>
+<section >
+<h2>Example: Translation</h2>
+<ul class="simple">
+<li><p>Show example</p></li>
+</ul>
+</section>
+<section >
+<h2>Example: GPT-3</h2>
+<ul class="simple">
+<li><p>Show example</p></li>
+</ul>
+</section>
+<section >
+<h2>QA</h2>
+</section>
+
+        </div>
+    </div>
+    
+    <script src="_static/revealjs4/dist/reveal.js"></script>
+    
+    
+      <script src="_static/revealjs4/plugin/highlight/highlight.js"></script>
+      
+    
+    <script>
+        var revealjsConfig = new Object();
+        Object.assign(revealjsConfig, 
+{
+    controls: false,
+    transition: 'none',
+  history: true,
+slideNumber: true,
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around
+  // the content
+  margin: 0.04,
+  //fragments: false,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 2.0,
+    center: false,
+    keyboard: {
+	    67: function() { RevealChalkboard.toggleNotesCanvas() },	// toggle notes canvas when 'c' is pressed
+	    66: function() { RevealChalkboard.toggleChalkboard() },	// toggle chalkboard when 'b' is pressed
+	    46: function() { RevealChalkboard.clear() },	// clear chalkboard when 'DEL' is pressed
+	     8: function() { RevealChalkboard.reset() },	// reset chalkboard data on current slide when 'BACKSPACE' is pressed
+	    68: function() { RevealChalkboard.download() },	// downlad recorded chalkboard drawing when 'd' is pressed
+	    88: function() { RevealChalkboard.colorNext() },	// cycle colors forward when 'x' is pressed
+	    89: function() { RevealChalkboard.colorPrev() },	// cycle colors backward when 'y' is pressed
+    }
+}
+);
+        
+        
+        
+          revealjsConfig.plugins = [
+            RevealHighlight,
+          ];
+        
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize(revealjsConfig);
+    </script>
+
+  </body>
+</html>
