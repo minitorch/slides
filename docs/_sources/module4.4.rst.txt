@@ -7,117 +7,71 @@ Module 4.4
 
    Softmax
 
-Intro
-======
-
-Protein Folding
-----------------
-
-.. image:: protein.gif
-   :width: 600px
 
 
-ML Breakthrough
----------------
+ReLU
+-------------
 
-.. image:: download.jpeg
-   :width: 700px
+Mathematically,
 
-ML Breakthrough
----------------
+.. math::
 
-.. image:: AlphaFold.svg
-   :width: 700px
+   \text{ReLU}(x) = \max\{0, x\}
 
-HW
-======
+Simplest `max` function.
 
 
-HW Q&A
--------
+Step
+------
 
-.. revealjs_fragments::
+Mathematically,
 
-   * Deadline Friday
-   * (very small subtraction if late)
+.. math::
 
-Tips for Debugging ML
------------------------
+   \text{step}(x) = x > 0 = \arg\max\{0, x\}
 
-* Extremely different than debugging code.
-* Cannot check if something easy went wrong.
-
-Tips for Debugging ML
-----------------------
-
-* Issue: It's so slow!
-
-* Methods: Start with small models
+Simplest `argmax` function.
 
 
-Tips for Debugging ML
-----------------------
+Relationship
+-------------
 
-* Issue: Waiting for model
+Step is derivative of ReLU
 
-* Methods: Never watch! Debug as you train.
-
-
-Tips for Debugging ML
-----------------------
-
-* Issue: It fails at the end.
-
-* Method: Overfitting to validation data.
+.. math::
+   \begin{eqnarray*}
+   \text{ReLU}'(x) &=& \begin{cases} 0 & \text{if } x \leq 0 \\ 1 & \text{ow}  \end{cases} \\
+   \text{step}(x) &=& \text{ReLU}'(x)
+   \end{eqnarray*}
 
 
-Real-World Models
-------------------
+What's wrong with step?
+------------------------
+   
+.. image:: figs/Graphs/incorrect.png
+           :align: center
+           :width: 350px
 
-* Extremely large, days to train
-* Many small variants
+Loss of step tells us how many points are wrong.
 
+Altenative Function: Sigmoid
+-----------------------------
 
-HW Q&A
--------
-
-.. revealjs_fragments::
-
-   * Conv?
-   * Batching?
-   * Tiling?
-
-Lecture
-=========
-
-Outline
----------
-
-.. revealjs_fragments::
-
-   * Review: Max and Argmax
-   * Softmax in Depth
-   * Gating in practice
+Used to determine the loss function
 
 
-Review: Max, Argmax, Softmax
-=============================
-
-Challenge
----------
-
-How do we generalize sigmoid to multiple outputs?
-
-.. image:: figs/Conv/value.png
-
+.. image:: figs/Graphs/sigmoid.png
+           :align: center
+           :width: 400px
 
 Max reduction
 --------------
 
 * Max is a binary associative operator
-* :math:`\max(a, b)` returns max value
-* Generalized :math:`\text{ReLU}(a) = \max(a, b)`
 
+* :math:`\max(a, b)` returns max value
+
+* Generalized :math:`\text{ReLU}(a) = \max(a, 0)`
 
 Argmax
 ------
@@ -126,8 +80,6 @@ Argmax
 * Generalizes step
 
 .. image:: figs/Conv/argmax.png
-
-
 
 Soft argmax?
 -------------
@@ -143,20 +95,12 @@ Softmax
 
    \text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}
 
-Sigmoid is Softmax
--------------------
-
-.. math::
-
-   \text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)
-
-
 Softmax
----------
+-------
 
-.. image:: figs/Conv/softmax.png
+* `Colab <https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu>`_
 
-
+   
 Review
 -------
 
@@ -168,54 +112,16 @@ Step     Argmax
 Sigmoid  Softmax
 ======= ============
 
+Quiz
+----
 
-Lecture Quiz
--------------
-
-  `Quiz <https://canvas.cornell.edu/courses/20583/assignments/178936>`_
-
+Quiz
 
 
-Softmax
-=========
-
-Network
--------------
-
-.. image:: figs/Conv/networkcnn.png
-           :align: center
-           :width: 500px
 
 
-Softmax Layer
--------------
-
-* Produces a probability distribution over outputs (Sum to 1)
-* Derivative similar to sigmoid
-* Lots of interesting practical properties
-
-Softmax Brainteaser
--------------------
-
-Contrast ::
-
-  a = minitorch.rand((10))
-  b1 = softmax(a)
-  b2 = sigmoid(a)
-  b1[2].backward()
-  b2[2].backward()
-
-Softmax in Context
--------------------
-
-* Not a map!
-* Gradient spreads out from one point to all.
-
-
-Softmax
+Review
 -------
-
-* `Colab <https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu>`_
 
 
 Soft Gates

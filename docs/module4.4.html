@@ -42,98 +42,44 @@
 </div></blockquote>
 </section>
 <section >
-<h1>Intro</h1>
+<h2>ReLU</h2>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[\text{ReLU}(x) = \max\{0, x\}\]</div>
+<p>Simplest <cite>max</cite> function.</p>
 </section>
 <section >
-<h2>Protein Folding</h2>
-<a class="reference internal image-reference" href="protein.gif"><img alt="protein.gif" src="protein.gif" style="width: 600px;" /></a>
+<h2>Step</h2>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[\text{step}(x) = x &gt; 0 = \arg\max\{0, x\}\]</div>
+<p>Simplest <cite>argmax</cite> function.</p>
 </section>
 <section >
-<h2>ML Breakthrough</h2>
-<a class="reference internal image-reference" href="download.jpeg"><img alt="download.jpeg" src="download.jpeg" style="width: 700px;" /></a>
+<h2>Relationship</h2>
+<p>Step is derivative of ReLU</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray*}
+\text{ReLU}'(x) &amp;=&amp; \begin{cases} 0 &amp; \text{if } x \leq 0 \\ 1 &amp; \text{ow}  \end{cases} \\
+\text{step}(x) &amp;=&amp; \text{ReLU}'(x)
+\end{eqnarray*}\end{split}\]</div>
 </section>
 <section >
-<h2>ML Breakthrough</h2>
-<a class="reference internal image-reference" href="AlphaFold.svg"><img alt="AlphaFold.svg" src="AlphaFold.svg" width="700px" /></a>
+<h2>What's wrong with step?</h2>
+<a class="reference internal image-reference" href="_images/incorrect.png"><img alt="_images/incorrect.png" class="align-center" src="_images/incorrect.png" style="width: 350px;" /></a>
+<p>Loss of step tells us how many points are wrong.</p>
 </section>
 <section >
-<h1>HW</h1>
-</section>
-<section >
-<h2>HW Q&amp;A</h2>
-<ul class="simple">
-<li class="fragment"><p>Deadline Friday</p></li>
-<li class="fragment"><p>(very small subtraction if late)</p></li>
-</ul>
-</section>
-<section >
-<h2>Tips for Debugging ML</h2>
-<ul class="simple">
-<li><p>Extremely different than debugging code.</p></li>
-<li><p>Cannot check if something easy went wrong.</p></li>
-</ul>
-</section>
-<section >
-<h2>Tips for Debugging ML</h2>
-<ul class="simple">
-<li><p>Issue: It's so slow!</p></li>
-<li><p>Methods: Start with small models</p></li>
-</ul>
-</section>
-<section >
-<h2>Tips for Debugging ML</h2>
-<ul class="simple">
-<li><p>Issue: Waiting for model</p></li>
-<li><p>Methods: Never watch! Debug as you train.</p></li>
-</ul>
-</section>
-<section >
-<h2>Tips for Debugging ML</h2>
-<ul class="simple">
-<li><p>Issue: It fails at the end.</p></li>
-<li><p>Method: Overfitting to validation data.</p></li>
-</ul>
-</section>
-<section >
-<h2>Real-World Models</h2>
-<ul class="simple">
-<li><p>Extremely large, days to train</p></li>
-<li><p>Many small variants</p></li>
-</ul>
-</section>
-<section >
-<h2>HW Q&amp;A</h2>
-<ul class="simple">
-<li class="fragment"><p>Conv?</p></li>
-<li class="fragment"><p>Batching?</p></li>
-<li class="fragment"><p>Tiling?</p></li>
-</ul>
-</section>
-<section >
-<h1>Lecture</h1>
-</section>
-<section >
-<h2>Outline</h2>
-<ul class="simple">
-<li class="fragment"><p>Review: Max and Argmax</p></li>
-<li class="fragment"><p>Softmax in Depth</p></li>
-<li class="fragment"><p>Gating in practice</p></li>
-</ul>
-</section>
-<section >
-<h1>Review: Max, Argmax, Softmax</h1>
-</section>
-<section >
-<h2>Challenge</h2>
-<p>How do we generalize sigmoid to multiple outputs?</p>
-<img alt="_images/value.png" src="_images/value.png" />
+<h2>Altenative Function: Sigmoid</h2>
+<p>Used to determine the loss function</p>
+<a class="reference internal image-reference" href="_images/sigmoid.png"><img alt="_images/sigmoid.png" class="align-center" src="_images/sigmoid.png" style="width: 400px;" /></a>
 </section>
 <section >
 <h2>Max reduction</h2>
 <ul class="simple">
 <li><p>Max is a binary associative operator</p></li>
 <li><p><span class="math notranslate nohighlight">\(\max(a, b)\)</span> returns max value</p></li>
-<li><p>Generalized <span class="math notranslate nohighlight">\(\text{ReLU}(a) = \max(a, b)\)</span></p></li>
+<li><p>Generalized <span class="math notranslate nohighlight">\(\text{ReLU}(a) = \max(a, 0)\)</span></p></li>
 </ul>
 </section>
 <section >
@@ -158,13 +104,10 @@
 \[\text{softmax}(\textbf{x}) = \frac{\exp \textbf{x}}{\sum_i \exp x_i}\]</div>
 </section>
 <section >
-<h2>Sigmoid is Softmax</h2>
-<div class="math notranslate nohighlight">
-\[\text{softmax}([0, x])[1] = \frac{\exp x}{\exp x + \exp 0} = \sigma(x)\]</div>
-</section>
-<section >
 <h2>Softmax</h2>
-<img alt="_images/softmax.png" src="_images/softmax.png" />
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu">Colab</a></p></li>
+</ul>
 </section>
 <section >
 <h2>Review</h2>
@@ -192,47 +135,11 @@
 </table>
 </section>
 <section >
-<h2>Lecture Quiz</h2>
-<blockquote>
-<div><p><a class="reference external" href="https://canvas.cornell.edu/courses/20583/assignments/178936">Quiz</a></p>
-</div></blockquote>
+<h2>Quiz</h2>
+<p>Quiz</p>
 </section>
 <section >
-<h1>Softmax</h1>
-</section>
-<section >
-<h2>Network</h2>
-<a class="reference internal image-reference" href="_images/networkcnn.png"><img alt="_images/networkcnn.png" class="align-center" src="_images/networkcnn.png" style="width: 500px;" /></a>
-</section>
-<section >
-<h2>Softmax Layer</h2>
-<ul class="simple">
-<li><p>Produces a probability distribution over outputs (Sum to 1)</p></li>
-<li><p>Derivative similar to sigmoid</p></li>
-<li><p>Lots of interesting practical properties</p></li>
-</ul>
-</section>
-<section >
-<h2>Softmax Brainteaser</h2>
-<p>Contrast</p>
-<pre data-id="softmax-brainteaser"><code data-trim data-noescape class="python">a = minitorch.rand((10))
-b1 = softmax(a)
-b2 = sigmoid(a)
-b1[2].backward()
-b2[2].backward()</code></pre>
-</section>
-<section >
-<h2>Softmax in Context</h2>
-<ul class="simple">
-<li><p>Not a map!</p></li>
-<li><p>Gradient spreads out from one point to all.</p></li>
-</ul>
-</section>
-<section >
-<h2>Softmax</h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://colab.research.google.com/drive/1EB7MI_3gzAR1gFwPPO27YU9uYzE_odSu">Colab</a></p></li>
-</ul>
+<h2>Review</h2>
 </section>
 <section >
 <h1>Soft Gates</h1>
