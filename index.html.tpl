@@ -9,6 +9,7 @@
 </script>
 <img width="50%" src="https://minitorch.github.io/minitorch.svg">
 
+<br><br><br><br>
 
 {% for i in range(5) %}
 {% for j in range(5) %}
