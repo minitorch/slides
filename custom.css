@@ -79,3 +79,7 @@ div.celltag_hide_inp div.jp-Cell-inputWrapper {
 /* .MathJax_CHTML { */
 /*     font-size: 50% !important; */
 /* } */
+.jp-RenderedHTMLCommon img, .jp-RenderedImage img, .jp-RenderedHTMLCommon svg, .jp-RenderedSVG svg {
+    max-width: max-content;
+    height: auto;
+}
