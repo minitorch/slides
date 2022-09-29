@@ -6,20 +6,18 @@ import cursoreffects from 'https://unpkg.com/cursor-effects@latest/dist/esm.js';
 new cursoreffects.rainbowCursor();
 </script>
 
-
-
-<script>
-  new cursoreffects.rainbowCursor();
-
-</script>
+<center>
 <img width="50%" src="https://minitorch.github.io/minitorch.svg">
+</center>
 
 <br><br><br><br>
 
 {% for i in range(5) %}
+<p>
 {% for j in range(5) %}
 <a href="module{{i}}.{{j}}.slides.html"> Module {{i}}.{{j}} </a> <a href="module{{i}}.{{j}}.slides.html?print-pdf"> [pdf] </a>
 <br>
 {% endfor %}
+</p>
 <hr>
 {% endfor %}
