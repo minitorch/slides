@@ -14,7 +14,7 @@ new cursoreffects.rainbowCursor();
 
 {% for i in range(5) %}
 <p>
-{% for j in range(5) %}
+{% for j in range({0:3, 1:5, 2:5, 3:5, 4:5}[i]) %}
 <a href="module{{i}}.{{j}}.slides.html"> Module {{i}}.{{j}} </a> <a href="module{{i}}.{{j}}.slides.html?print-pdf"> [pdf] </a>
 <br>
 {% endfor %}
