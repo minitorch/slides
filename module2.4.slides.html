@@ -4995,7 +4995,7 @@ form{
   .bp3-running-text table th, table.bp3-html-table th{
     color:#182026;
     font-weight:600; }
-  
+
   .bp3-running-text table td,
   table.bp3-html-table td{
     color:#182026; }
@@ -14723,7 +14723,7 @@ div.jp-OutputPrompt {
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
 
 
@@ -14781,7 +14781,7 @@ div.jp-OutputPrompt {
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
 
 
@@ -14851,7 +14851,7 @@ div.jp-OutputPrompt {
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 
 
@@ -14925,7 +14925,7 @@ div.jp-OutputPrompt {
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 
 
@@ -15081,7 +15081,7 @@ div.jp-OutputPrompt {
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
 
 
@@ -15173,7 +15173,7 @@ div.jp-OutputPrompt {
 <h2 id="Example:-Product-Gradient">Example: Product Gradient<a class="anchor-link" href="#Example:-Product-Gradient">&#182;</a></h2><p>The gradient is a tensor of derivatives.</p>
 <p>$$G'([x_1, x_2, x_3]) = [z/x_1, z/x_2, z/x_3]$$
  $$z = x_1 x_2 x_3 $$</p>
-<p>Original $G$ tensor-to-scalar. 
+<p>Original $G$ tensor-to-scalar.
 Gradient $G'$ tensor-to-tensor.</p>
 
 </div>
@@ -15218,11 +15218,11 @@ Gradient $G'$ tensor-to-tensor.</p>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">prod</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">prod</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">prod</span>    
-    
+        <span class="k">return</span> <span class="n">prod</span>
+
     <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">prod</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_values</span>
-        <span class="k">return</span> <span class="n">d</span> <span class="o">*</span> <span class="n">prod</span> <span class="o">/</span> <span class="n">x</span>  
+        <span class="k">return</span> <span class="n">d</span> <span class="o">*</span> <span class="n">prod</span> <span class="o">/</span> <span class="n">x</span>
 </pre></div>
 
      </div>
@@ -15309,7 +15309,7 @@ Gradient $G'$ tensor-to-tensor.</p>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 
 
@@ -15509,7 +15509,7 @@ Gradient $G'$ tensor-to-tensor.</p>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">minitorch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-    
+
     <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">x</span><span class="p">,</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_values</span>
         <span class="k">return</span> <span class="n">minitorch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
@@ -15630,7 +15630,7 @@ Gradient $G'$ tensor-to-tensor.</p>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
@@ -15890,7 +15890,7 @@ Gradient $G'$ tensor-to-tensor.</p>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
 
 
@@ -15984,7 +15984,7 @@ Gradient $G'$ tensor-to-tensor.</p>
 
 <div class="jp-OutputArea-child">
 
-    
+
     <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
 
 
@@ -16078,7 +16078,7 @@ require(
             center: false,
             progress: true,
             history: true,
-            pdfMaxPagesPerSlide: 1,             
+            pdfMaxPagesPerSlide: 1,
             transition: "none",
             plugins: [RevealNotes, RevealMath.MathJax3  ],
        });
